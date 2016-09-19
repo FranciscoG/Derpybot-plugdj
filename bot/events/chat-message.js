@@ -71,14 +71,13 @@ module.exports = function(bot, db) {
         parsedCommands = [];
     
     //command handler
-    tokens.forEach(function(token) {
-        if (token.charAt(0) === '$') {
+    tokens.forEach(function(token, i, r) {
+        if (token.charAt(0) === '$' && i === 0 && r.length === 1) {
           bot.sendChat('RIP @mixerbot, we will never forget you.');
           bot.sendChat('http://i.imgur.com/xyny6OZ.gif');
         }
 
         if (token.charAt(0) === '!' && parsedCommands.indexOf(token.substr(1)) === -1) {
-            
           // add the command used to the data sent from the chat to be used later
           data.trigger = token.substr(1).toLowerCase();
           
