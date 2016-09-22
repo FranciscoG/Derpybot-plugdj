@@ -18,5 +18,5 @@ module.exports = function(bot, db, data) {
     'So I says to Mable I says...'
   ];
 
-  bot.sendChat(getRandom(responses));
+  return bot.sendChat(getRandom(responses));
 };
