@@ -4,6 +4,7 @@ var DubAPI = require('dubapi'),
     firebase = require('firebase'),
     settings = require(process.cwd() + '/private/settings.js');
 
+
 //make logger timestamp more readable
 log.setTimeformat('YYYY-MM-DD HH:mm:ss:SSS');
 
@@ -18,7 +19,9 @@ var db = firebase.database();
 new DubAPI({ username: settings.USERNAME, password: settings.PASSWORD }, function(err, bot) {
         
     if (err) {
-        return log('error', 'BOT', err);
+        log('error', 'BOT', err);
+        process.exit(1); // exit so pm2 can restart
+        return;
     }
 
     //to find out how to use jethro visit: https://github.com/JethroLogger/Jethro
@@ -36,7 +39,7 @@ new DubAPI({ username: settings.USERNAME, password: settings.PASSWORD }, functio
 
         if(err) bot.log('error', 'BOT', err.stack);
 
-        process.exit();
+        process.exit(err ? 1 : 0);
     }
 
     //Properly disconnect from room and close db connection when program stops

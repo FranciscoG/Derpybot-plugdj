@@ -1,10 +1,15 @@
 'use strict';
 var mediaInfo = require(process.cwd()+'/bot/utilities/media');
 var usersInfo = require(process.cwd()+'/bot/utilities/users');
+var youtube = require(process.cwd()+'/bot/utilities/youtube');
+// var soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
+var checkPath = require(process.cwd()+'/bot/utilities/checkPath');
 
 module.exports = function(bot, db) {
   bot.on(bot.events.roomPlaylistUpdate, function(data) {
     bot.updub();
+
+    // console.log(data.media);
 
     var messageToSend = [];
     var plural = '';
@@ -12,12 +17,7 @@ module.exports = function(bot, db) {
 
     if (usersInfo.usersThatPropped.length > 0) {
       plural = usersInfo.usersThatPropped.length > 1 ? 's' : '';
-      messageToSend.push(`${usersInfo.usersThatPropped.length} prop${plural} :fist:`);
-    }
-
-    if (usersInfo.usersThatHearted.length > 0) {
-      plural = usersInfo.usersThatHearted.length > 1 ? 's' : '';
-      messageToSend.push(`${usersInfo.usersThatHearted.length} heart${plural} :heart:`);
+      messageToSend.push(`${usersInfo.usersThatPropped.length} prop${plural} props :fist: :heart: :musical_note:`);
     }
 
     if (usersInfo.usersThatFlowed.length > 0) {
@@ -38,12 +38,10 @@ module.exports = function(bot, db) {
     mediaInfo.lastMedia.currentDJName = mediaInfo.currentDJName;
     mediaInfo.lastMedia.currentLink = mediaInfo.currentLink;
     mediaInfo.lastMedia.usersThatPropped = usersInfo.usersThatPropped;
-    mediaInfo.lastMedia.usersThatHearted = usersInfo.usersThatHearted;
     mediaInfo.lastMedia.usersThatFlowed = usersInfo.usersThatFlowed;
 
-    //Reset user props/tunes/hearts stuff
+    //Reset user props/tunes stuff
     usersInfo.usersThatPropped = [];
-    usersInfo.usersThatHearted = [];
     usersInfo.usersThatFlowed = [];
 
     //Media info
@@ -61,6 +59,29 @@ module.exports = function(bot, db) {
     mediaInfo.currentDJName = '404usernamenotfound';
     if ( data.user !== void(0) && data.user.username !== void(0) ) {
       mediaInfo.currentDJName = data.user.username;
+    }
+
+    //****************************/
+    
+    // set your minutes time limit here
+    var minToMs = 10/*min*/ * 60/*sec*/ * 1000 /*ms*/;
+
+    var songLength = checkPath(data, 'data.media.songLength') || null;
+    if (songLength >= minToMs) {
+      bot.sendChat('Just a friendly warning that this song is 10 minutes or greater');
+    }
+
+    var songID = checkPath(data, 'data.media.fkid') || null;
+    var type = checkPath(data, 'data.media.type') || null;
+    if (!type || !songID) { return; }
+    type = type.toUpperCase();
+    
+    if (type === 'YOUTUBE'){
+      return youtube(bot, db, data.media);
+    }
+
+    if (type === 'SOUNDCLOUD'){
+      // return soundcloud(bot, songID);
     }
 
   });
