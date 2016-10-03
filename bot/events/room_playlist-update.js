@@ -1,28 +1,30 @@
 'use strict';
 var mediaInfo = require(process.cwd()+'/bot/utilities/media');
-var usersInfo = require(process.cwd()+'/bot/utilities/users');
+var userStore = require(process.cwd()+ '/bot/store/users.js');
+var youtube = require(process.cwd()+'/bot/utilities/youtube');
+// var soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
+var checkPath = require(process.cwd()+'/bot/utilities/checkPath');
 
 module.exports = function(bot, db) {
   bot.on(bot.events.roomPlaylistUpdate, function(data) {
     bot.updub();
 
+    // console.log(data.media);
+
     var messageToSend = [];
     var plural = '';
     var finalChat = '';
 
-    if (usersInfo.usersThatPropped.length > 0) {
-      plural = usersInfo.usersThatPropped.length > 1 ? 's' : '';
-      messageToSend.push(`${usersInfo.usersThatPropped.length} prop${plural} :fist:`);
+    var propped = userStore.getProps();
+    if (propped.length > 0) {
+      plural = propped.length > 1 ? 's' : '';
+      messageToSend.push(`${propped.length} prop${plural} props :fist: :heart: :musical_note:`);
     }
 
-    if (usersInfo.usersThatHearted.length > 0) {
-      plural = usersInfo.usersThatHearted.length > 1 ? 's' : '';
-      messageToSend.push(`${usersInfo.usersThatHearted.length} heart${plural} :heart:`);
-    }
-
-    if (usersInfo.usersThatFlowed.length > 0) {
-      plural = usersInfo.usersThatFlowed.length > 1 ? 's' : '';
-      messageToSend.push(`${usersInfo.usersThatFlowed.length} flowpoint${plural} :surfer:`);
+    var flowed = userStore.getFlows();
+    if (flowed.length > 0) {
+      plural = flowed.length > 1 ? 's' : '';
+      messageToSend.push(`${flowed.length} flowpoint${plural} :surfer:`);
     }
 
     if (messageToSend.length > 0) {
@@ -37,14 +39,11 @@ module.exports = function(bot, db) {
     mediaInfo.lastMedia.currentType = mediaInfo.type;
     mediaInfo.lastMedia.currentDJName = mediaInfo.currentDJName;
     mediaInfo.lastMedia.currentLink = mediaInfo.currentLink;
-    mediaInfo.lastMedia.usersThatPropped = usersInfo.usersThatPropped;
-    mediaInfo.lastMedia.usersThatHearted = usersInfo.usersThatHearted;
-    mediaInfo.lastMedia.usersThatFlowed = usersInfo.usersThatFlowed;
+    mediaInfo.lastMedia.usersThatPropped = propped;
+    mediaInfo.lastMedia.usersThatFlowed = flowed;
 
-    //Reset user props/tunes/hearts stuff
-    usersInfo.usersThatPropped = [];
-    usersInfo.usersThatHearted = [];
-    usersInfo.usersThatFlowed = [];
+    //Reset user props/tunes stuff
+    userStore.clear();
 
     //Media info
     mediaInfo.getLink(bot, function(link){
@@ -61,6 +60,29 @@ module.exports = function(bot, db) {
     mediaInfo.currentDJName = '404usernamenotfound';
     if ( data.user !== void(0) && data.user.username !== void(0) ) {
       mediaInfo.currentDJName = data.user.username;
+    }
+
+    //****************************/
+    
+    // set your minutes time limit here
+    var minToMs = 10/*min*/ * 60/*sec*/ * 1000 /*ms*/;
+
+    var songLength = checkPath(data, 'data.media.songLength') || null;
+    if (songLength >= minToMs) {
+      bot.sendChat('Just a friendly warning that this song is 10 minutes or greater');
+    }
+
+    var songID = checkPath(data, 'data.media.fkid') || null;
+    var type = checkPath(data, 'data.media.type') || null;
+    if (!type || !songID) { return; }
+    type = type.toUpperCase();
+    
+    if (type === 'YOUTUBE'){
+      return youtube(bot, db, data.media);
+    }
+
+    if (type === 'SOUNDCLOUD'){
+      // return soundcloud(bot, songID);
     }
 
   });

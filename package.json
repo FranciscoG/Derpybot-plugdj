@@ -1,11 +1,12 @@
 {
   "name": "DerpyBot",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Dubtrack.fm Bot using DubAPI",
   "main": "index.js",
   "scripts": {
     "start" : "env ENV=dev nodemon index.js",
-    "test" : "env ENV=test mocha -c --reporter=nyan tests"
+    "test" : "env ENV=test mocha -c --reporter=nyan tests",
+    "lint": "./node_modules/eslint/bin/eslint.js ."
   },
   "dependencies": {
     "dubapi": "^1.6.3",
@@ -37,6 +38,7 @@
     "chai": "^3.5.0",
     "eslint": "^1.10.3",
     "mocha": "^3.0.2",
-    "supertest": "^2.0.0"
+    "supertest": "^2.0.0",
+    "marked": "^0.3.6"
   }
 }

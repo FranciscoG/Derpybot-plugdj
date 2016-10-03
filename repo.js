@@ -1,4 +1,6 @@
 'use strict';
+var log = require('jethro');
+log.setTimeformat('YYYY-MM-DD HH:mm:ss:SSS');
 
 var _env = process.env.ENV;
 if (_env === null || typeof _env === 'undefined' || _env === '') {
@@ -13,11 +15,11 @@ if (_env === null || typeof _env === 'undefined' || _env === '') {
  */
 var findUserById = function(db, userid, callback) { 
   var user = db.ref(_env + '/users/' + userid);
-  user.once('value', function(snapshot){
+  user.on('value', function(snapshot){
       var val = snapshot.val();
       callback(val);
     }, function(error){
-      console.log('findUserById :' + error.code);
+      log('error', 'REPO', 'findUserById :' + error.code);
   });
 };
 
@@ -43,7 +45,6 @@ var insertUser = function(db, user, callback) {
   var usersRef = db.ref(_env + '/users');
   var extraStuff = {
     props : 0,
-    hearts : 0,
     flow : 0,
     DateAdded : new Date(),
     LastConnected : new Date()
@@ -69,22 +70,26 @@ var logUser = function(db, user, callback) {
     if(!foundUser){
       
       insertUser(db, user, function(error){
-        if (error) return console.log(user.id + ' could not be saved');
+        if (error) {
+          return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
+        }
 
         user.logType = 'inserted';
         return callback(user);
       });
       
     } else {
-
       var newdata = {
         'dubs': user.dubs || null,
-        'LastConnected': new Date(),
-        'flow' : user.flow || 0
+        'LastConnected': Date.now(),
+        'flow' : user.flow || 0,
+        'props' : user.props || 0
       };
 
       updateUser(db, user.id, newdata, function(error){
-        if (error) return console.log(user.id + ' could not be saved');
+        if (error) {
+          return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
+        }
 
         user.logType = 'updated';
         return callback(user);
@@ -112,11 +117,10 @@ var incrementUser = function(db, user, thing, callback) {
     // completion handler
     function (error) {
       if (error) {
-        console.log('ERR:', error);
-        callback();
+        log('error', 'REPO', 'incrementUser:' + error);
+        callback(null);
       } else {
         findUserById(db, user.id, function(foundUser){
-          console.log('Updated ', user.username, thing, foundUser.props);
           return callback(foundUser);
         });
       }
@@ -156,7 +160,7 @@ var getLeaders = function(db, prop, limit, callback) {
   return db.ref(_env + '/users')
     .orderByChild(prop)
     .limitToLast(limit)
-    .once('value', function(snapshot) {
+    .on('value', function(snapshot) {
       callback(snapshot.val());
     });
 };
@@ -172,7 +176,7 @@ var getTrigger = function (bot, db, triggerName, callback) {
   db.ref('triggers')
     .orderByChild('Trigger')
     .equalTo(triggerName + ':')
-    .once('value', function(snapshot) {
+    .on('value', function(snapshot) {
       var val = snapshot.val();
       if (typeof callback === 'function') {
         return callback(val);
@@ -222,6 +226,30 @@ var deleteTrigger = function(db, triggerKey) {
   return db.ref('triggers/' + triggerKey).set(null);
 };
 
+/**
+ * Pretty self explanatory
+ * @param  {Object}   db       Firebase Object
+ * @param  {Object}   media    DubApi's current media info object
+ * @param  {String|Int} id     data.media.fkid
+ * @param  {String} reason      what the issue was
+ * @param  {Function} callback 
+ */
+var trackSongIssues = function(db, ytResponse, media, reason) {
+  var songIssues = db.ref('/song_issues');
+  
+  ytResponse.reason = reason;
+  ytResponse.date = new Date();
+  ytResponse.timestamp = Date.now();
+
+  var saveObj = Object.assign({}, ytResponse, media);
+
+  songIssues.child(media.fkid).set(saveObj, function(err){
+    if (err) { 
+      log('error', 'REPO', 'trackSongIssues: Error saving for id ' + media.fkid);
+    }
+  });
+};
+
 module.exports = {
   logUser  : logUser,
   findUserById  : findUserById,
@@ -235,5 +263,6 @@ module.exports = {
   getTrigger : getTrigger,
   updateTrigger : updateTrigger,
   insertTrigger : insertTrigger,
-  deleteTrigger : deleteTrigger
+  deleteTrigger : deleteTrigger,
+  trackSongIssues : trackSongIssues
 };
