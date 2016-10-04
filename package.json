@@ -4,8 +4,9 @@
   "description": "A Dubtrack.fm Bot using DubAPI",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "./node_modules/eslint/bin/eslint.js ."
+    "start": "env ENV=dev nodemon index.js",
+    "test": "env ENV=test mocha -c -t 8000 --reporter=spec tests",
+    "lint": "./node_modules/eslint/bin/eslint.js ."
   },
   "dependencies": {
     "dubapi": "^1.6.3",
@@ -13,7 +14,7 @@
     "fs": "0.0.2",
     "jethro": "^2.6.6",
     "kerberos": "0.0.18",
-    "lodash": "^4.16.2",
+    "lodash": "^4.16.3",
     "path": "^0.12.7",
     "request": "^2.69.0",
     "simple-lastfm": "git+https://github.com/atomjack/simple-lastfm.git",
@@ -32,10 +33,13 @@
     "dubtrack",
     "DubAPI"
   ],
-  "author": "Cory Shaw, Francisco",
+  "author": "Cory Shaw, FranciscoG",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "^1.10.3",
+    "mocha": "^3.0.2",
+    "supertest": "^2.0.0",
     "marked": "^0.3.6"
   }
 }

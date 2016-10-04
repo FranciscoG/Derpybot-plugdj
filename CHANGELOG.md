@@ -6,7 +6,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 ### Changed
 - changing how firebase is accessed
 - moved commands info into a gh-pages accessible page
-- replacing underscore with lodash and using _.get
+- replacing underscore with lodash
+- code improvements
 
 ## [0.1.0] - 2016-09-30
 ### Added
