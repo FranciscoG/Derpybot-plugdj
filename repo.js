@@ -7,6 +7,12 @@ if (_env === null || typeof _env === 'undefined' || _env === '') {
   _env = 'dev';
 }
 
+var triggEnv = '';
+if (_env && _env === 'test') {
+  triggEnv = 'test/';
+}
+
+
 /**
  * Find a user by user.id
  * @param  {Object}   db       Firebase object
@@ -14,8 +20,8 @@ if (_env === null || typeof _env === 'undefined' || _env === '') {
  * @param  {Function} callback
  */
 var findUserById = function(db, userid, callback) { 
-  var user = db.ref(_env + '/users/' + userid);
-  user.on('value', function(snapshot){
+  var user = db.ref(_env + '/users').child(userid);
+  user.once('value', function(snapshot){
       var val = snapshot.val();
       callback(val);
     }, function(error){
@@ -118,7 +124,7 @@ var incrementUser = function(db, user, thing, callback) {
     function (error) {
       if (error) {
         log('error', 'REPO', 'incrementUser:' + error);
-        callback();
+        callback(null);
       } else {
         findUserById(db, user.id, function(foundUser){
           return callback(foundUser);
@@ -160,7 +166,7 @@ var getLeaders = function(db, prop, limit, callback) {
   return db.ref(_env + '/users')
     .orderByChild(prop)
     .limitToLast(limit)
-    .on('value', function(snapshot) {
+    .once('value', function(snapshot) {
       callback(snapshot.val());
     });
 };
@@ -173,10 +179,10 @@ var getLeaders = function(db, prop, limit, callback) {
  * @param  {Function} callback    
  */
 var getTrigger = function (bot, db, triggerName, callback) {
-  db.ref('triggers')
+  db.ref(triggEnv + 'triggers')
     .orderByChild('Trigger')
     .equalTo(triggerName + ':')
-    .on('value', function(snapshot) {
+    .once('value', function(snapshot) {
       var val = snapshot.val();
       if (typeof callback === 'function') {
         return callback(val);
@@ -197,7 +203,7 @@ var updateTrigger = function(db, data, triggerKey){
     Returns: data.triggerText,
     Trigger: data.triggerName + ':'
   };
-  return db.ref('triggers/'+triggerKey).set(updateObj);
+  return db.ref(triggEnv + 'triggers/'+triggerKey).set(updateObj);
 };
 
 /**
@@ -208,7 +214,7 @@ var updateTrigger = function(db, data, triggerKey){
  */
 var insertTrigger  = function(db, data) {
   if (!data || !data.triggerText || !data.triggerText) { return; }
-  return db.ref('triggers').push().set({
+  return db.ref(triggEnv + 'triggers').push().set({
     Author: data.user.username,
     Returns: data.triggerText,
     Trigger: data.triggerName + ':'
@@ -223,7 +229,7 @@ var insertTrigger  = function(db, data) {
  */
 var deleteTrigger = function(db, triggerKey) {
   if (!triggerKey) { return; }
-  return db.ref('triggers/' + triggerKey).set(null);
+  return db.ref(triggEnv + 'triggers/' + triggerKey).set(null);
 };
 
 /**

@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start" : "env ENV=dev nodemon index.js",
-    "test" : "env ENV=test mocha -c --reporter=spec tests"
+    "test" : "env ENV=test mocha -c -t 8000 --reporter=spec tests",
+    "lint": "./node_modules/eslint/bin/eslint.js ."
   },
   "dependencies": {
     "dubapi": "^1.6.3",
@@ -31,7 +32,7 @@
     "dubtrack",
     "DubAPI"
   ],
-  "author": "Cory Shaw, Francisco",
+  "author": "Cory Shaw, FranciscoG",
   "license": "MIT",
   "devDependencies": {
     "chai": "^3.5.0",
@@ -39,6 +40,5 @@
     "mocha": "^3.0.2",
     "supertest": "^2.0.0",
     "marked": "^0.3.6"
-
   }
 }

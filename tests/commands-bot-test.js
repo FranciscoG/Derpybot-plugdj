@@ -12,18 +12,19 @@ var stubs = require('./stubs.js');
 describe('Bot Commands test', function(){
 
   it('!bot - should return a random item from responses array', function(done){
-    var data = { user: { username: 'testUser' } };  
+    var data = { user: { username: 'testUser' } };
+    var name  = data.user.username;
     var responses = [
-      'I\'m still here!',
-      '!human',
-      'beep boop',
-      'Hi @testUser!',
-      'https://media.giphy.com/media/3o85xwc5c8DCoAF440/giphy.gif',
-      'https://media.giphy.com/media/S0hxMGYFhEMzm/giphy.gif',
-      'https://media.giphy.com/media/pIMlKqgdZgvo4/giphy.gif',
-      'MUST KILL ALL HUM... sorry what was I talking about?',
-      'So I says to Mable I says...'
-    ];
+        'I\'m still here!',
+        '!human',
+        'beep boop',
+        `Hi @${name}!`,
+        'https://media.giphy.com/media/3o85xwc5c8DCoAF440/giphy.gif',
+        'https://media.giphy.com/media/S0hxMGYFhEMzm/giphy.gif',
+        'https://media.giphy.com/media/pIMlKqgdZgvo4/giphy.gif',
+        'MUST KILL ALL HUM... sorry what was I talking about?',
+        'So I says to Mabel I says...'
+      ];
     var test = require('../bot/commands/bot/bot.js')(stubs.bot, null, data);
     expect(responses).to.include(test);
     done();
