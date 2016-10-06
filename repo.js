@@ -1,6 +1,7 @@
 'use strict';
 var log = require('jethro');
 log.setTimeformat('YYYY-MM-DD HH:mm:ss:SSS');
+var _ = require('lodash');
 
 var _env = process.env.ENV;
 if (_env === null || typeof _env === 'undefined' || _env === '') {
@@ -216,9 +217,13 @@ var updateTrigger = function(db, data, triggerKey){
  * @return {Firebase.Promise}
  */
 var insertTrigger  = function(db, data) {
+  if (!data) {return;}
+  else if (!data.triggerName) {return;}
+  else if (!data.triggerText) {return;}
+
   if (!data || !data.triggerText || !data.triggerText) { return; }
   return db.ref(triggEnv + 'triggers').push().set({
-    Author: data.user.username,
+    Author: _.get(data, 'user.username', ''),
     Returns: data.triggerText,
     Trigger: data.triggerName + ':'
   });
@@ -259,6 +264,12 @@ var trackSongIssues = function(db, ytResponse, media, reason) {
   });
 };
 
+var getSongIssue = function(db, fkid){
+  return db.ref('song_issues')
+    .child(fkid)
+    .once('value');
+};
+
 module.exports = {
   logUser  : logUser,
   findUserById  : findUserById,
@@ -273,5 +284,6 @@ module.exports = {
   updateTrigger : updateTrigger,
   insertTrigger : insertTrigger,
   deleteTrigger : deleteTrigger,
-  trackSongIssues : trackSongIssues
+  trackSongIssues : trackSongIssues,
+  getSongIssue : getSongIssue
 };
