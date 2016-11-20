@@ -53,7 +53,7 @@ var historyStore = {
 
     // make sure this array stays small
     if (this.warnedStore.length > 20) {
-      this.warnedStore.pop();
+      this.warnedStore.shift();
     }
 
     return result;
