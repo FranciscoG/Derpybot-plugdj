@@ -302,6 +302,16 @@ var getSong = function(db, fkid) {
     .once('value');
 };
 
+/**
+ * Insert leaderboard info for the month
+ * @param  {Object}   db       Firebase Object
+ * @param  {string}   id       Leader id whic is a combination of month + year
+ * @param  {Object}   leaderObj Leaderboard information
+ */
+var insertLeaderMonth = function(db, id, leaderObj) {
+  return db.ref('leaderboard').child(id).set(leaderObj);
+};
+
 module.exports = {
   logUser  : logUser,
   findUserById  : findUserById,
@@ -319,5 +329,6 @@ module.exports = {
   trackSongIssues : trackSongIssues,
   getSongIssue : getSongIssue,
   saveSong : saveSong,
-  getSong : getSong
+  getSong : getSong,
+  insertLeaderMonth : insertLeaderMonth
 };
