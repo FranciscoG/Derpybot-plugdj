@@ -8,12 +8,6 @@ if (_env === null || typeof _env === 'undefined' || _env === '') {
   _env = 'dev';
 }
 
-var triggEnv = '';
-if (_env && _env === 'test') {
-  triggEnv = 'test/';
-}
-
-
 /**
  * Find a user by user.id
  * @param  {Object}   db       Firebase object
@@ -84,7 +78,7 @@ var insertUser = function(db, user, callback) {
  * Logs a user to the db
  * @param  {Object}   db       Firebase object
  * @param  {Object}   user     DT user object
- * @param  {Function} callback [description]
+ * @param  {Function} callback the Firebase User object
  */
 var logUser = function(db, user, callback) {
   findUserById(db, user.id, function(foundUser) {
@@ -190,7 +184,7 @@ var getLeaders = function(db, prop, limit, callback) {
  * @param  {Function} callback    
  */
 var getTrigger = function (bot, db, triggerName, callback) {
-  db.ref(triggEnv + 'triggers')
+  db.ref('triggers')
     .orderByChild('Trigger')
     .equalTo(triggerName + ':')
     .once('value', function(snapshot) {
@@ -219,7 +213,7 @@ var updateTrigger = function(db, data, triggerKey, val){
     createdOn : val.createdOn || null,
     createdBy : val.createdBy || null
   };
-  return db.ref(triggEnv + 'triggers/'+triggerKey).set(updateObj);
+  return db.ref('triggers/'+triggerKey).set(updateObj);
 };
 
 /**
@@ -233,7 +227,7 @@ var insertTrigger  = function(db, data) {
   
   var author = _.get(data, 'user.username', 'unknown');
 
-  return db.ref(triggEnv + 'triggers').push().set({
+  return db.ref('triggers').push().set({
     Author: author,
     Returns: data.triggerText,
     Trigger: data.triggerName + ':',
@@ -252,7 +246,7 @@ var insertTrigger  = function(db, data) {
  */
 var deleteTrigger = function(db, triggerKey) {
   if (!triggerKey) { return; }
-  return db.ref(triggEnv + 'triggers/' + triggerKey).set(null);
+  return db.ref('triggers/' + triggerKey).set(null);
 };
 
 /**
