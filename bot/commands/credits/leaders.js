@@ -1,37 +1,25 @@
+/**
+ * !leaders
+ * returns the top 3 props and flow leaders
+ */
 'use strict';
-var repo = require(process.cwd()+'/repo');
+const leaderUtils = require(process.cwd() + '/bot/utilities/leaderUtils.js');
+const moment = require('moment');
 
-function checkLeaders(bot, db, data, type, msgPrefix, msgNone){
-  repo.getLeaders(db, type, 3, function(items){
-    var currentChat = '';
-    var propsArr = [];
-    
-    var keys = Object.keys(items);
-    keys.forEach(function(userId){
-      if (items[userId][type] > 0) {
-        propsArr.push(items[userId].username + ' (' + items[userId][type] + ')');
-      }
-    });
+module.exports = function(bot, data) {
+  if (!bot.leaderboard) {
+    bot.sendChat("I don't have leader informtaion at the momemt but try again in a minute");
+  }
 
-    if (propsArr.length === 0){
-      currentChat += msgNone;
-    } else {
-      currentChat += propsArr.join(', ');
-    }
-    bot.sendChat(msgPrefix);
-    bot.sendChat('> ' + currentChat);
-  });
-}
+  var year = moment().format('Y');
+  var month = moment().format('MMM');
 
-module.exports = function(bot, db, data) {
+  bot.sendChat('By !props, :heart:, :musical_note:, :fist:, :fire:, etc...');
+  bot.sendChat(bot.leaderboard[ month + year ].props);
   
-  var propsChat = 'By !props, :heart:, :musical_note:, :fist:, :fire:, etc...';
-  var propsNone = 'nobody got any props';
-  checkLeaders(bot, db, data, 'props', propsChat, propsNone);
 
-  var flowChat = 'By *!flowpoint* :surfer:';
-  var flowNone = 'there are currently no flow leaders';
-  checkLeaders(bot, db, data, 'flow', flowChat, flowNone);
+  bot.sendChat('By *!flowpoint* :surfer:');
+  bot.sendChat(bot.leaderboard[ month + year ].flow);
 
 };
 

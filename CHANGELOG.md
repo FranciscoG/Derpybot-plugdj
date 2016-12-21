@@ -7,7 +7,62 @@ The Commands of the bot are its API so here's how it will adhere to Semantic Ver
 **MINOR** - Adding new commands or functionality that won't affect or break existing ones    
 **PATCH** - Bug fixes, code improvements (backwards-compatible bug fixes)
 
-## [1.6.0] - 2016-10-21
+## [1.12.0] - 2016-12-16
+### Added
+- new command `!urban` to search urban dictionary
+
+## [1.11.1] - 2016-12-15
+### Added
+- added "unrecognized command" response
+
+## [1.11.0] - 2016-12-13
+### Added
+- `!dj [stop]` command which makes the bot join or leave the queue
+- bot extention to shuffle playlist
+- `!shuffleplaylist` or `!sp` to shuffle bot's playlist
+- bot jumps into the queue when there are 0 DJs
+
+## [1.10.0] - 2016-12-12
+### Changed
+- updating internals to use firebase more effeciently
+- fixed the order of !leaders
+- improved how YouTube region restrictions are announced.  Now it just adds a link
+- changed lastplay messaging for tracks that haven't been played before
+
+### Added
+- Announce new users under 20 dubs that join the queue
+- Added monthly leaderboard tracking
+
+## [1.9.0] - 2016-12-07
+### Added
+- now tracking song stats for all songs
+- new command: "!lastplay" shows who was the last person to play current song
+- new command: "!firstplay" shows who was the first person to play current song
+- new command: "!plays" shows total number of plays for the current song
+
+## [1.8.1] - 2016-12-01
+### Changed
+- "+prop" & "+flow" now still show the trigger even if already gave a point
+
+## [1.8.0] - 2016-11-30
+### Added
+- extend dubapi to add abiliy to add song to a playlist
+- extend dubapi to add abiliy to get a list of all its own playlists
+- Added new configurations:  playlistID, playlistName, playOnEmpty
+- bot now saves the previously played song to a playlist if it wasn't skipped
+- updated !source to include the new metada for triggers if they exist
+
+## [1.7.0] - 2016-11-29
+### Added
+- added new "!source" command that shows you who created or updated a trigger
+- added more metadata to when a trigger is created or updated
+
+## [1.6.1] - 2016-11-29
+### Changed
+- updated Cleverbot
+- update Firebase to use their new admin module
+
+## [1.6.0] - 2016-11-23
 ### Added
 - "+prop" at the very end of any trigger and it will add a prop point along with the trigger text (for current DJ only)
 - "+flow" at the very end of any trigger will add a flowpoint to the current DJ only

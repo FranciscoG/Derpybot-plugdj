@@ -11,8 +11,10 @@ var db = new Database(svcAcct, BASEURL);
 /**
  * Add my own extensions
  */
-var getHistoryExtension = require(process.cwd() + '/bot/extend/getRoomHistory.js');
-DubAPI.prototype.getRoomHistory = getHistoryExtension;
+DubAPI.prototype.getRoomHistory = require(process.cwd() + '/bot/extend/getRoomHistory.js');
+DubAPI.prototype.addToPlaylist = require(process.cwd() + '/bot/extend/addToPlaylist.js');
+DubAPI.prototype.getPlaylists = require(process.cwd() + '/bot/extend/getPlaylists.js');
+DubAPI.prototype.shufflePlaylist = require(process.cwd() + '/bot/extend/shufflePlaylist.js');
 
 new DubAPI({ username: settings.USERNAME, password: settings.PASSWORD }, function(err, bot) {
         
@@ -24,6 +26,8 @@ new DubAPI({ username: settings.USERNAME, password: settings.PASSWORD }, functio
     
     bot.myconfig = config;
     bot.maxChatMessageSplits = 5;
+    bot.commandedToDJ = false;
+    bot.isDJing = false;
 
     if (bot.myconfig.verboseLogging) {
       bot.log = require('jethro');
@@ -51,7 +55,7 @@ new DubAPI({ username: settings.USERNAME, password: settings.PASSWORD }, functio
     process.on('SIGINT', disconnect); //ctrl+c close
     process.on('uncaughtException', disconnect);
     process.on('message', function(msg) {  
-      bot.log('info','BOT', msg);
+      bot.log('info','BOT', 'message: ' + msg);
       if (msg === 'shutdown') {
         disconnect();
       }

@@ -1,12 +1,9 @@
 'use strict';
-var firebase = require('firebase');
-var settings = require(process.cwd() + '/private/settings.js');
+var settings = require(process.cwd() + '/private/test-settings.js');
 var config = require(process.cwd() + '/bot/config.js');
-
-firebase.initializeApp({
-  serviceAccount: process.cwd() + '/private/serviceAccountCredentials.json',
-  databaseURL: settings.FIREBASE.BASEURL
-});
+var Database = require(process.cwd() + '/bot/db.js');
+var svcAcct = process.cwd() + '/private/TESTserviceAccountCredentials.json';
+var BASEURL = settings.FIREBASE.BASEURL;
 
 /**
  * [bot description]
@@ -34,15 +31,30 @@ var bot = {
   log : function(x,y,z) {
     console.log('TEST',x,y,z);
   },
-  myconfig : config
-};
-
-// when you require this you need to run the function in order
-// to get the db instance started.
-// var stubs = require('../path/to/stubs.js');
-// var db = stubs.db();
-var connectDB = function(){
-  return firebase.database();
+  isMod : function(user){
+    return user && user.niceRole && user.niceRole === 'mod';
+  },
+  isCreator : function(user){
+    return user && user.niceRole && user.niceRole === 'creator';
+  },
+  isOwner : function(user){
+    return user && user.niceRole && user.niceRole === 'owner';
+  },
+  isManager : function(user){
+    return user && user.niceRole && user.niceRole === 'manager';
+  },
+  isVIP : function(user){
+    return user && user.niceRole && user.niceRole === 'vip';
+  },
+  isResidentDJ : function(user){
+    return user && user.niceRole && user.niceRole === 'residentdj';
+  },
+  isSaff : function(user){
+    return user && user.niceRole && user.niceRole === 'staff';
+  },
+  myconfig : config,
+  commandedToDJ : false,
+  isDJing : false
 };
 
 // need different kind of data responses
@@ -54,6 +66,6 @@ var dataResponse = {};
 
 module.exports = {
   bot : bot,
-  db : connectDB,
+  db : new Database(svcAcct, BASEURL),
   data : dataResponse
 };

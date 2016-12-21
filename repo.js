@@ -8,12 +8,6 @@ if (_env === null || typeof _env === 'undefined' || _env === '') {
   _env = 'dev';
 }
 
-var triggEnv = '';
-if (_env && _env === 'test') {
-  triggEnv = 'test/';
-}
-
-
 /**
  * Find a user by user.id
  * @param  {Object}   db       Firebase object
@@ -43,6 +37,24 @@ var updateUser = function(db, userid, data, callback) {
 };
 
 /**
+ * Takes in a data object provided by DT and only returns an object
+ * of the items we need in order to keep our DB small
+ */
+function refineUser(data){
+  return {
+    'props' : data.props || 0,
+    'flow' : data.flow || 0,
+    'DateAdded' : data.DateAdded || new Date(),
+    'LastConnected': data.LastConnected || Date.now(),
+    'username' : data.username || '404unknown',
+    'id' : data.id,
+    'introduced' : data.introduced || false,
+    'dubs': data.dubs || 0,
+    'logType' : data.logType || 'inserted'
+  };
+}
+
+/**
  * Pretty self explanatory
  * @param  {Object}   db       Firebase Object
  * @param  {Object}   user     DT user object
@@ -50,68 +62,56 @@ var updateUser = function(db, userid, data, callback) {
  */
 var insertUser = function(db, user, callback) {
   var usersRef = db.ref(_env + '/users');
-  var extraStuff = {
-    props : 0,
-    flow : 0,
-    DateAdded : new Date(),
-    LastConnected : new Date(),
-    'username' : user.username,
-    'id' : user.id
-  };
+  var extraStuff = refineUser(user);
   var finalNewUser = Object.assign({}, user, extraStuff);
+
   Object.keys(finalNewUser).forEach(function(key){
     if ( finalNewUser[key] === void(0)/* aka undefined */ ){ 
       finalNewUser[key] = null; 
     }
   });
-  usersRef.child(user.id).set(finalNewUser, callback);
+  return usersRef.child(user.id).set(finalNewUser, callback);
 };
 
-function userModel(data){
-  return {
-    'dubs': data.dubs || null,
-    'LastConnected': Date.now(),
-    'flow' : data.flow || 0,
-    'props' : data.props || 0,
-    'username' : data.username,
-    'id' : data.id
-  };
-}
 
 /**
  * Logs a user to the db
  * @param  {Object}   db       Firebase object
  * @param  {Object}   user     DT user object
- * @param  {Function} callback [description]
+ * @param  {Function} callback the Firebase User object
  */
 var logUser = function(db, user, callback) {
-  findUserById(db, user.id, function(foundUser) {
 
-    var userLogInfo;
-    
-    if(!foundUser){
-      userLogInfo = userModel(user);
-      insertUser(db, userLogInfo, function(error){
-        if (error) {
-          return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
-        }
-        user.logType = 'inserted';
-        return callback(user);
-      });
-      
-    } else {
-      userLogInfo = userModel(foundUser);
-      userLogInfo.username = user.username;
-      updateUser(db, user.id, userLogInfo, function(error){
-        if (error) {
-          return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
-        }
-        user.logType = 'updated';
-        return callback(user);
-      });
+  let lookup = db.ref(_env + '/users').child(user.id);
 
-    }
-  });
+  lookup.once('value')
+    .then(function(snapshot){
+      var val = snapshot.val();
+
+      if (!val) {
+        let userLogInfo = refineUser(user);
+        insertUser(db, userLogInfo, function(error){
+          if (error) {
+            return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
+          }
+          user.logType = 'inserted';
+          return callback(user);
+        });
+      } else {
+        let userLogInfo = refineUser(val);
+        userLogInfo.username = user.username;
+        updateUser(db, user.id, userLogInfo, function(error){
+          if (error) {
+            return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
+          }
+          user.logType = 'updated';
+          return callback(user);
+        });
+      }
+    })
+    .catch(function(error){
+      log('error', 'REPO', 'logUser findUserById :' + error.code);
+    });
 };
 
 
@@ -188,7 +188,7 @@ var getLeaders = function(db, prop, limit, callback) {
  * @param  {Function} callback    
  */
 var getTrigger = function (bot, db, triggerName, callback) {
-  db.ref(triggEnv + 'triggers')
+  db.ref('triggers')
     .orderByChild('Trigger')
     .equalTo(triggerName + ':')
     .once('value', function(snapshot) {
@@ -203,16 +203,26 @@ var getTrigger = function (bot, db, triggerName, callback) {
  * Updates a trigger in the DB
  * @param  {Object} db   Firebase instance
  * @param  {Object} data Trigger data, see function for details, needs {Author, Returns, Trigger}
+ * @param {Object} orignialValue  original value from firebase of trigger
  * @return {Firebase.Promise}
  */
-var updateTrigger = function(db, data, triggerKey){
-  if (!triggerKey || !data || !data.triggerText || !data.triggerText) { return; }
+var updateTrigger = function(db, data, triggerKey, orignialValue){
+  if (!triggerKey || !data || !data.triggerText || !data.triggerName) { return; }
+
+  if (!orignialValue) { orignialValue = {}; }
+  
   var updateObj = {
     Author: data.user.username,
     Returns: data.triggerText,
-    Trigger: data.triggerName + ':'
+    Trigger: data.triggerName + ':',
+    status: 'updated',
+    lastUpdated : Date.now(),
+    createdOn : orignialValue.createdOn || null,
+    createdBy : orignialValue.createdBy || null
   };
-  return db.ref(triggEnv + 'triggers/'+triggerKey).set(updateObj);
+
+  db.ref('lastTrigger').set(updateObj);
+  return db.ref('triggers/'+triggerKey).set(updateObj);
 };
 
 /**
@@ -222,16 +232,22 @@ var updateTrigger = function(db, data, triggerKey){
  * @return {Firebase.Promise}
  */
 var insertTrigger  = function(db, data) {
-  if (!data) {return;}
-  else if (!data.triggerName) {return;}
-  else if (!data.triggerText) {return;}
+  if (!data || !data.triggerName || !data.triggerText) { return; }
+  
+  var author = _.get(data, 'user.username', 'unknown');
 
-  if (!data || !data.triggerText || !data.triggerText) { return; }
-  return db.ref(triggEnv + 'triggers').push().set({
-    Author: _.get(data, 'user.username', ''),
+  let newTrigger = {
+    Author: author,
     Returns: data.triggerText,
-    Trigger: data.triggerName + ':'
-  });
+    Trigger: data.triggerName + ':',
+    status: 'created',
+    lastUpdated : null,
+    createdOn : Date.now(),
+    createdBy : author
+  };
+
+  db.ref('lastTrigger').set(newTrigger);
+  return db.ref('triggers').push().set(newTrigger);
 };
 
 /**
@@ -242,7 +258,30 @@ var insertTrigger  = function(db, data) {
  */
 var deleteTrigger = function(db, triggerKey) {
   if (!triggerKey) { return; }
-  return db.ref(triggEnv + 'triggers/' + triggerKey).set(null);
+  return db.ref('triggers/' + triggerKey).set(null);
+};
+
+/**
+ * Inserts to trigger history
+ * @param  {Object} db   Firebase instance
+ * @param  {Object} data Trigger data returned from Firebase
+ * @return {Firebase.Promise}
+ */
+var logTriggerHistory  = function(db, msg, data) {
+  if (!data || !data.triggerName || !data.triggerText) { return; }
+  
+  var author = _.get(data, 'user.username', 'unknown');
+
+  return db.ref('triggerHistory').push().set({
+    Author: data.Author,
+    Returns: data.Returns,
+    Trigger: data.Trigger,
+    status: data.status,
+    lastUpdated : data.lastUpdated,
+    createdOn : data.createdOn,
+    createdBy : data.createdBy,
+    msg : msg
+  });
 };
 
 /**
@@ -275,6 +314,33 @@ var getSongIssue = function(db, fkid){
     .once('value');
 };
 
+
+
+var saveSong = function(db, fkid, saveObj) {
+  var song_stats = db.ref('song_stats');
+  song_stats.child(fkid).set(saveObj, function(err){
+    if (err) { 
+      log('error', 'REPO', 'song_stats: Error saving for id ' + fkid);
+    }
+  });
+};
+
+var getSong = function(db, fkid) {
+  return db.ref('song_stats')
+    .child(fkid)
+    .once('value');
+};
+
+/**
+ * Insert leaderboard info for the month
+ * @param  {Object}   db       Firebase Object
+ * @param  {string}   id       Leader id whic is a combination of month + year
+ * @param  {Object}   leaderObj Leaderboard information
+ */
+var insertLeaderMonth = function(db, id, leaderObj) {
+  return db.ref('leaderboard').child(id).set(leaderObj);
+};
+
 module.exports = {
   logUser  : logUser,
   findUserById  : findUserById,
@@ -290,5 +356,9 @@ module.exports = {
   insertTrigger : insertTrigger,
   deleteTrigger : deleteTrigger,
   trackSongIssues : trackSongIssues,
-  getSongIssue : getSongIssue
+  getSongIssue : getSongIssue,
+  saveSong : saveSong,
+  getSong : getSong,
+  insertLeaderMonth : insertLeaderMonth,
+  logTriggerHistory :logTriggerHistory 
 };

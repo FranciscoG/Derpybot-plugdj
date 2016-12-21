@@ -1,6 +1,7 @@
 'use strict';
 var sc = require(process.cwd() + '/bot/utilities/soundcloud.js');
 var _ = require('lodash');
+var repo = require(process.cwd()+'/repo');
 
 // TODO: move this to another file
 var getSongLink = function(bot, callback){
@@ -29,8 +30,10 @@ var mediaStore = {
     id : null,
     type : null,
     dj : null,
+    length : 0,
     usersThatPropped : 0,
-    usersThatFlowed : 0
+    usersThatFlowed : 0,
+    when: 0
   },
 
   last : {
@@ -39,8 +42,10 @@ var mediaStore = {
     id : null,
     type : null,
     dj : null,
+    length : 0,
     usersThatPropped : 0,
-    usersThatFlowed : 0
+    usersThatFlowed : 0,
+    when: 0
   },
 
   getCurrent : function(){
@@ -51,13 +56,47 @@ var mediaStore = {
     return this.last;
   },
 
-  setLast : function(x) {
-    if (typeof x === 'object') {
-      for (var key in x) {
+  lastPlayModel: function(currentSong, storedData) {
+    console.log(_.get(storedData , 'plays'));
+    let obj = {
+      id : currentSong.id,
+      type : currentSong.type,
+      name : currentSong.name,
+      plays : 1,
+      firstplay : { 
+        user : _.get(storedData , 'firstplay.user', currentSong.dj),
+        when : _.get(storedData , 'firstplay.when', Date.now())
+      }, 
+      lastplay : {
+        user : _.get(storedData , 'lastplay.user', currentSong.dj),
+        when : _.get(storedData , 'lastplay.when', Date.now())
+      }
+    };
+
+    if (storedData && storedData.plays) {
+       obj.plays = storedData.plays + 1;
+    }
+    return obj;
+  },
+
+  setLast : function(db, song) {
+    let that = this;
+    console.log(song);
+
+    if (typeof song === 'object' && song) {
+      for (var key in song) {
         if (this.last.hasOwnProperty(key) ) {
-          this.last[key] = x[key];
+          this.last[key] = song[key];
         }
       }
+
+      if (!song.id) {return; }
+      // look for the song in the db
+      repo.getSong(db, song.id).then(function(data){
+        // then save song in the db
+        console.log(data.val());
+        repo.saveSong(db, song.id, that.lastPlayModel(song, data.val()) );
+      });
     }
   },
 

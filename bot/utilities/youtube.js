@@ -1,9 +1,10 @@
 'use strict';
-var _ = require('lodash');
-var settings = require(process.cwd() + '/private/settings.js');
-var repo = require(process.cwd()+'/repo');
-var YOUR_API_KEY = settings.YT_API;
-var request = require('request');
+const _ = require('lodash');
+const settings = require(process.cwd() + '/private/settings.js');
+const repo = require(process.cwd()+'/repo');
+const YOUR_API_KEY = settings.YT_API;
+const request = require('request');
+// var countryCodes = require(process.cwd() + '/bot/utilities/countries.js');
 
 
 var Youtube = {
@@ -61,6 +62,10 @@ function trackIssue(db, ytResponse, media, reason){
   repo.trackSongIssues(db, ytResponse, media, reason);
 }
 
+function makeYTCheckerUrl(yid){
+  return `https://polsy.org.uk/stuff/ytrestrict.cgi?ytid=${yid}`;
+}
+
 function regionBlock(bot, db, _region, yt, media){
   // yes we get THAT many blocked youtube videos in Germany that we might
   // as well make fun of it
@@ -70,22 +75,14 @@ function regionBlock(bot, db, _region, yt, media){
     return bot.sendChat( getRandom(responsesDE) );
   }
 
-  bot.sendChat(`*FYI, this Youtube video has region restrictions:*`);
+  bot.sendChat(`*FYI, Youtube is saying this video has region restrictions:*`);
   bot.sendChat(`${media.name}`);
-  
-  var flags;
-  if (_region.allowed && _region.allowed.length > 0) {
-    flags = _region.allowed.map( function(country){
-      return ':flag_' + country.toLowerCase() + ':'; 
-    });
-    bot.sendChat('*allowed in:* ' + flags.join(' '));
+  var ytid = _.get(yt, 'items[0].id');
+  if (ytid) {
+    var ytchk = makeYTCheckerUrl(ytid);
+    bot.sendChat(`See here for more details: ${ytchk}`);
   }
-  if (_region.blocked && _region.blocked.length > 0) {
-    flags = _region.blocked.map( function(country){
-      return ':flag_' + country.toLowerCase() + ':'; 
-    });
-    bot.sendChat('*blocked in:* ' + flags.join(' '));
-  }
+
   trackIssue(db, yt, media, 'region restrictions');
 }
 

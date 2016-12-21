@@ -1,13 +1,17 @@
+/***************************************************************
+ * This event is fired when a new song begins to play
+ */
+
 'use strict';
 var mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
 var userStore = require(process.cwd()+ '/bot/store/users.js');
 var youtube = require(process.cwd()+'/bot/utilities/youtube');
 var historyStore = require(process.cwd()+ '/bot/store/history.js');
 var _ = require('lodash');
+var moment = require('moment');
+var repo = require(process.cwd()+'/repo');
 
 // var soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
-
-
 
 function reviewPoints(bot, currentSong) {
   var propped = userStore.getProps();
@@ -80,6 +84,71 @@ function checkHistory(bot, data){
   historyStore.save(bot, data);
 }
 
+function lastPlayModel(currentSong, storedData) {
+  var obj = {
+    id : currentSong.id,
+    type : currentSong.type,
+    name : currentSong.name,
+    firstplay : { 
+      user : _.get(storedData , 'firstplay.user', currentSong.dj),
+      when : _.get(storedData , 'firstplay.when', Date.now())
+    }
+  };
+
+  var total = 1;
+  var lastWhen = Date.now();
+
+  if (storedData) {
+    lastWhen = storedData.lastplay.when;
+    total = storedData.plays;
+
+    // don't want to incrememt time and plays if the bot reboot for some reason
+    var songTime = storedData.lastplay.when + currentSong.length;
+    if ( Date.now() - songTime > 0  ) {
+      total = storedData.plays + 1;
+      lastWhen = Date.now();
+    }
+
+  }
+
+  obj.plays = total;
+  obj.lastplay =  {
+    user : currentSong.dj,
+    when : lastWhen
+  };
+  return obj;
+}
+
+function saveSong(db, bot, song) {
+  // then save songs to bot's playlist for later use
+  // skip saving songs on Funky Friday
+  if (moment().format('dddd') === 'Friday') { return; }
+
+  bot.getRoomHistory(1, function(history){
+    
+    if (history && history.length > 0) {
+
+      // we don't want to save a skipped song
+      if (history[0].skipped) {return;}
+
+      let song = history[0]._song;
+
+      bot.addToPlaylist(
+        bot.myconfig.playlistID, song.fkid, song.type, 
+        function(code, _data){
+          if (code === 200) {
+            bot.log('info','BOT', `${song.name} saved to playlist`);
+          }
+          if (code === 400) {
+            bot.log('info','BOT', `${song.name} - ${_data.data.details.message}`);
+          }
+        }
+      );
+    }
+
+  });
+}
+
 module.exports = function(bot, db) {
   bot.on(bot.events.roomPlaylistUpdate, function(data) {
     bot.updub();
@@ -105,7 +174,7 @@ module.exports = function(bot, db) {
     //Save previous song for !lastplayed
     currentSong.usersThatFlowed = flowed.length;
     currentSong.usersThatPropped = propped.length;
-    mediaStore.setLast(currentSong);
+    mediaStore.setLast(db, currentSong);
 
     //Reset user props/tunes stuff
     userStore.clear();
@@ -125,7 +194,9 @@ module.exports = function(bot, db) {
     newSong.name = data.media.name;
     newSong.id = data.media.fkid;
     newSong.type = data.media.type;
+    newSong.length = data.media.songLength;
     newSong.dj = _.get(data, 'user.username', '404usernamenotfound');
+    newSong.when = Date.now();
 
     // store new song data reseting current in the store
     mediaStore.setCurrent(newSong);
@@ -141,6 +212,11 @@ module.exports = function(bot, db) {
      */
     
     checkHistory(bot, data);
+
+    /************************************************************
+     * Save song to playlist and for last/first-play func
+     */
+    saveSong(db, bot, newSong);
 
   });
 };
