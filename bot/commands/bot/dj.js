@@ -1,10 +1,13 @@
 'use strict';
-// const _ = require('lodash');
+const _ = require('lodash');
 const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 const settings = require(process.cwd() + '/private/settings.js');
 
 
 module.exports = function(bot, db, data) {
+
+  return bot.sendChat("The !dj command is disabled for now until an issue with dubapi (third party lib that powers this bot) is resolved");
+
   // if not at least a MOD, GTFO!
   if ( !roleChecker(bot, data.user, 'mod') ) {
     bot.sendChat('sorry, !dj can only be used by mods');
@@ -43,11 +46,13 @@ module.exports = function(bot, db, data) {
   bot.queuePlaylist(
     bot.myconfig.playlistID, 
     function(code, _data){
+      console.log("queuePlaylist", code, _data);
       if (code === 200) {
         bot.log('info', 'BOT', 'Successfully queued playlist');
 
         // then in the success we join the queue by unpausing it
         bot.pauseQueue(false, function(code, _data){
+          console.log("pauseQueue", code, _data);
           if (code === 200) {
             bot.sendChat("Ok I've joined the queue! Don't worry boss, I won't let you down");
             bot.log('info', 'BOT', 'Successfully joined the queue');
@@ -61,7 +66,8 @@ module.exports = function(bot, db, data) {
         });
 
       } else {
-         bot.log('error','BOT', `Could not queue playlist - ${_data.data.details.message}`);
+         let msg = _.get(_data, 'data.details.message', 'error');
+         bot.log('error','BOT', `Could not queue playlist - ${code} ${msg}`);
          bot.sendChat("Error joining the queue, probably an API issue. Check the queue to see if I've joined. If I'm not in it then try again.");
       }
     }
