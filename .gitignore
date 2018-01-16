@@ -6,5 +6,9 @@ private/*
 tool/*.json
 tool/temp.js
 npm-debug.log
-*.tar
 .vscode
+
+# travis stuff
+secrets.tar
+# double overkill
+*.tar
