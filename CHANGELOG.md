@@ -7,6 +7,16 @@ The Commands of the bot are its API so here's how it will adhere to Semantic Ver
 **MINOR** - Adding new commands or functionality that won't affect or break existing ones    
 **PATCH** - Bug fixes, code improvements (backwards-compatible bug fixes)
 
+## [1.20.0] - 2018-03-
+### Changed
+- removed `!ping` hard coded command
+- removed `!pong` hard coded command
+- removed `!thanks` hard coded command
+- removed `!bot` hard coded command
+### Fixed
+- working on fixing warning
+
+
 ## [1.19.1] - 2018-02-07
 ### Fixed
 - fixed reset points issue
