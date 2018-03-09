@@ -18,6 +18,10 @@ The Commands of the bot are its API so here's how it will adhere to Semantic Ver
 - reorganized the private data to have subfolders based on environment.    
 - added a `get` method to abstract loading private data to make it easily changed in the future
 - add support for new 'MUTED' env variable
+- removed `!ping` hard coded command
+- removed `!pong` hard coded command
+- removed `!thanks` hard coded command
+- removed `!bot` hard coded command
 
 ## [1.19.1] - 2018-02-07
 ### Fixed
