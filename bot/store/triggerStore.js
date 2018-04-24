@@ -7,6 +7,8 @@ const fuzzy = require('fuzzy');
 
 var TriggerStore = {
   triggers : {},
+  propGivers : [],
+  flowGivers : [],
   lastTrigger : {},
 
   random : function () {
@@ -77,6 +79,22 @@ var TriggerStore = {
         });
   },
 
+  updatePropGivers : function(trig,val) {
+    if (this.propGivers.indexOf(trig) >= 0) {return;}
+
+    if (val.indexOf('+prop') >= 0) {
+      this.propGivers.push(trig);
+    }
+  },
+
+  updateFlowGivers : function(trig,val) {
+    if (this.flowGivers.indexOf(trig) >= 0) {return;}
+
+    if (val.indexOf('+flow') >= 0) {
+      this.flowGivers.push(trig);
+    }
+  },
+
   setTriggers : function(bot, val) {
     bot.log('info', 'BOT', 'Trigger cache updated');
         // reorganize the triggers in memory to remove the keys that Firebase makes
@@ -84,6 +102,9 @@ var TriggerStore = {
       var thisTrig = val[key];
       thisTrig.fbkey = key;
       this.triggers[thisTrig.Trigger] = thisTrig;
+      
+      this.updatePropGivers(thisTrig.Trigger, thisTrig.Returns);
+      this.updateFlowGivers(thisTrig.Trigger, thisTrig.Returns);
     });
   },
 
@@ -98,7 +119,7 @@ var TriggerStore = {
     var triggers = db.ref('triggers');
 
     // Get ALL triggers and store them locally
-    // do this only once on init
+    // this will run everytime a trigger is updated or created
     triggers.on('value', (snapshot)=>{
         let val = snapshot.val();
         this.setTriggers.call(this,bot,val);
