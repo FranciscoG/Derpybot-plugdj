@@ -7,14 +7,26 @@ const fuzzy = require('fuzzy');
 
 var TriggerStore = {
   triggers : {},
-  propGivers : [],
-  flowGivers : [],
+  propGivers : {},
+  flowGivers : {},
   lastTrigger : {},
 
   random : function () {
     var trigKeys = Object.keys(this.triggers);
     var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
     return this.triggers[randKey];
+  },
+
+  randomProp : function() {
+    var trigKeys = Object.keys(this.propGivers);
+    var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
+    return this.propGivers[randKey];
+  },
+
+  randomFlow : function() {
+    var trigKeys = Object.keys(this.flowGivers);
+    var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
+    return this.flowGivers[randKey];
   },
 
   search : function(term) {
@@ -79,19 +91,20 @@ var TriggerStore = {
         });
   },
 
-  updatePropGivers : function(trig,val) {
-    if (this.propGivers.indexOf(trig) >= 0) {return;}
+  updateGivers : function(trig) {
+    let val = trig.Returns;
 
-    if (val && val.indexOf('+prop') >= 0) {
-      this.propGivers.push(trig);
+    // because there was a trigger that returned as a num
+    if (typeof val === 'number') {
+      val = val+''; // coerce to a number
     }
-  },
+    // just in case it's not still not a string
+    if (typeof val !== 'string') { return; }
 
-  updateFlowGivers : function(trig,val) {
-    if (this.flowGivers.indexOf(trig) >= 0) {return;}
-
-    if (val && val.indexOf('+flow') >= 0) {
-      this.flowGivers.push(trig);
+    if (val.indexOf('+flow') >= 0) {
+      this.flowGivers[trig.Trigger] = trig;
+    } else if (val.indexOf('+prop') >= 0) {
+      this.propGivers[trig.Trigger] = trig;
     }
   },
 
@@ -103,8 +116,7 @@ var TriggerStore = {
       thisTrig.fbkey = key;
       this.triggers[thisTrig.Trigger] = thisTrig;
       
-      this.updatePropGivers(thisTrig.Trigger, thisTrig.Returns);
-      this.updateFlowGivers(thisTrig.Trigger, thisTrig.Returns);
+      this.updateGivers(thisTrig);
     });
   },
 
@@ -115,7 +127,6 @@ var TriggerStore = {
   },
 
   init : function(bot, db){
-    var self = this;
     var triggers = db.ref('triggers');
 
     // Get ALL triggers and store them locally
@@ -138,10 +149,10 @@ var TriggerStore = {
     });
 
     var lastTrigger = db.ref('lastTrigger');
-    lastTrigger.on('value', function(snapshot){
+    lastTrigger.on('value', (snapshot)=>{
       var val = snapshot.val();
       bot.log('info', 'BOT', 'lastTrigger updated');
-      self.lastTrigger = val;
+      this.lastTrigger = val;
     }, function(error){
         bot.log('error', 'BOT', 'error getting lastTrigger from firebase');
     });
