@@ -4,15 +4,14 @@
  * This event is fired when a new song begins to play
  */
 'use strict';
-var mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
-var userStore = require(process.cwd()+ '/bot/store/users.js');
-var youtube = require(process.cwd()+'/bot/utilities/youtube.js');
-var historyStore = require(process.cwd()+ '/bot/store/history.js');
-var _ = require('lodash');
-var moment = require('moment');
-var repo = require(process.cwd()+'/repo');
-
-// var soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
+const mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
+const userStore = require(process.cwd()+ '/bot/store/users.js');
+const youtube = require(process.cwd()+'/bot/utilities/youtube.js');
+const soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
+const historyStore = require(process.cwd()+ '/bot/store/history.js');
+const _ = require('lodash');
+const moment = require('moment');
+const repo = require(process.cwd()+'/repo');
 
 function reviewPoints(bot, currentSong) {
   var propped = userStore.getProps();
@@ -68,7 +67,7 @@ function songWarning(bot, db, data){
     return youtube(bot, db, data.media);
   }
   if (type === 'SOUNDCLOUD'){
-    // return soundcloud(bot, songID);
+    soundcloud.moderate(bot, data.media);
   }
 }
 
@@ -179,10 +178,7 @@ module.exports = function(bot, db) {
     var newSong = {};
 
     // get current song link
-    mediaStore.getLink(bot, function(link){
-        var val = !link ? '' : link;
-        mediaStore.setCurrentKey('link', val);
-    });
+    mediaStore.setLink(bot);
 
     // if no data.media from the api then stop now
     if(!data.media) { return; }

@@ -12,8 +12,10 @@ var getSongLink = function(bot, callback){
   }
 
   if(media.type.toUpperCase() === 'SOUNDCLOUD') {
-    sc(bot, media, function(error, result){
-      if (error) {
+    sc.getLink(bot, media, function(error, result){
+      var isForbidden = error === null && result === null;
+      var error404 = _.get(result, 'errors', null);
+      if (error || isForbidden || error404) {
         return callback('https://api.dubtrack.fm/song/' + media.id + '/redirect');
       }
       return callback(_.get(result, 'permalink_url', null));
