@@ -1,5 +1,6 @@
 'use strict';
 const triggerStore = require(process.cwd()+ '/bot/store/triggerStore.js');
+const triggerPoint = require(process.cwd()+ '/bot/utilities/triggerPoint.js');
 
 module.exports = function(bot, db, data) {
   if (!data) {
@@ -10,7 +11,7 @@ module.exports = function(bot, db, data) {
    * This handles just calling !random by itself
    */
   if (data.params.length === 0) {
-    var randomTrigger = triggerStore.random();
+    var randomTrigger = triggerStore.getRandom(bot, data);
 
     if (randomTrigger) {
       bot.sendChat('Trigger name: ' + randomTrigger.Trigger.replace(/\:$/, ''));
