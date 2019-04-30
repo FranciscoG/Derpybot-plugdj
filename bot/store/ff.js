@@ -10,16 +10,16 @@ const MySheet = require(process.cwd() + '/bot/utilities/spreadsheet.js');
 
 const SPREAD_ID = settings.spreadsheets.weekly_events;
 const API_KEY = settings.spreadsheets.api_key;
-let nmm = new MySheet(SPREAD_ID, API_KEY);
+let ff = new MySheet(SPREAD_ID, API_KEY);
 
 function loadIntoMemory(bot){
-  nmm.getRows('NMM', 'A3:E')
+  ff.getRows('FF ', 'A3:G')
     .then((rows)=>{
       let row1 = rows.shift();
-      let convertedRows = nmm.toObj(row1, rows).filter(o => o.Date && o.Artist && o.Album);
-      let nextUp = nmm.getNext(convertedRows, 'Date');
+      let convertedRows = ff.toObj(row1, rows).filter(o => o.Date && o.User && o.Theme);
+      let nextUp = ff.getNext(convertedRows, 'Date');
       bot.sheetsData = bot.sheetsData || {};
-      bot.sheetsData.nmm = nextUp;
+      bot.sheetsData.ff = nextUp;
     })
     .catch((err)=>{
       bot.log('error','BOT', err);
