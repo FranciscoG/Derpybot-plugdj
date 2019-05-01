@@ -34,19 +34,23 @@ var dmStore = {
   },
 
   update : function(bot) {
-    bot.DM.getAll(bot, (err,data)=>{
-      if (err !== 200) {
-         bot.log('error', 'BOT', 'DM: error getting all direct messages on connection');
-      }
-      if (data.code === 200) {
-        // store all messages 
-        this.messages = this.reformat(data.data);
-      }
+    return new Promise((resolve,reject)=>{
+      bot.DM.getAll(bot, (err,data)=>{
+        if (err !== 200) {
+           bot.log('error', 'BOT', 'DM: error getting all direct messages on connection');
+           reject(err);
+        }
+        if (data.code === 200) {
+          // store all messages 
+          this.messages = this.reformat(data.data);
+          resolve();
+        }
+      });
     });
   },
 
   init : function(bot) {
-    this.update(bot);
+    return this.update(bot);
   }
 };
 
