@@ -91,12 +91,14 @@ module.exports = function(bot, db) {
 
       pointReset(bot, db);
 
+      bot.sendChat(`\`Initialization complete\``);
+
       Promise.all([
         dmStore.init(bot),
         historyStore.init(bot)
       ]).then(function(){
         var complete = (Date.now() - initStart) / 1000;
-        bot.sendChat(`\`Initialization completed in ${complete} seconds\``);
+        bot.log('info', 'BOT', `Initialization completed in ${complete} seconds`);
       });
     }, 3000);
   });
