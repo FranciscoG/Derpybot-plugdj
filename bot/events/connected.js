@@ -4,8 +4,8 @@ const historyStore = require(process.cwd() + "/bot/store/history.js");
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 const dmStore = require(process.cwd() + "/bot/store/messages.js");
 const leaderUtils = require(process.cwd() + "/bot/utilities/leaderUtils.js");
-const _private = require(process.cwd() + "/private/get");
-const settings = _private.settings;
+// const _private = require(process.cwd() + "/private/get");
+// const settings = _private.settings;
 const repo = require(process.cwd() + "/repo");
 const pointReset = require(process.cwd() + "/bot/utilities/point-reset.js");
 const setTimeout = require("timers").setTimeout;
@@ -39,10 +39,6 @@ module.exports = function(bot, db) {
         };
         mediaStore.setCurrent(currentSong);
       }
-
-      dmStore.init(bot);
-
-      historyStore.init(bot);
 
       // // load new music monday next row into memory
       // nmm.load(bot);
@@ -95,8 +91,15 @@ module.exports = function(bot, db) {
 
       pointReset(bot, db);
 
-      var complete = (Date.now() - initStart) / 1000;
-      bot.sendChat(`\`Initialization completed in ${complete} seconds\``);
+      bot.sendChat(`\`Initialization complete\``);
+
+      Promise.all([
+        dmStore.init(bot),
+        historyStore.init(bot)
+      ]).then(function(){
+        var complete = (Date.now() - initStart) / 1000;
+        bot.log('info', 'BOT', `Initialization completed in ${complete} seconds`);
+      });
     }, 3000);
   });
 };

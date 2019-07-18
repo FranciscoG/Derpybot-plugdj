@@ -136,15 +136,16 @@ var historyStore = {
 
       var self = this;
 
-      bot.getRoomHistory(bot.myconfig.history_pages || 8, function(history){
-        
-        if (history && history.length > 0) {
-          self.songStore = history.map(function(song){
-            return self.fromHistory(song);
-          });
-          self.ready = true;
-        }
-
+      return new Promise(function(resolve, reject){
+        bot.getRoomHistory(bot.myconfig.history_pages || 8, function(history){
+          if (history && history.length > 0) {
+            self.songStore = history.map(function(song){
+              return self.fromHistory(song);
+            });
+            self.ready = true;
+          }
+          resolve();
+        });
       });
     }
     
