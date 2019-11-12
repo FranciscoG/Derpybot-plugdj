@@ -1,10 +1,9 @@
 'use strict';
-// const _ = require('lodash');
 const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 
 module.exports = function(bot, db, data) {
   // if not at least a MOD, GTFO!
-  if ( !roleChecker(bot, data.user, 'mod') ) {
+  if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
     bot.sendChat('sorry, !shuffle can only be used by mods');
   }
 

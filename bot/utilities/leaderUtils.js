@@ -4,10 +4,12 @@ const repo = require(process.cwd()+'/repo');
 
 function getTop3(bot, prop) {
   var arr = [];
-  var keys = Object.keys(bot.allUsers);
-  keys.forEach(function(userId){
-    arr.push(bot.allUsers[userId]);
-  });
+  
+  Object.keys(bot.allUsers)
+    .forEach( userId => {
+      arr.push(bot.allUsers[userId]);
+    });
+
   // help from: http://stackoverflow.com/a/1129270/395414
   arr.sort(function (a,b) {
     if (a[prop] < b[prop]) { 
@@ -19,6 +21,7 @@ function getTop3(bot, prop) {
     return 0;
   });
   arr.reverse();
+
   var finalArr = [];
   for (let i = 0; i < 3; i++) {
     finalArr.push(arr[i]);

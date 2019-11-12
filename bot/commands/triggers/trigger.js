@@ -24,7 +24,7 @@ module.exports = function(bot, db, data) {
     return bot.sendChat('An error occured, try again');
   }
 
-  const isMod = roleChecker(bot, data.user, 'mod');
+  const isMod = roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER);
 
   // if just "!trigger" was used then we show the help info for using it
   if (data.params === void(0) || data.params.length < 1) {
@@ -47,7 +47,7 @@ module.exports = function(bot, db, data) {
         return;
       }
 
-      if ( !roleChecker(bot, data.user, 'residentdj') ) {
+      if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.RESIDENTDJ) ) {
         bot.sendChat('Sorry only ResidentDJs and above can create triggers');
         return;
       }

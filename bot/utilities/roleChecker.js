@@ -12,20 +12,34 @@ function capitalize(string) {
   role "isMod", even though they are above that role.  So this will
   go through all the roles above given minimum role until it one passes
   of all are checked
+
+  https://plugcubed.github.io/plugAPI/#plugapiglobal_roles
+
+  ROOM_ROLE.NONE Number
+  Room role of 0. User has no role.
+
+  ROOM_ROLE.RESIDENTDJ Number
+  Room role of 1000. User is a resident DJ.
+
+  ROOM_ROLE.BOUNCER Number
+  Room role of 2000. User is a bouncer.
+
+  ROOM_ROLE.MANAGER Number
+  Room role of 3000. User is a manager.
+
+  ROOM_ROLE.COHOST Number
+  Room role of 4000. User is a cohost.
+
+  ROOM_ROLE.HOST Number
+  Room role of 5000. User is a host.
 */
 
-// placing role in order where index 0 is highest role
-// and the larger index is lowest role
-var roleRanks = [
-  'creator', // [0] <-- highest role
-  'owner',
-  'manager',
-  'mod',
-  'vip',
-  'residentdj',
-  'staff' // [6] <-- lowest role
-];
-
+/**
+ * Check if user is allowed to do something by checking Role status
+ * @param {Object} bot
+ * @param {Object} user instance of User: https://plugcubed.github.io/plugAPI/#user
+ * @param {Number} minRole minimum room role user needs: https://plugcubed.github.io/plugAPI/#plugapiroom_role
+ */
 module.exports = function(bot, user, minRole) {
   // trying to minimize the amount of bot crashing due to possible missing user data from api
   if (!bot || !user || !minRole) {
@@ -33,31 +47,6 @@ module.exports = function(bot, user, minRole) {
     return false; 
   }
 
-  // get the index of the mininum role from our roleRanks
-  var rankEnd = roleRanks.indexOf(minRole.toLowerCase());
-  
-  // not even a valid role, GTFO ;-)
-  if (rankEnd < 0) { 
-    return false;
-  }
-  
-  // create a new array with just the ranks starting at minRole and above
-  var ranks = roleRanks.slice(0, rankEnd + 1).reverse();
-
-  // loop through the different "bot.is[RANK]" methods until one of them returns true
-  // examples: bot.isMod, bot.isOwner, etc.
-  var hasRole = false;
-  for (var i = 0; i < ranks.length; i++) {
-    
-    var chk = 'is' + capitalize(ranks[i]);
-    if (ranks[i] === 'vip') {chk = 'isVIP'; }
-    if (ranks[i] === 'residentdj') {chk = 'isResidentDJ'; }
-
-    if (bot[chk](user)) {
-      hasRole = true;
-      break;
-    }
-  }
-
-  return hasRole;
+  return user.role >= minRole;
+ 
 };

@@ -2,39 +2,39 @@
 const mediaStore = require(process.cwd() + "/bot/store/mediaInfo.js");
 const historyStore = require(process.cwd() + "/bot/store/history.js");
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
-const dmStore = require(process.cwd() + "/bot/store/messages.js");
 const leaderUtils = require(process.cwd() + "/bot/utilities/leaderUtils.js");
-// const _private = require(process.cwd() + "/private/get");
-// const settings = _private.settings;
 const repo = require(process.cwd() + "/repo");
 const pointReset = require(process.cwd() + "/bot/utilities/point-reset.js");
 const setTimeout = require("timers").setTimeout;
-// const nmm = require(process.cwd()+ '/bot/store/nmm.js');
-// const ff = require(process.cwd()+ '/bot/store/ff.js');
 
 module.exports = function(bot, db) {
-  bot.on("connected", function(data) {
+  bot.on(bot.events.ROOM_JOIN, function(roomname) {
     bot.isConnected = true;
-    bot.log("info", "BOT", "Connected to " + data);
-    bot.sendChat("`Initializing...`");
+    bot.log("info", "BOT", "Connected to " + roomname);
+    bot.sendChat("Initializing...");
     var initStart = Date.now();
 
     setTimeout(function() {
-      // log current logged in user data
-      var users = bot.getUsers();
-      for (var i = 0; i < users.length; i++) {
-        repo.logUser(db, users[i]);
-      }
 
-      // handle current playing song
-      bot.updub();
+      /*******************************************
+       *  log current logged in user data
+       */
+      var users = bot.getUsers();
+      users.forEach((user,i)=>{
+        repo.logUser(db, user);
+      });
+
+      /*******************************************
+       *  handle current playing song
+       */
+      bot.woot();
       var media = bot.getMedia();
       var dj = bot.getDJ();
       if (media) {
         var currentSong = {
-          name: media.name,
-          id: media.fkid,
-          type: media.type,
+          name: media.title,
+          id: media.cid,
+          format: media.format, // format (Number) : 1 if the song is YouTube. 2 if SoundCloud
           dj: !dj || !dj.username ? "404usernamenotfound" : dj.username
         };
         mediaStore.setCurrent(currentSong);
@@ -88,18 +88,20 @@ module.exports = function(bot, db) {
           );
         }
       );
-
+      
+      /*******************************************
+       *  Start the monthly point reset
+       */
       pointReset(bot, db);
 
-      bot.sendChat(`\`Initialization complete\``);
+      bot.sendChat("Initialization complete");
 
-      Promise.all([
-        dmStore.init(bot),
-        historyStore.init(bot)
-      ]).then(function(){
-        var complete = (Date.now() - initStart) / 1000;
-        bot.log('info', 'BOT', `Initialization completed in ${complete} seconds`);
-      });
+      historyStore
+        .init(bot)
+        .then(function(){
+          var complete = (Date.now() - initStart) / 1000;
+          bot.log('info', 'BOT', `Initialization completed in ${complete} seconds`);
+        });
     }, 3000);
   });
 };

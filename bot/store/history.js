@@ -1,34 +1,34 @@
-'use strict';
-const _ = require('lodash');
-var moment = require('moment');
+"use strict";
+const _ = require("lodash");
+var moment = require("moment");
 
 var historyStore = {
-  songStore : [],
-  warnedStore : [],
+  songStore: [],
+  warnedStore: [],
 
-  ready : false,
+  ready: false,
 
-  convertTime : function (timestamp){
+  convertTime: function(timestamp) {
     return moment(timestamp).fromNow();
   },
 
-  fromHistory : function(song) {
+  fromHistory: function(song) {
     return {
-      songid : song.songid,
-      lastplayed : song.played,
-      user : song._user.username,
-      name : song._song.name,
-      modIgnore : false
+      id: song.id,
+      lastplayed: song.timestamp,
+      user: song.user.username,
+      title: song.media.title,
+      modIgnore: false
     };
   },
 
-  fromUpdate : function(song){
+  fromUpdate: function(song) {
     return {
-      songid : song.media.id,
-      lastplayed : song.raw.song.played,
-      user : _.get(song, 'user.username', '404usernamenotfound'),
-      name : _.get(song, 'media.name', '404songnamenotfound'),
-      modIgnore : false
+      id: song.id,
+      lastplayed: song.timestamp,
+      user: _.get(song, "user.username", "404usernamenotfound"),
+      title: _.get(song, "media.title", "404songnamenotfound"),
+      modIgnore: false
     };
   },
 
@@ -37,11 +37,11 @@ var historyStore = {
    * @param  {Object} warnSong
    * @return {Bool}
    */
-  recentlyWarned : function(warnSong){
+  recentlyWarned: function(warnSong) {
     var result = false;
 
-    this.warnedStore.forEach(function(song){
-      if (song.songid !== warnSong.songid && song.user !== warnSong.user) {
+    this.warnedStore.forEach(function(song) {
+      if (song.id !== warnSong.id && song.user !== warnSong.user) {
         return;
       }
 
@@ -62,20 +62,24 @@ var historyStore = {
   /**
    * check history to see if songid is present
    */
-  getSong : function(bot, songid){
-    if (!songid) { return; }
-    if (!this.ready) {return;}
+  getSong: function(bot, songid) {
+    if (!songid) {
+      return;
+    }
+    if (!this.ready) {
+      return;
+    }
     var result = [];
     var self = this;
 
-    this.songStore.forEach(function(song){
+    this.songStore.forEach(function(song) {
       if (song.songid !== songid) {
         return; // continue to next song in the list
       }
 
       // if a mod wants to play a song again then why not
       if (song.modIgnore) {
-        return; 
+        return;
       }
 
       // giving DJs a 1 minute grace period between warnings
@@ -87,71 +91,69 @@ var historyStore = {
       result.push(song);
       // song.warned = Date.now();
       // self.warnedStore.push(song);
-      
     });
 
     return result;
   },
 
   /**
-   * Save the currently played song into the history array that 
+   * Save the currently played song into the history array that
    * was initially created on load by scraping the last 8 pages
    * of song history
-   * 
+   *
    * For every new song that comes in, one song must be removed
    * that way we always keep the array at a certain length which
    * is (20 * config.history_pages)
    * 1 history page = 20 songs
-   * 
+   *
    * @param {object} bot instance of dubapi
    * @param {object} song dubapi song info object
    */
-  save : function(bot, song){
-    if (!song) { return; }
-    if (!this.ready) {return;}
+  save: function(bot, song) {
+    if (!song) {
+      return;
+    }
+    if (!this.ready) {
+      return;
+    }
 
-    var songId = _.get(song, 'media.id');
-    var lastplayed = _.get(song, 'raw.song.played');
-    if (!lastplayed || !songId) {return;}
+    var songId = _.get(song, "media.id");
+    var lastplayed = _.get(song, "raw.song.played");
+    if (!lastplayed || !songId) {
+      return;
+    }
 
     var convert = this.fromUpdate(song);
     // add song to the beginning of the array
     this.songStore.unshift(convert);
-    
+
     // remove last element from array
     this.songStore.pop();
   },
 
-  clear : function(){
+  clear: function() {
     this.songStore = [];
-    this. warnedStore = [];
+    this.warnedStore = [];
     this.ready = false;
   },
 
-  init: function(bot){
-    var roomid = _.get(bot, '_.room.id');
+  init: function(bot) {
+    this.clear();
 
-    if (roomid) {
-      this.clear();
+    var self = this;
 
-      var self = this;
-
-      return new Promise(function(resolve, reject){
-        bot.getRoomHistory(bot.myconfig.history_pages || 8, function(history){
-          if (history && history.length > 0) {
-            self.songStore = history.map(function(song){
-              return self.fromHistory(song);
-            });
-            self.ready = true;
-          }
-          resolve();
-        });
+    return new Promise(function(resolve, reject) {
+      bot.getHistory(function(history) {
+        if (history && history.length > 0) {
+          self.songStore = history.map(function(song) {
+            return self.fromHistory(song);
+          });
+          self.ready = true;
+        }
+        resolve();
       });
-    }
-    
+    });
   }
-
 };
-
 
 module.exports = historyStore;

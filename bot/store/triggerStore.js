@@ -2,7 +2,6 @@
 var repo = require(process.cwd()+'/repo');
 const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 const triggerFormatter = require(process.cwd()+ '/bot/utilities/trigger-formatter.js');
-const triggerPoint = require(process.cwd()+ '/bot/utilities/triggerPoint.js');
 const _ = require('lodash');
 const fuzzy = require('fuzzy');
 
@@ -88,7 +87,7 @@ var TriggerStore = {
 
   append: function(bot, db, data, trig) {
     // if not at least a MOD, GTFO!
-    if ( !roleChecker(bot, data.user, 'mod') ) {
+    if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
       return bot.sendChat('Sorry only mods (or above) can do this');
     }
 

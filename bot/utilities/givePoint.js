@@ -20,7 +20,7 @@ function addPoint(bot, db, data, recipient, opts) {
 
 module.exports = function(bot, db, data, opts) {
   // check if user is the bot
-  if (data.user.username === bot.myconfig.botName) {
+  if (data.user.username === bot.getUser().username) {
     return bot.sendChat('I am not allowed to award points');
   }
 

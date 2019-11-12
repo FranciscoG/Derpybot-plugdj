@@ -12,9 +12,9 @@ var UserStore = {
     return this.usersThatPropped;
   },
 
-  addPoint : function(type, id){
-    if (!type || !id) {return;}
-    this[type].push(id);
+  addPoint : function(pointType, id){
+    if (!pointType || !id) {return;}
+    this[pointType].push(id);
   },
 
   hasId: function(type, id){

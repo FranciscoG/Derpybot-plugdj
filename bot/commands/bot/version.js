@@ -6,7 +6,7 @@ var pkg = require(process.cwd() + '/package.json');
  * @param  {Object} bot Dubapi instance
  */
 module.exports = function(bot) {
-  return bot.sendChat(bot.myconfig.botName + ' version: ' + pkg.version);
+  return bot.sendChat(bot.getUser().username + ' version: ' + pkg.version);
 };
 
 module.exports.extraCommands = ['v', 'ver'];

@@ -1,17 +1,16 @@
 /***************************************************************
- * Event: room_playlist-update
+ * Event: Advance
  * 
- * This event is fired when a new song begins to play
+ * https://plugcubed.github.io/plugAPI/#plugapieventadvance
+ * This is emitted when the song has changed to another one.
+ * 
  */
 'use strict';
 const mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
 const userStore = require(process.cwd()+ '/bot/store/users.js');
 const youtube = require(process.cwd()+'/bot/utilities/youtube.js');
 const soundcloud = require(process.cwd()+'/bot/utilities/soundcloud');
-const historyStore = require(process.cwd()+ '/bot/store/history.js');
 const _ = require('lodash');
-const moment = require('moment');
-const repo = require(process.cwd()+'/repo');
 
 /**
  * 
@@ -26,7 +25,6 @@ function reviewPoints(bot, currentSong) {
   var plural = '';
   var finalChat = '';
 
- 
   if (propped.length > 0) {
     plural = propped.length > 1 ? 's' : '';
     messageToSend.push(`${propped.length} prop${plural} :fist: :heart: :musical_note:`);
@@ -61,58 +59,24 @@ function songModerate(bot, db, data){
     bot.sendChat(bot.myconfig.longSongs.message);
   }
 
-  var songID = _.get(data, 'media.fkid');
-  var type = _.get(data, 'media.type');
+  var songID = _.get(data, 'media.cid');
+  var type = _.get(data, 'media.format');
   if (!type || !songID) { return; }
 
-  if (type.toUpperCase() === 'YOUTUBE'){
+  //type (aka format): 1 if the song is YouTube. 2 if SoundCloud
+  if (type === 1 || type === "1"){
     return youtube(bot, db, data.media);
   }
 }
 
-/**
- * Save song to bot's own playlist.
- * Helpful to build a large playlist so bot can play during off hours
- * 
- * @param {Object} db 
- * @param {Object} bot 
- * @param {Object} song 
- */
-function saveSong(db, bot, song) {
-  // then save songs to bot's playlist for later use
-  // skip saving songs on Funky Friday
-  if (moment().format('dddd') === 'Friday') { return; }
-
-  bot.getRoomHistory(1, function(history){
-    
-    if (history && history.length > 0) {
-
-      // we don't want to save a skipped song
-      if (history[0].skipped) {return;}
-
-      let song = history[0]._song;
-
-      bot.addToPlaylist(
-        bot.myconfig.playlistID, song.fkid, song.type, 
-        function(code, _data){
-          if (code === 200) {
-            bot.log('info','BOT', `${song.name} saved to playlist`);
-          }
-          if (code === 400) {
-            bot.log('info','BOT', `${song.name} - ${_data.data.details.message}`);
-          }
-        }
-      );
-    }
-
-  });
-}
-
 module.exports = function(bot, db) {
-  bot.on(bot.events.roomPlaylistUpdate, function(data) {
-    bot.updub();
+  
+  // https://plugcubed.github.io/plugAPI/#plugapieventadvance
+  bot.on(bot.events.ADVANCE, function(data) {
+    bot.woot();
 
-    let dj = _.get(data, 'user.username', '404usernamenotfound');
+    // get the current DJ
+    let dj = data.currentDJ;
     
     /************************************************************
      *  song info and trackinng
@@ -147,8 +111,8 @@ module.exports = function(bot, db) {
     if(!data.media) { return; }
 
     newSong.name = data.media.name;
-    newSong.id = data.media.fkid;
-    newSong.type = data.media.type;
+    newSong.id = data.media.cid;
+    newSong.format = data.media.format;
     newSong.length = data.media.songLength;
     newSong.dj = dj;
     newSong.when = Date.now();
@@ -156,7 +120,7 @@ module.exports = function(bot, db) {
     // store new song data reseting current in the store
     mediaStore.setCurrent(newSong);
 
-    if (data.media.type.toUpperCase() === 'SOUNDCLOUD') {
+    if (data.media.format === 2) {
 
       soundcloud.getLink(bot, data.media ,function(result){
         mediaStore.setCurrentKey('link', result.link);
@@ -170,7 +134,7 @@ module.exports = function(bot, db) {
       });
 
     } else {
-      mediaStore.setCurrentKey('link', `http://www.youtube.com/watch?v=${data.media.fkid}`);
+      mediaStore.setCurrentKey('link', `http://www.youtube.com/watch?v=${data.media.cid}`);
     }
 
     /************************************************************
@@ -178,13 +142,5 @@ module.exports = function(bot, db) {
      */
     
     songModerate(bot, db, data);
-
-    /************************************************************
-     * Save song to playlist and for last/first-play func
-     */
-    if (bot.myconfig.saveSongs) {
-      saveSong(db, bot, newSong);
-    }
-
   });
 };

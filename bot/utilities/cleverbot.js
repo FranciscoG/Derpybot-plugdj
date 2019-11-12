@@ -1,21 +1,20 @@
 'use strict';
 const Cleverbot = require('cleverbot-node');
-const _private = require(process.cwd() + '/private/get'); 
-const settings = _private.settings;
+const settings = require(process.cwd() + '/private/get').settings;
 
-module.exports = function(bot, db, data) {
+module.exports = function(bot, message) {
   if (!bot) {
     return;
   }
 
-  if (data.params.length < 1) {
+  if (message.length < 1) {
     bot.sendChat("how can I be of assistance?");
     return;
   }
 
   var cleverbot = new Cleverbot();
   cleverbot.configure({botapi: settings.CLEVERBOT_API_KEY});
-  cleverbot.write(data.params.join(" "), function (response) {
+  cleverbot.write(message, function (response) {
     if (!response) {
       return bot.log('error', 'BOT', 'No response from cleverbot');
     }

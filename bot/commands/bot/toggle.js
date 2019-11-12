@@ -8,8 +8,8 @@ module.exports = function(bot, db, data) {
   }
 
   // everything below this block is mod only action
-  if ( !roleChecker(bot, data.user, 'mod') ) {
-    bot.sendChat('Sorry only Mods and above can toggle a configuration');
+  if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
+    bot.sendChat('Sorry only Managers and above can toggle a configuration');
     return;
   }
 

@@ -20,8 +20,8 @@ var bot = {
     // return a media object
     return {
       name : '',
-      fkid : '',
-      type : 'youtube'
+      cid : '',
+      format : 1
     };
   },
   updub : function() {

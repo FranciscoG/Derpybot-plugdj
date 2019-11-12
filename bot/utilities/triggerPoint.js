@@ -2,15 +2,11 @@
 var repo = require(process.cwd()+'/repo');
 var userStore = require(process.cwd()+ '/bot/store/users.js');
 
-var successMsg = function(recipient, type, pointEmoji){
-  if (type === 'flow') {
-    return `@${recipient.username} now has ${recipient[type]} flowpoint :${pointEmoji}:`;
+var successMsg = function(recipient, pointType, pointEmoji){
+  if (pointType === 'flow') {
+    return `@${recipient.username} now has ${recipient[pointType]} flowpoint :${pointEmoji}:`;
   } 
-  return `@${recipient.username} now has ${recipient[type]} props :${pointEmoji}:`;
-};
-
-var noSelfAwardingMsg = function(username){
-  return `Propping yourself @${username} is like patting yourself on the back`;
+  return `@${recipient.username} now has ${recipient[pointType]} props :${pointEmoji}:`;
 };
 
 var noRepeatPointMsg = function(username, pointEmoji){
@@ -28,14 +24,14 @@ var noRepeatPointMsg = function(username, pointEmoji){
 function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
   repo.incrementUser(db, recipient, pointType, function(user){
     if (!user) {return;}
-    userStore.addPoint( repeatCheck, data.user.id);
+    userStore.addPoint( repeatCheck, data.from.id);
     bot.sendChat( successMsg(user, pointType, pointEmoji) );
   });
 }
 
 
 module.exports = function(bot, db, data, trig, type) {
-  if (data.user.username === bot.myconfig.botName) {
+  if (data.from.username === bot.getUser().username) {
     return bot.sendChat('I am not allowed to award points');
   }
 
@@ -64,8 +60,8 @@ module.exports = function(bot, db, data, trig, type) {
 
   if (!bot.myconfig.allow_multi_prop ) {
     // no repeat giving
-    if ( userStore.hasId( repeatCheck, data.user.id ) ) {
-      return bot.sendChat( noRepeatPointMsg(data.user.username, pointEmoji) );
+    if ( userStore.hasId( repeatCheck, data.from.id ) ) {
+      return bot.sendChat( noRepeatPointMsg(data.frml.username, pointEmoji) );
     }
   }
 
@@ -73,8 +69,8 @@ module.exports = function(bot, db, data, trig, type) {
   
   // can not give points to self
   // but don't show a warning, just remain silent
-  if(data.user.username === dj.username){
-    // return bot.sendChat( noSelfAwardingMsg(data.user.username) );
+  if(data.from.username === dj.username){
+    // return bot.sendChat( noSelfAwardingMsg(data.from.username) );
     return;
   }
 

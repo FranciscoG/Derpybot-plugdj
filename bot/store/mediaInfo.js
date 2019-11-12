@@ -1,5 +1,4 @@
 'use strict';
-var sc = require(process.cwd() + '/bot/utilities/soundcloud.js');
 var _ = require('lodash');
 var repo = require(process.cwd()+'/repo');
 
@@ -8,7 +7,7 @@ var mediaStore = {
     link : null,
     name : null,
     id : null,
-    type : null,
+    format : null,
     dj : null,
     length : 0,
     usersThatPropped : 0,
@@ -20,7 +19,7 @@ var mediaStore = {
     link : null,
     name : null,
     id : null,
-    type : null,
+    format : null,
     dj : null,
     length : 0,
     usersThatPropped : 0,
@@ -38,9 +37,9 @@ var mediaStore = {
 
   lastPlayModel: function(currentSong, storedData) {
     let obj = {
-      id : currentSong.id,
-      type : currentSong.type,
-      name : currentSong.name,
+      id : currentSong.cid,
+      format : currentSong.format,
+      name : currentSong.title,
       plays : 1,
       firstplay : { 
         user : _.get(storedData , 'firstplay.user', currentSong.dj),
@@ -70,10 +69,14 @@ var mediaStore = {
 
       if (!song.id) {return; }
       // look for the song in the db
-      repo.getSong(db, song.id).then(function(data){
-        // then save song in the db
-        repo.saveSong(db, song.id, that.lastPlayModel(song, data.val()) );
-      });
+      repo.getSong(db, song.id)
+        .then(function(data){
+          // then save song in the db
+          repo.saveSong(db, song.id, that.lastPlayModel(song, data.val()) );
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
   },
 

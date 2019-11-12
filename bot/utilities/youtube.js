@@ -61,7 +61,7 @@ function regionBlock(bot, db, _region, yt, media){
 }
 
 function doSkip(bot, media, chatMsg, logReason) {
-  bot.log('info', 'BOT', `[SKIP] YouTube video: ${media.fkid} - ${media.name||'unknown track'} - ${logReason}`);
+  bot.log('info', 'BOT', `[SKIP] YouTube video: ${media.cid} - ${media.name||'unknown track'} - ${logReason}`);
 
   if (bot.myconfig.autoskip_stuck) { 
     return bot.moderateSkip(function(){
@@ -110,7 +110,7 @@ function checkStatus(bot, db, media, body) {
 }
 
 var start = function(bot, db, media){
-  request(makeYTurl(media.fkid), function (error, response, body) {
+  request(makeYTurl(media.cid), function (error, response, body) {
     if (!error && response.statusCode === 200) {
       return checkStatus(bot, db, media, body);
     }

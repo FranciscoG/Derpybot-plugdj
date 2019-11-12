@@ -16,7 +16,7 @@ const _ = require('lodash');
  * @param {string} logReason the message the bot will use when logging
  */
 function doSkip(bot, media, chatMsg, logReason) {
-  bot.log('info', 'BOT', `[SKIP] Soundcloud track - ${media.fkid} - ${media.name || 'unknown track name'} - ${logReason}`);
+  bot.log('info', 'BOT', `[SKIP] Soundcloud track - ${media.cid} - ${media.name || 'unknown track name'} - ${logReason}`);
 
   if (bot.myconfig.autoskip_stuck) { 
     return bot.moderateSkip(function(){
@@ -55,9 +55,9 @@ function getLink(bot, media, callback) {
   }
 
   if (!media ){ return callback({error_message: 'soundcloud getSCjson: missing media object'}); }
-  if (!media.fkid ){ return callback({error_message: 'soundcloud getSCjson: missing song id'}); }
+  if (!media.cid ){ return callback({error_message: 'soundcloud getSCjson: missing song id'}); }
 
-  const songID = media.fkid;
+  const songID = media.cid;
 
   var options = {
     url: `https://api.soundcloud.com/tracks/${songID}.json?client_id=${settings.SOUNDCLOUDID}`

@@ -51,6 +51,7 @@ var updateAllUsers = function(db, data) {
  */
 function refineUser(data){
   return {
+    'isPlugDJ' : true,
     'props' : data.props || 0,
     'flow' : data.flow || 0,
     'DateAdded' : data.DateAdded || new Date(),
@@ -58,7 +59,7 @@ function refineUser(data){
     'username' : data.username || '404unknown',
     'id' : data.id,
     'introduced' : data.introduced || false,
-    'dubs': data.dubs || 0,
+    'pp': data.pp || 0,  // plug points
     'logType' : data.logType || 'inserted'
   };
 }
@@ -86,7 +87,7 @@ var insertUser = function(db, user, callback) {
 /**
  * Logs a user to the db
  * @param  {Object}   db       Firebase object
- * @param  {Object}   user     DT user object
+ * @param  {Object}   user     PlugAPI user object: https://plugcubed.github.io/plugAPI/#user
  * @param  {Function} callback the Firebase User object
  */
 var logUser = function(db, user, callback) {
@@ -307,7 +308,7 @@ var logTriggerHistory  = function(db, msg, data) {
  * Pretty self explanatory
  * @param  {Object}   db       Firebase Object
  * @param  {Object}   media    DubApi's current media info object
- * @param  {String|Int} id     data.media.fkid
+ * @param  {String|Int} id     data.media.cid
  * @param  {String} reason      what the issue was
  * @param  {Function} callback 
  */
@@ -320,33 +321,33 @@ var trackSongIssues = function(db, ytResponse, media, reason) {
 
   var saveObj = Object.assign({}, ytResponse, media);
 
-  songIssues.child(media.fkid).set(saveObj, function(err){
+  songIssues.child(media.cid).set(saveObj, function(err){
     if (err) { 
-      log('error', 'REPO', 'trackSongIssues: Error saving for id ' + media.fkid);
+      log('error', 'REPO', 'trackSongIssues: Error saving for id ' + media.cid);
     }
   });
 };
 
-var getSongIssue = function(db, fkid){
+var getSongIssue = function(db, cid){
   return db.ref('song_issues')
-    .child(fkid)
+    .child(cid)
     .once('value');
 };
 
 
 
-var saveSong = function(db, fkid, saveObj) {
+var saveSong = function(db, cid, saveObj) {
   var song_stats = db.ref('song_stats');
-  song_stats.child(fkid).set(saveObj, function(err){
+  song_stats.child(cid).set(saveObj, function(err){
     if (err) { 
-      log('error', 'REPO', 'song_stats: Error saving for id ' + fkid);
+      log('error', 'REPO', 'song_stats: Error saving for id ' + cid);
     }
   });
 };
 
-var getSong = function(db, fkid) {
+var getSong = function(db, cid) {
   return db.ref('song_stats')
-    .child(fkid)
+    .child(cid)
     .once('value');
 };
 

@@ -1,15 +1,14 @@
 'use strict';
 const _private = require(process.cwd() + '/private/get'); 
+const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 const settings = _private.settings;
 var historyStore = require(process.cwd()+ '/bot/store/history.js');
-const nmm = require(process.cwd()+ '/bot/store/nmm.js');
-const ff = require(process.cwd()+ '/bot/store/ff.js');
+// const nmm = require(process.cwd()+ '/bot/store/nmm.js');
+// const ff = require(process.cwd()+ '/bot/store/ff.js');
 var _ = require('lodash');
 
-settings.APPROVED_USERS.push(settings.OWNER);
-var approved = settings.APPROVED_USERS.map(function(u){return u.toLowerCase(); });
-function checkCreds(user){
-  return approved.indexOf(user.toLowerCase()) >= 0;
+function checkCreds(bot, user){
+  return roleChecker(user, bot.ROOM_ROLE.MANAGER);
 }
 
 module.exports = function(bot, db, data) {
@@ -17,12 +16,9 @@ module.exports = function(bot, db, data) {
     return;
   }
 
-  var userName = _.get(data, 'user.username');
-  if (!userName) { return; }
-
   // check if person sending chat is the owner
-  if (!checkCreds(userName)) {
-    return bot.sendChat('Sorry I only take admin commands from my master');
+  if (!roleChecker(data.user, bot.ROOM_ROLE.MANAGER)) {
+    return bot.sendChat('Sorry I only take admin commands from managers and above');
   }
 
   // now we can assume all chats are from owner
@@ -44,7 +40,7 @@ module.exports = function(bot, db, data) {
       break;
     case 'reconnect':
       bot.sendChat(':phone: Redialing Dubtrack, brb! :computer:');
-      bot.disconnect();
+      bot.close(true);
       setTimeout(function(){
          bot.connect(settings.ROOMNAME);
       }, 5000);
@@ -63,8 +59,8 @@ module.exports = function(bot, db, data) {
       break;
     case 'refresh':
       bot.sendChat('refreshing all spreadsheet data');
-      nmm.load(bot);
-      ff.load(bot);
+      // nmm.load(bot);
+      // ff.load(bot);
       break;
     case 'unmute':
       if (bot.myconfig.muted) {
@@ -79,11 +75,3 @@ module.exports = function(bot, db, data) {
   }
 
 };
-
-/******
-
-Ideas:
-- restore - restore firebase from latest backup
-
-
-*******/

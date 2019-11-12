@@ -34,7 +34,7 @@ const sc = require('../bot/utilities/soundcloud.js');
 describe('Soundcloud track info tests', function(){
 
   it('Should successfully connect to soundcloud', function(done){
-    var media = {fkid: 123456789, name: 'not a real track' };
+    var media = {cid: 123456789, name: 'not a real track' };
     sc.getLink(bot, media, function(error, result){
       expect(result).to.not.be.null;
       done();
@@ -66,7 +66,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Should return a 404 for made-up id', function(done){
-    var media = { fkid: 111111111111111 };
+    var media = { cid: 111111111111111 };
 
     sc.getLink(bot, media, function(result){
       expect(result.skippable).to.be.true;
@@ -76,7 +76,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Should return a 404 for a confirmed broken id', function(done){
-    var media = {fkid: 87380722, name: 'Chamber Of Secrets' };
+    var media = {cid: 87380722, name: 'Chamber Of Secrets' };
 
     sc.getLink(bot, media, function(result){
       expect(result.link).to.be.null;
@@ -87,7 +87,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Body should be null for api forbidden track', function(done){
-    var media = {fkid: 116534641, name: 'The Other Side - Help Me (FilososfischeStilte Remix)' };
+    var media = {cid: 116534641, name: 'The Other Side - Help Me (FilososfischeStilte Remix)' };
 
     sc.getLink(bot, media, function(result){
       expect(result.link).to.be.null;
@@ -98,7 +98,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Body should be null for api forbidden track', function(done){
-    var media = {fkid: 54816877, name: 'Morning in Japan' };
+    var media = {cid: 54816877, name: 'Morning in Japan' };
 
     sc.getLink(bot, media, function(result){
       expect(result.link).to.be.null;
@@ -109,7 +109,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Should successfully return track info', function(done){
-    var media = {fkid: 223456028, name: 'Mz Boom Bap - Fast Life (Instrumental)' };
+    var media = {cid: 223456028, name: 'Mz Boom Bap - Fast Life (Instrumental)' };
 
     sc.getLink(bot, media, function(result){
       expect(result.link).to.be.a.string;
@@ -121,7 +121,7 @@ describe('Soundcloud track info tests', function(){
   });
 
   it('Should not skip this track but the bot did anyways which is weird, oh well', function(done){
-    var media = {fkid: 276516174, name: 'Grown' };
+    var media = {cid: 276516174, name: 'Grown' };
 
     sc.getLink(bot, media, function(result){
       expect(result.link).to.equal('https://soundcloud.com/pryced/grown');
