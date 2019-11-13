@@ -11,11 +11,11 @@ function help(bot){
 }
 
 module.exports = function (bot, db, data) {
-  if (data.params === void(0) || data.params.length < 1) {
+  if (data.args === void(0) || data.args.length < 1) {
     return help(bot);
   }
 
-  if (data.params.length > 1) {
+  if (data.args.length > 1) {
     bot.sendChat('only one trigger at a time');
     return help(bot);
   }

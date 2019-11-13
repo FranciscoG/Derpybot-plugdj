@@ -33,28 +33,37 @@ function regEsc(s) {
   return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
-function handleNumbered(text, c, bot, data) {
-  let params = data.params || [];
+/**
+ * handle replacing indexed placeholder with data args from the commands
+ *
+ * @param {*} text - the full text of the trigger
+ * @param {*} arg - current numbered argument index to replace
+ * @param {*} bot - the PlugApi instance
+ * @param {*} data - full data object from the event callback
+ * @returns
+ */
+function handleNumbered(text, arg, bot, data) {
+  let params = data.args;
 
   // if only %n%, then replace
-  if (/^%[0-9]+%$/.test(c)) {
-    let num = parseInt(c.replace("%", ""), 10);
-    let item = new RegExp(regEsc(c), "g");
+  if (/^%[0-9]+%$/.test(arg)) {
+    let num = parseInt(arg.replace("%", ""), 10);
+    let item = new RegExp(regEsc(arg), "g");
     if (params[num]) {
       text = text.replace(item, params[num]);
     }
   }
 
   // now handle default params
-  if (/^%[0-9]+\|/.test(c)) {
-    let parts = c.replace(/%/g, "").split("|");
+  if (/^%[0-9]+\|/.test(arg)) {
+    let parts = arg.replace(/%/g, "").split("|");
 
     let dflt = parts[1];
     let num = parseInt(parts[0], 10);
 
-    let item = new RegExp(regEsc(c), "g");
+    let item = new RegExp(regEsc(arg), "g");
     if (dflt === "me") {
-      dflt = data.user.username;
+      dflt = data.from.username;
     }
     if (dflt === "dj") {
       dflt = bot.getDJ().username;
@@ -85,14 +94,15 @@ function handleSpreadsheets(text, c, bot) {
 module.exports = function triggerFormatter(text, bot, data) {
   var tokens = getTokens(text);
 
-  tokens.forEach(function(c) {
-    if (c === "%dj%") {
+  tokens.forEach(function(token) {
+    if (token === "%dj%") {
       // replace with current DJ name
       text = text.replace("%dj%", "@" + bot.getDJ().username);
     }
-    if (c === "%me%") {
+
+    if (token === "%me%") {
       // replace with user who entered chat name
-      text = text.replace("%me%", data.user.username);
+      text = text.replace("%me%", data.from.username);
     }
 
     // if (/%[a-z]+\./.test(c)) {
@@ -100,8 +110,8 @@ module.exports = function triggerFormatter(text, bot, data) {
     // }
 
     // if it's a numbered one
-    if (/%[0-9]/.test(c)) {
-      text = handleNumbered(text, c, bot, data);
+    if (/%[0-9]/.test(token)) {
+      text = handleNumbered(text, token, bot, data);
     }
   });
 

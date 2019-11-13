@@ -1,20 +1,30 @@
 'use strict';
-var roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
-var Verifier = require(process.cwd()+ '/bot/utilities/verify.js');
+function hasPermission(bot, user) {
+  if (!user || !user.id) {
+    bot.sendChat('unrecognized user id, try again');
+    return false;
+  }
+
+  // if not at least a MOD, GTFO!
+  if (!bot.havePermission(user.id, bot.ROOM_ROLE.MANAGER)) {
+    bot.sendChat('Sorry only Managers and above can toggle a configuration');
+    return false;
+  }
+
+  return true;
+}
 
 module.exports = function(bot, db, data) {
   if (typeof bot !== 'object' || typeof data !== 'object') {
     return;
   }
 
-  // everything below this block is mod only action
-  if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
-    bot.sendChat('Sorry only Managers and above can toggle a configuration');
-    return;
-  }
+  const { user } = data;
+  
+  if (!hasPermission(bot,user)) return;
 
   // config item to toggle
-  var item = data.params[0];
+  var item = data.args[0];
 
   if (!item) {
     bot.sendChat(`You must provide a config item to toggle. See full list here: http://franciscog.com/DerpyBot/commands/#config`);

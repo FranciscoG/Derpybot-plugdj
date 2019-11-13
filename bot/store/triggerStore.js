@@ -1,6 +1,5 @@
 'use strict';
 var repo = require(process.cwd()+'/repo');
-const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 const triggerFormatter = require(process.cwd()+ '/bot/utilities/trigger-formatter.js');
 const _ = require('lodash');
 const fuzzy = require('fuzzy');
@@ -64,14 +63,15 @@ var TriggerStore = {
   },
   
   /**
-   * bot = dupapi object
+   * bot = PlugAPI object
    * db = instance of firebase repo middleman
-   * data = data from dubapi chat
+   * data = data from PlugAPI chat message
    * callback = fn
    * full [bool] = whether to return full trigger object or just the text
    */
   get: function(bot, db, data, callback, full) {
     var theReturn = null;
+
     if (this.triggers[data.trigger.toLowerCase() + ":"]) {
       theReturn = this.triggers[data.trigger + ":"];
     }
@@ -87,7 +87,7 @@ var TriggerStore = {
 
   append: function(bot, db, data, trig) {
     // if not at least a MOD, GTFO!
-    if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
+    if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER) ) {
       return bot.sendChat('Sorry only mods (or above) can do this');
     }
 
@@ -96,11 +96,11 @@ var TriggerStore = {
     }
 
     // first we need to remove the "+=" from the array
-    data.params.shift();
+    data.args.shift();
     // move the trigger name for existing updateTrigger function
     data.triggerName = data.trigger;
     // combine old trigger value with new trigger value
-    data.triggerText = trig.Returns + ' ' + data.params.join(' ');
+    data.triggerText = trig.Returns + ' ' + data.args.join(' ');
 
     // updateTrigger = function(db, data, triggerKey, orignialValue){
     repo.updateTrigger(db, data, data.trigger, trig)

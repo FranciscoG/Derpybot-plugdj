@@ -43,12 +43,12 @@ var _get = require('lodash/get');
   var deets = parseTrigger(trigger);
   var url = deets.url;
 
-  if (/(\{\d\})+/g.test(url) && !data.params.length) {
+  if (/(\{\d\})+/g.test(url) && !data.args.length) {
     return bot.sendChat("This trigger requires more data");
   }
 
-  if (data.params.length > 0) {
-    data.params.forEach((p, i) => {
+  if (data.args.length > 0) {
+    data.args.forEach((p, i) => {
       url = url.replace(`{${i}}`, p);
     });
   }

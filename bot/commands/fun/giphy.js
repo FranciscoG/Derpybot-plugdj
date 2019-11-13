@@ -8,11 +8,11 @@ module.exports = function(bot, db, data) {
     return bot.sendChat('An error occured, try again');
   }
 
-  if (data.params.length === 0) {
+  if (data.args.length === 0) {
     return bot.sendChat('*usage:* !giphy <search text>');
   }
   
-  data.triggerText = data.params.join('+');
+  data.triggerText = data.args.join('+');
 
   giphy.getGif({random: true}, data.triggerText, function(error, url){
     if (!error && url) {

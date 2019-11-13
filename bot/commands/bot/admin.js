@@ -1,14 +1,24 @@
 'use strict';
 const _private = require(process.cwd() + '/private/get'); 
-const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 const settings = _private.settings;
 var historyStore = require(process.cwd()+ '/bot/store/history.js');
 // const nmm = require(process.cwd()+ '/bot/store/nmm.js');
 // const ff = require(process.cwd()+ '/bot/store/ff.js');
 var _ = require('lodash');
 
-function checkCreds(bot, user){
-  return roleChecker(user, bot.ROOM_ROLE.MANAGER);
+function hasPermission(bot, user) {
+  if (!user || !user.id) {
+    bot.sendChat('unrecognized user id, try again');
+    return false;
+  }
+
+  // if not at least a MOD, GTFO!
+  if (!bot.havePermission(user.id, bot.ROOM_ROLE.MANAGER)) {
+    bot.sendChat('Sorry I only take admin commands from managers and above');
+    return false;
+  }
+
+  return true;
 }
 
 module.exports = function(bot, db, data) {
@@ -16,23 +26,23 @@ module.exports = function(bot, db, data) {
     return;
   }
 
-  // check if person sending chat is the owner
-  if (!roleChecker(data.user, bot.ROOM_ROLE.MANAGER)) {
-    return bot.sendChat('Sorry I only take admin commands from managers and above');
-  }
+  const { user } = data;
+  
+  if (!hasPermission(bot,user)) return;
 
   // now we can assume all chats are from owner
   
-  var command = _.get(data, 'params[0]');
   // if messages was just '!admin' without a any arguments
-  if (!command) {
+  if (data.args.length === 0) {
     bot.sendChat('What would you like me to do master?');
     return;
   }
+  
+  var command = data.args[0];
 
   // now to go through possible commands
   // !admin command extra stuff  
-  var extra = data.params.slice(1);
+  var extra = data.args.slice(1);
   switch(command) {
     case 'restart':
       bot.sendChat(':recycle: brb! :recycle:');

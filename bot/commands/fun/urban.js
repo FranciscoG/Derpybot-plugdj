@@ -34,12 +34,12 @@ function getFirstResult(path, bot) {
 module.exports = function(bot, db, data) {
   if (!bot || !data) { return; }
 
-  if (data.params.length === 0) {  
+  if (data.args.length === 0) {  
     getFirstResult("random", bot);
     return;
   }
 
-  var search = encodeURI( data.params.join(" ").trim() );
+  var search = encodeURI( data.args.join(" ").trim() );
   getFirstResult("define?term="+search, bot);
 
 };

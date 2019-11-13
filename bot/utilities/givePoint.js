@@ -29,7 +29,7 @@ module.exports = function(bot, db, data, opts) {
   }
 
   // if user just wrote "![pointType]"
-  if (data.params === void(0) || data.params.length === 0){
+  if (data.args === void(0) || data.args.length === 0){
 
     if (!bot.myconfig.allow_multi_prop ) {
       // no repeat giving
@@ -48,21 +48,21 @@ module.exports = function(bot, db, data, opts) {
   }
 
   // if user wrote ![pointType] @person1 @person2 ...
-  if (data.params.length > 1) {
+  if (data.args.length > 1) {
     return bot.sendChat( opts.noMultiAwarding(data.user.username) );
   }
 
   // if user wrote ![pointType] recipient (but didn't use the '@'')
-  if (data.params.length === 1 && data.params[0].charAt(0) !== '@') {
+  if (data.args.length === 1 && data.args[0].charAt(0) !== '@') {
     return bot.sendChat( opts.badFormatMsg(data.user.username) );
   }
 
   // if user wrote ![pointType] @recipient
-  if (data.params.length === 1 && data.params[0].charAt(0) === '@') {
+  if (data.args.length === 1 && data.args[0].charAt(0) === '@') {
 
     // can't give points to yourself
     // but don't show a warning, just remain silent
-    if (data.params[0] === '@'+data.user.username) {
+    if (data.args[0] === '@'+data.user.username) {
       // return bot.sendChat( opts.noSelfAwardingMsg(data.user.username) );
       return;
     }
@@ -74,7 +74,7 @@ module.exports = function(bot, db, data, opts) {
       }
     }
 
-    var recipient = bot.getUserByName(data.params[0].replace('@', ''), true);
+    var recipient = bot.getUserByName(data.args[0].replace('@', ''), true);
     return addPoint(bot, db, data, recipient, opts);
   }
 };

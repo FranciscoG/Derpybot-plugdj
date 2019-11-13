@@ -35,28 +35,26 @@ function lookUpBalance(bot, db, whoAsked, whoFor, which){
 
 module.exports = function(bot, db, data) {
 
-  if (typeof(data.params) === 'undefined' || data.params.length === 0) {
+  if (data.args.length === 0) {
     return lookUpBalance(bot, db, data.user.username, data.user, 'mine');
   }
 
-  if (data.params.length > 1) {
+  if (data.args.length > 1) {
     return bot.sendChat(`@${data.user.username} you can only lookup one person`);
   }
 
-  if (data.params.length === 1 && data.params[0].substr(0, 1) !== '@') {
+  if (typeof data.args[0] === 'string') {
     return bot.sendChat(`@${data.user.username}, use '!balance @[username]' to check another user's balance`);
   }
 
-  if (data.params.length === 1 && data.params[0].substr(0, 1) === '@') {
-    var recipient = bot.getUserByName(data.params[0].replace('@', ''), true);
+  const recipient = data.args[0];
 
-    if(!recipient){
-      bot.sendChat(`@${data.user.username}, the user ${data.params[0]} was not found!`);
-      return;
-    }
-
-    return lookUpBalance(bot, db, data.user.username, recipient, 'theirs');
+  if (!recipient){
+    bot.sendChat(`@${data.user.username}, that user was not found!`);
+    return;
   }
+
+  return lookUpBalance(bot, db, data.user.username, recipient, 'theirs');
 
 };
 

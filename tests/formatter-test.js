@@ -21,14 +21,14 @@ describe('Trigger Formatter tests', function(){
 
   it('Should show the first argument', function(done){
     var text = "hello @%0|dj%";
-    data.params = ['you'];
+    data.args = ['you'];
     var parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('hello @you');
     done();
   });
 
   it('only show the defaults', function(done){
-    data.params = [];
+    data.args = [];
     
     var text = "hello %0|dj%, do you know %1|me%, because %1|me% am %2|amazing%";
     var parsed = triggerFormatter(text, bot, data);
@@ -39,7 +39,7 @@ describe('Trigger Formatter tests', function(){
 
   it('Should show do replacement with all args given in order', function(done){
     var text = "%0% %1% %2% %3% %4% %5% %6% %7%";
-    data.params = ['this', 'is', 'a', 'test', 'of', 'the', 'trigger', 'system'];
+    data.args = ['this', 'is', 'a', 'test', 'of', 'the', 'trigger', 'system'];
     var parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('this is a test of the trigger system');
     done();
@@ -47,7 +47,7 @@ describe('Trigger Formatter tests', function(){
 
   it('mixing reserved words with interpolated n', function(done){
     var text = "hey you %dj%, %0% said to %me% that you suck";
-    data.params = ["yoda"];
+    data.args = ["yoda"];
     var parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('hey you @testDJname, yoda said to testUser that you suck');
     done();
@@ -55,11 +55,11 @@ describe('Trigger Formatter tests', function(){
 
   it('with and without reserved word defaults', function(done){
     var text = "hey %0|dj%, you are pretty %1|cool%";
-    data.params = ["brad"];
+    data.args = ["brad"];
     var parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('hey brad, you are pretty cool');
     
-    data.params = ["brad", "dumb"];
+    data.args = ["brad", "dumb"];
     parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('hey brad, you are pretty dumb');
 
@@ -68,7 +68,7 @@ describe('Trigger Formatter tests', function(){
 
   it('out of order in the text', function(done){
     var text = "%0% hated her %2% because it was full of %3% and %1%";
-    data.params = ["sally", "bees", "head", "doodoo"];
+    data.args = ["sally", "bees", "head", "doodoo"];
     var parsed = triggerFormatter(text, bot, data);
     expect(parsed).to.equal('sally hated her head because it was full of doodoo and bees');
     done();

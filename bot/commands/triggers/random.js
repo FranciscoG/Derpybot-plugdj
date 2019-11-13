@@ -10,7 +10,7 @@ module.exports = function(bot, db, data) {
   /************************************************
    * This handles just calling !random by itself
    */
-  if (data.params.length === 0) {
+  if (data.args.length === 0) {
     var randomTrigger = triggerStore.getRandom(bot, data);
 
     if (randomTrigger) {
@@ -24,11 +24,11 @@ module.exports = function(bot, db, data) {
    * This handles doing random with filter
    */
 
-  if (data.params[0].length < 3) {
+  if (data.args[0].length < 3) {
     return bot.sendChat('Your random filter should be at least 3 letters or more');
   }
 
-  var results = triggerStore.search(data.params[0]);
+  var results = triggerStore.search(data.args[0]);
 
   if (results && results.length > 0) {
     let ran = results.random();
@@ -47,7 +47,7 @@ module.exports = function(bot, db, data) {
       }
     });
   } else {
-    return bot.sendChat(`No results for the filter: ${data.params[0]}`);
+    return bot.sendChat(`No results for the filter: ${data.args[0]}`);
   }
 
 };

@@ -9,16 +9,16 @@ var repo = require(process.cwd()+'/repo');
  * @param {array} data 
  */
 module.exports = function (bot, db, data) {
-  if (data.params === void(0) || data.params.length < 1) {
+  if (data.args === void(0) || data.args.length < 1) {
     return bot.sendChat('*usage:* !sourcetext <trigger_name>');
   }
 
-  if (data.params.length > 1) {
+  if (data.args.length > 1) {
     bot.sendChat('only one trigger at a time');
     return bot.sendChat('*usage:* !sourcetext <trigger_name>');
   }
 
-  var trigger = data.params[0];
+  var trigger = data.args[0];
 
   if (trigger.charAt(0) === '!') {
     trigger = trigger.substring(1);

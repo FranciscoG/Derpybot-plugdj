@@ -1,11 +1,24 @@
 'use strict';
-const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
+
+function hasPermission(bot, user) {
+  if (!user || !user.id) {
+    bot.sendChat('unrecognized user id, try again');
+    return false;
+  }
+
+  // if not at least a MOD, GTFO!
+  if (!bot.havePermission(user.id, bot.ROOM_ROLE.MANAGER)) {
+    bot.sendChat('sorry, !shuffle can only be used by mods');
+    return false;
+  }
+
+  return true;
+}
 
 module.exports = function(bot, db, data) {
-  // if not at least a MOD, GTFO!
-  if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
-    bot.sendChat('sorry, !shuffle can only be used by mods');
-  }
+  const { user } = data;
+  
+  if (!hasPermission(bot,user)) return;
 
   bot.shufflePlaylist(
     bot.myconfig.playlistID,

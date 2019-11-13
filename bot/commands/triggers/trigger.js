@@ -1,6 +1,5 @@
 'use strict';
 var repo = require(process.cwd()+'/repo');
-var roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 var Verifier = require(process.cwd()+ '/bot/utilities/verify.js');
 
 function displayHelp(bot){
@@ -24,15 +23,15 @@ module.exports = function(bot, db, data) {
     return bot.sendChat('An error occured, try again');
   }
 
-  const isMod = roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER);
+  const isMod = bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER);
 
   // if just "!trigger" was used then we show the help info for using it
-  if (data.params === void(0) || data.params.length < 1) {
+  if (data.args.length === 0) {
     return displayHelp(bot);
   }
 
-  data.triggerName = data.params[0];
-  data.triggerText = data.params.slice(1).join(' ');
+  data.triggerName = data.args[0];
+  data.triggerText = data.args.slice(1).join(' ');
 
   repo.getTrigger(bot, db, data.triggerName, function(val){
     
@@ -40,20 +39,20 @@ module.exports = function(bot, db, data) {
      * Create Trigger
      * min role:  Resident DJs
      */
-    if (val === null && data.params.length > 1) {
+    if (val === null && data.args.length > 1) {
 
       if (/^\{.+\}$/.test(data.trigger) && !isMod) {
         bot.sendChat('Sorry only Mods can create code triggers');
         return;
       }
 
-      if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.RESIDENTDJ) ) {
+      if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.RESIDENTDJ) ) {
         bot.sendChat('Sorry only ResidentDJs and above can create triggers');
         return;
       }
 
       // scold user for not doing it right
-      if (data.params[0].charAt(0) === '!') {
+      if (data.args[0].charAt(0) === '!') {
         return  noExc(bot);
       }
 
@@ -76,11 +75,11 @@ module.exports = function(bot, db, data) {
     }
 
     // scold user for not doing it right
-    if (data.params[0].charAt(0) === '!') {
+    if (data.args[0].charAt(0) === '!') {
       return  noExc(bot);
     }
 
-    if (val === null && data.params.length === 1) {
+    if (val === null && data.args.length === 1) {
       // trying to delete a trigger that doesn't exist
       return bot.sendChat('You can\'t delete a trigger that doesn\'t exist');
     }
@@ -91,7 +90,7 @@ module.exports = function(bot, db, data) {
      */
     var keys;
     var foundTrigger;
-    if (val !== null && data.params.length > 1) {
+    if (val !== null && data.args.length > 1) {
       keys = Object.keys(val);
       foundTrigger = val[keys[0]];
       return repo.updateTrigger(db, data, keys[0], foundTrigger)
@@ -110,7 +109,7 @@ module.exports = function(bot, db, data) {
      * Delete Trigger Section
      * min role:  Mods
      */
-    if (val !== null && data.params.length === 1) {
+    if (val !== null && data.args.length === 1) {
       keys = Object.keys(val);
 
       let verify = new Verifier(bot, data, 'delete trigger ' + data.triggerName);

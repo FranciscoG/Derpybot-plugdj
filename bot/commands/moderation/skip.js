@@ -2,23 +2,19 @@
 var skipService = require(process.cwd() + '/bot/utilities/skips');
 
 module.exports = function(bot, db, data) {
-  if(!bot.hasPermission(bot.getUserByName(data.user.username), 'skip')) {
-    return bot.sendChat('Sorry I don\'t have skip permissions');
-  }
-  
-  // just plain old skip
-  if (typeof(data.params) === "undefined" || data.params.length === 0) {
-    bot.moderateSkip(function(){});
+
+  // if just !skip
+  // or if too many arguments, then just plain skipping
+  if (data.args.length === 0 || data.args.length > 1) {
+    bot.moderateForceSkip(function(success){
+      if (!success) {
+        return bot.sendChat("Sorry I couldn't skip this song.");
+      }
+    });
     return;
   }
 
-  // if too many arguments, then just plain skipping
-  if (data.params.length > 1) {
-    bot.moderateSkip(function(){});
-    return;
-  }
-
-  switch(data.params[0].toLowerCase()){
+  switch(data.args[0].toLowerCase()){
     case 'broke':
     case 'broken':
         skipService.broken(bot, db, data);
@@ -40,7 +36,11 @@ module.exports = function(bot, db, data) {
         skipService.troll(bot, db, data);
         break;
     default:
-        bot.moderateSkip(function(){});
+      bot.moderateForceSkip(function(success){
+        if (!success) {
+          bot.sendChat("Sorry I couldn't skip this song.");
+        }
+      });
         break;
   }
 

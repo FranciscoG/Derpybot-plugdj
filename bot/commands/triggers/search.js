@@ -7,15 +7,15 @@ module.exports = function(bot, db, data)  {
     return bot.sendChat('An error occured, try again');
   }
 
-  if (data.params.length === 0) {
+  if (data.args.length === 0) {
     return bot.sendChat('*usage:* !search <name, minimum 3 letters>');
   }
 
-  if (data.params[0].length < 3) {
+  if (data.args[0].length < 3) {
     return bot.sendChat('Your search term should be at least 3 letters or more');
   }
 
-  var results = triggerStore.search(data.params[0]);
+  var results = triggerStore.search(data.args[0]);
   
   if (results.length > 50) {
     bot.sendChat('Too many results, only showing first 50:');

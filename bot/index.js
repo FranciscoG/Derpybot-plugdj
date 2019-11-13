@@ -81,7 +81,8 @@ new PlugAPI(
     require('./events/room_join')(bot,db);
     require('./events/chat-command')(bot,db);
     require('./events/chat-message')(bot,db);
-  
+    require('./events/advance')(bot,db);
+
     bot.connect(settings.ROOMNAME);
 
   }

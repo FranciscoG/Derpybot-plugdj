@@ -338,11 +338,12 @@ var getSongIssue = function(db, cid){
 
 var saveSong = function(db, cid, saveObj) {
   var song_stats = db.ref('song_stats');
-  song_stats.child(cid).set(saveObj, function(err){
-    if (err) { 
-      log('error', 'REPO', 'song_stats: Error saving for id ' + cid);
-    }
-  });
+  song_stats.child(cid)
+    .set(saveObj, function(err){
+      if (err) { 
+        log('error', 'REPO', 'song_stats: Error saving for id ' + cid);
+      }
+    });
 };
 
 var getSong = function(db, cid) {

@@ -64,7 +64,7 @@ function doSkip(bot, media, chatMsg, logReason) {
   bot.log('info', 'BOT', `[SKIP] YouTube video: ${media.cid} - ${media.name||'unknown track'} - ${logReason}`);
 
   if (bot.myconfig.autoskip_stuck) { 
-    return bot.moderateSkip(function(){
+    return bot.moderateForceSkip(function(){
       bot.sendChat(chatMsg);
     });
   }

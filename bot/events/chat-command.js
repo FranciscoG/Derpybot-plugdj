@@ -22,9 +22,10 @@ function unrecognized(bot, trigger) {
 }
 
 var handleCommands = function(bot, db, data) {
+
   // first go through the commands in /commands to see if they exist
-  if (typeof(commands[data.trigger]) !== 'undefined'){
-    return commands[data.trigger](bot, db, data);
+  if (typeof(commands[data.command]) !== 'undefined'){
+    return commands[data.command](bot, db, data);
   }
 
   // check if it's an exsiting trigger
@@ -59,20 +60,31 @@ module.exports = function(bot, db) {
   // This is emitted when a chat message starting with the 
   // PlugAPI#commandPrefix is received
 
+  /**
+   * CHAT_COMMAND event
+   * is emitted when a "!" command is sent bypassing the CHAT evemt
+   * https://plugcubed.github.io/plugAPI/#plugapieventcommand
+   * 
+   * data: Object
+   *    args: Array
+   *    command: String
+   *    from: Object
+   *    havePermission: function(permission, permissionCallback)
+   *    id: String
+   *    isFrom: functon(ids, success, failure)
+   *    mentions: Array
+   *    muted: Boolean
+   *    params: Array
+   */
   bot.on(bot.events.CHAT_COMMAND, (data) => {
     console.log("CHAT_COMMAND", data);
-    
-    var cmd = data.message;
-    //split the whole message words into tokens
-    var  tokens = cmd.split(' ');
 
-    if (tokens.length > 0 && tokens[0].charAt(0) === '!') {
-      data.trigger = tokens[0].substring(1).toLowerCase();
-      
-      //the params are an array of the remaining tokens
-      data.params = tokens.slice(1);
-      return handleCommands(bot, db, data);
-    }
+    // to make compatible wth DubAPI code
+    data.trigger = data.trigger || data.command;
+    data.user = data.user || data.from; 
+    data.args = data.args || []; // ensure always be an empty array
+    
+    handleCommands(bot, db, data);
   });
 
 };

@@ -1,12 +1,16 @@
 'use strict';
 const _ = require('lodash');
-const roleChecker = require(process.cwd()+ '/bot/utilities/roleChecker.js');
 
 module.exports = function(bot, db, data) {
   return bot.sendChat("The !dj command is disabled for now until some issues are resolved");
 
+  const { user } = data
+  if (!user || !user.id) {
+    return
+  }
+
   // if not at least a MOD, GTFO!
-  if ( !roleChecker(bot, data.user, bot.ROOM_ROLE.MANAGER) ) {
+  if ( !bot.havePermission(user.id, bot.ROOM_ROLE.MANAGER) ) {
     bot.sendChat('sorry, !dj can only be used by mods');
   }
   
