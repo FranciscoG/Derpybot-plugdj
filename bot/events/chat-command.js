@@ -65,16 +65,45 @@ module.exports = function(bot, db) {
    * is emitted when a "!" command is sent bypassing the CHAT evemt
    * https://plugcubed.github.io/plugAPI/#plugapieventcommand
    * 
-   * data: Object
-   *    args: Array
-   *    command: String
-   *    from: Object
-   *    havePermission: function(permission, permissionCallback)
-   *    id: String
-   *    isFrom: functon(ids, success, failure)
-   *    mentions: Array
-   *    muted: Boolean
-   *    params: Array
+   * data (Object) : The chat data Object
+        data.id String
+        The chat id of the message.
+
+        data.command String
+        The command message.
+
+        data.message String
+        The chat message.
+
+        data.args (Array<User> | Array<String>)
+        An array of strings / user objects after the command.
+
+        data.from User
+        The user object of the message sender
+
+        data.raw Object
+        The raw data object from plug.dj. Not changed by PlugAPI
+
+        data.mentions Array<User>
+        An array of mentioned users.
+
+        data.muted Boolean
+        If the user is muted.
+
+        data.type String
+        The message type (mention, emote, messaage)
+
+        data.isFrom Function
+        Checks if the message sender is from the inputted array of IDs or ID
+
+        data.respond Function
+        Sends a message specified and mentions the command user.
+
+        data.respondTime Function
+        Same as data.respond, except it has an additional parameter to delete the message after specified amount of time in seconds.
+
+        data.havePermission Function
+        Checks if command user has specified permission or above.
    */
   bot.on(bot.events.CHAT_COMMAND, (data) => {
     console.log("CHAT_COMMAND", data);

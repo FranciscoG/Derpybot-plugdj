@@ -77,11 +77,7 @@ new PlugAPI(
     });
     
     // Load all events
-    // require('./loadEvents')(bot, db);
-    require('./events/room_join')(bot,db);
-    require('./events/chat-command')(bot,db);
-    require('./events/chat-message')(bot,db);
-    require('./events/advance')(bot,db);
+    require('./loadEvents')(bot, db);
 
     bot.connect(settings.ROOMNAME);
 

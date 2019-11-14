@@ -61,7 +61,7 @@ module.exports = function(bot, db, data, trig, type) {
   if (!bot.myconfig.allow_multi_prop ) {
     // no repeat giving
     if ( userStore.hasId( repeatCheck, data.from.id ) ) {
-      return bot.sendChat( noRepeatPointMsg(data.frml.username, pointEmoji) );
+      return bot.sendChat( noRepeatPointMsg(data.from.username, pointEmoji) );
     }
   }
 

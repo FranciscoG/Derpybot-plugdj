@@ -1,36 +1,43 @@
 'use strict';
-
+/**
+ * !front
+ * Move a user to the front of the queue
+ * usage: !front @username
+ */
 
 module.exports = function(bot, db, data) {
-  if(!bot.hasPermission(data.user, 'queue-order')) {
+  if (!bot.havePermission(data.user.id, bot.ROOM_ROLE.BOUNCER)) {
+    bot.sendChat(
+      `@${data.user.username}, only room bouncers or above can kickskip`
+    );
     return;
   }
 
-  if (typeof(data.args) === "undefined" || data.args.length === 0) {
-    bot.sendChat("@" + data.user.username + " you didn't select a user. You need to @[username] to move them to the front of the queue");
+  if (data.mentions.length === 0) {
+    bot.sendChat(`@${data.user.username} you didn't select a user. You need to @[username] to move them to the front of the waitlist`);
     return;
   }
 
-  if (data.args.length > 1) {
-    bot.sendChat("@" + data.user.username + " you can only move one person to the front of the queue at a time");
+  if (data.mentions.length > 1) {
+    bot.sendChat(`@${data.user.username} you can only move one person to the front of the waitlist at a time`);
     return;
   }
 
-  if (data.args[0].charAt(0) !== "@") {
-    bot.sendChat("@" + data.user.username + " you need to @[username] to move them to the front of the queue");
+  if (data.mentions.length === 0 && data.args.length > 0) {
+    bot.sendChat(`@${data.user.username} you need to @[username] to move them to the front of the waitlist`);
     return;
   }
   
   // finally 
-  var recipient = bot.getUserByName(data.args[0].replace("@",""));
-  var queuePosition = bot.getQueuePosition(recipient.id);
+  var recipient = bot.mentions[0];
+  var queuePosition = bot.getWaitListPosition(recipient.id);
   
   if (queuePosition > 0) {
     bot.moderateMoveDJ(recipient.id, 0, function(){});
   } else if (queuePosition === 0){
-    bot.sendChat("@" + recipient.username + " is already at the front of the queue");
+    bot.sendChat(`@${recipient.username} is already at the front of the waitlist`);
   } else{
-    bot.sendChat("@" + recipient.username + " is not in the queue");
+    bot.sendChat(`@${recipient.username} is not in the waitlist`);
   }
 
 };

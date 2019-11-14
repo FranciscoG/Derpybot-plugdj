@@ -47,7 +47,7 @@ module.exports = function(bot, db, data) {
     return bot.sendChat(`@${data.user.username}, use '!balance @[username]' to check another user's balance`);
   }
 
-  const recipient = data.args[0];
+  const recipient = data.mentions[0];
 
   if (!recipient){
     bot.sendChat(`@${data.user.username}, that user was not found!`);

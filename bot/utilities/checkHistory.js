@@ -3,7 +3,7 @@ const historyStore = require(process.cwd()+ '/bot/store/history.js');
 const _ = require('lodash');
 
 /**
- * Checks current playing song against room history and
+ * Checks a song against room history and
  * gives a warning if song was played within a specific
  * time frame
  * 
@@ -20,7 +20,7 @@ module.exports = function checkHistory(bot, data){
   var limitInMS = bot.myconfig.recently_played_limit * (1000 * 60 * 60) ;
 
   var dj = _.get(data, 'user.username');
-  var songName = _.get(data, 'media.name');
+  var songName = _.get(data, 'media.title');
   var id = _.get(data, 'media.id');
 
   if (!id) { return; }
