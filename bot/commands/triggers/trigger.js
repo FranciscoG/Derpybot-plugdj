@@ -8,12 +8,6 @@ function displayHelp(bot){
   bot.sendChat('Don\'t add the "!" before trigger_name');
 }
 
-function noExc(bot) {
-  bot.sendChat("leave out the \"!\".");
-  bot.sendChat("*Don't* do this: !trigger !stupidface.");
-  bot.sendChat("*Do* this: !trigger stupidface");
-}
-
 module.exports.extraCommands = ['triggers'];
 module.exports = function(bot, db, data) {
   const chatID = data.id;
@@ -24,44 +18,46 @@ module.exports = function(bot, db, data) {
   }
 
   const isMod = bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER);
+  const isResDJ = bot.havePermission(data.user.id, bot.ROOM_ROLE.RESIDENTDJ);
 
   // if just "!trigger" was used then we show the help info for using it
   if (data.args.length === 0) {
     return displayHelp(bot);
   }
 
-  data.triggerName = data.args[0];
-  data.triggerText = data.args.slice(1).join(' ');
+  let triggerName = data.args[0];
 
-  repo.getTrigger(bot, db, data.triggerName, function(val){
+  // remove the leading "!" if there is one
+  if (triggerName.charAt(0) === '!') {
+    triggerName = triggerName.substring(1);
+  }
+
+  let triggerText = data.args.slice(1).join(' ').trim();
+
+  repo.getTrigger(bot, db, triggerName, function(val){
     
     /*********************************************************
      * Create Trigger
      * min role:  Resident DJs
      */
-    if (val === null && data.args.length > 1) {
+    if (!val && triggerText) {
 
-      if (/^\{.+\}$/.test(data.trigger) && !isMod) {
+      if (/^\{.+\}$/.test(triggerText) && !isMod) {
         bot.sendChat('Sorry only Mods can create code triggers');
         return;
       }
 
-      if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.RESIDENTDJ) ) {
+      if (!isResDJ) {
         bot.sendChat('Sorry only ResidentDJs and above can create triggers');
         return;
       }
 
-      // scold user for not doing it right
-      if (data.args[0].charAt(0) === '!') {
-        return  noExc(bot);
-      }
-
       return repo.insertTrigger(db, data)
         .then(function(){
-          var inf = `[TRIG] ADDED by ${data.user.username} -> !${data.triggerName} -> ${data.triggerText}`;
+          var inf = `[TRIG] ADDED by ${data.user.username} -> !${triggerName} -> ${triggerText}`;
           bot.log('info', 'BOT', inf);
           bot.moderateDeleteChat(chatID, function(){});
-          bot.sendChat(`trigger for *!${data.triggerName}* created, try it out!`);
+          bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
         })
         .catch(function(err){
           if (err) { bot.log('error', 'BOT',`[TRIG] ADD: ${err}`);}
@@ -74,12 +70,7 @@ module.exports = function(bot, db, data) {
       return;
     }
 
-    // scold user for not doing it right
-    if (data.args[0].charAt(0) === '!') {
-      return  noExc(bot);
-    }
-
-    if (val === null && data.args.length === 1) {
+    if (!val && !triggerText) {
       // trying to delete a trigger that doesn't exist
       return bot.sendChat('You can\'t delete a trigger that doesn\'t exist');
     }
@@ -90,15 +81,15 @@ module.exports = function(bot, db, data) {
      */
     var keys;
     var foundTrigger;
-    if (val !== null && data.args.length > 1) {
+    if (val && triggerText) {
       keys = Object.keys(val);
       foundTrigger = val[keys[0]];
       return repo.updateTrigger(db, data, keys[0], foundTrigger)
         .then(function(){
-          var info = `[TRIG] UPDATE: ${data.user.username} changed !${data.triggerName} FROM-> ${foundTrigger.Returns} TO-> ${data.triggerText}`;
+          var info = `[TRIG] UPDATE: ${data.user.username} changed !${triggerName} FROM-> ${foundTrigger.Returns} TO-> ${triggerText}`;
           bot.log('info', 'BOT', info);
           bot.moderateDeleteChat(chatID, function(){});
-          bot.sendChat(`trigger for *!${data.triggerName}* updated!`);
+          bot.sendChat(`trigger for *!${triggerName}* updated!`);
         })
         .catch(function(err){
           if (err) { bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${err}`); }
@@ -109,30 +100,30 @@ module.exports = function(bot, db, data) {
      * Delete Trigger Section
      * min role:  Mods
      */
-    if (val !== null && data.args.length === 1) {
+    if (val && !triggerText) {
       keys = Object.keys(val);
 
-      let verify = new Verifier(bot, data, 'delete trigger ' + data.triggerName);
+      let verify = new Verifier(bot, data, 'delete trigger ' + triggerName);
       
       verify
         .then((userChoice)=>{
           if (!userChoice) {
-            bot.sendChat(`ok, \`${data.triggerName}\` trigger delete canceled`);
+            bot.sendChat(`ok, \`${triggerName}\` trigger delete canceled`);
             return;
           }
 
           repo.deleteTrigger(db, keys[0], val[keys[0]])
             .then(function(){
-              var info = `[TRIG] DEL by ${data.user.username} -> !${data.triggerName}`;
+              var info = `[TRIG] DEL by ${data.user.username} -> !${triggerName}`;
               bot.log('info', 'BOT', info);
-              bot.sendChat(`Trigger for *!${data.triggerName}* deleted`);
+              bot.sendChat(`Trigger for *!${triggerName}* deleted`);
             })
             .catch(function(err){
               if (err) { bot.log('error', 'BOT', `[TRIG] DEL ERROR: ${err}`); }
             });
         })
         .catch(()=>{
-          bot.log('info', 'BOT', `${data.triggerName} - trigger delete cancelled by timeout`);
+          bot.log('info', 'BOT', `${triggerName} - trigger delete cancelled by timeout`);
         });
     }
 
