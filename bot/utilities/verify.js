@@ -26,14 +26,14 @@ module.exports = function Verifier(bot, data, actionText) {
 
     // setup new temporary chat message listener
     function verifyListner(_data){
-      if (_data.user.username === user) {
+      if (_data.from.username === user) {
         if (/^y(es)?$/i.test(_data.message)) {
           answered = true;
-          bot.removeListener(bot.events.chatMessage, verifyListner);
+          bot.removeListener(bot.events.CHAT, verifyListner);
           resolve(true);
         } else if (/^no?$/i.test(_data.message)) {
           answered = true;
-          bot.removeListener(bot.events.chatMessage, verifyListner);
+          bot.removeListener(bot.events.CHAT, verifyListner);
           resolve(false);
         } else {
           bot.sendChat(`@${user}, you must only respond with 'yes' or 'no'`);
@@ -41,7 +41,7 @@ module.exports = function Verifier(bot, data, actionText) {
       }
     }
     
-    bot.on(bot.events.chatMessage, verifyListner);
+    bot.on(bot.events.CHAT, verifyListner);
     
     let count = 1;
     let interval = (responseTime / countLimit);
@@ -61,7 +61,7 @@ module.exports = function Verifier(bot, data, actionText) {
 
       if (count >= countLimit) {
         // if still not answered then we auto reject and disable the listener
-        bot.removeListener(bot.events.chatMessage, verifyListner);
+        bot.removeListener(bot.events.CHAT, verifyListner);
         bot.sendChat(`@${user}: you have not responded in time, cancelling _${actionText}_`);
         clearInterval(check);
         reject();

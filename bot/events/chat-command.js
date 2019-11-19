@@ -30,7 +30,7 @@ var handleCommands = function(bot, db, data) {
 
   // check if it's an exsiting trigger
   triggerStore.get(bot, db, data, function(trig){
-    if (trig !== null) {
+    if (trig) {
       
       // if this is a special code trigger that is wrapped in brackets "{ }"
       if (/^\{.+\}$/.test(trig)) {
