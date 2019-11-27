@@ -42,7 +42,7 @@ A Dubtrack Bot using DubAPI
 
   You'll also need your own of the following API keys:
   - [SoundCloud](https://developers.soundcloud.com/)
-  - [YouTube Data Api](https://developers.google.com/youtube/v3/getting-started) - hav
+  - [YouTube Data Api](https://developers.google.com/youtube/v3/getting-started)
 
   Both are just used to get data for the currently playing song
 </details>
