@@ -28,3 +28,22 @@ A Dubtrack Bot using DubAPI
 # Commands
 # List of commands can be found [here](http://franciscog.com/DerpyBot/commands/)
 
+<details>
+  <summary>Want to contribute?</summary>
+  
+  # Contributing
+  
+  Fork this repo    
+  Create Pull Requests 
+
+  DerpyBot uses Firebase for its database so I need to grant you access. I've setup a development database in there that contributors will solely be using for now. Please DM me in Chillout Mixer's Discord channel with your email so that I can add you to the project. You'll need to download a json account credentials file.  
+
+  I'll provide you with the firebase url
+
+  You'll also need your own of the following API keys:
+  - [SoundCloud](https://developers.soundcloud.com/)
+  - [YouTube Data Api](https://developers.google.com/youtube/v3/getting-started) - hav
+
+  Both are just used to get data for the currently playing song
+</details>
+
