@@ -28,7 +28,7 @@ var handleCommands = function(bot, db, data) {
   }
 
   // check if it's an exsiting trigger
-  let trig = triggerStore.get(bot, db, data);
+  let trig = triggerStore.get(data.command, bot, data);
 
   if (trig) {
     // if this is a special code trigger that is wrapped in brackets "{ }"

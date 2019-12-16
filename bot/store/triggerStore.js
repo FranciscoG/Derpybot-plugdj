@@ -34,6 +34,11 @@ var TriggerStore = {
     return this.flowGivers[randKey];
   },
 
+  /**  
+   * @param {string} term what to search for, can be partial word
+   * @param {number} returnLimit some searches produce too many values, use this to limit the total returned
+   * @returns {array}
+   */
   search : function(term, returnLimit) {
     if (!term || term ==='') {return [];}
     var trigKeys = Object.keys(this.triggers);
@@ -63,18 +68,17 @@ var TriggerStore = {
   },
   
   /**
-   * bot = PlugAPI object
-   * db = instance of firebase repo middleman
-   * data = data from PlugAPI chat message
-   * callback = fn
-   * full [bool] = whether to return full trigger object or just the text
+   * @param {string} trigger the trigger to look up
+   * @param {object} bot PlugAPI object
+   * @param {object} data data from PlugAPI chat message
+   * @param {boolean} full whether to return full trigger object or just the text
    * @returns {string}
    */
-  get: function(bot, db, data, callback, full) {
+  get: function(trigger, bot, data, full) {
     var theReturn = null;
 
-    if (this.triggers[data.trigger.toLowerCase() + ":"]) {
-      theReturn = this.triggers[data.trigger + ":"];
+    if (this.triggers[trigger.toLowerCase() + ":"]) {
+      theReturn = this.triggers[trigger + ":"];
     }
 
     if (theReturn && !full){

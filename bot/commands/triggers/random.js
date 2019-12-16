@@ -28,13 +28,17 @@ module.exports = function(bot, db, data) {
     return bot.sendChat('Your random filter should be at least 3 letters or more');
   }
 
+  // get list of 
   var results = triggerStore.search(data.args[0]);
 
   if (results && results.length > 0) {
     let ran = results.random();
+
     // check if it's an exsiting trigger
-    let trig = triggerStore.get(bot, db, data);
-    if (trig !== null) {
+    let trig = triggerStore.get(ran, bot, data);
+
+    if (trig) {
+      bot.sendChat(`Trigger name: ${ran}`);
       var last = trig.split(" ").pop();
       var pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
       if (pointCheck.test(last)) {
