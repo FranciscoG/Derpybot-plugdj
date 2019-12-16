@@ -10,7 +10,7 @@ const bot = stubs.bot;
 
 // DJ = testDJname;
 const data = {
-  user: { username: 'testUser' }
+  from: { username: 'testUser' }
 };
 
 // require our file to test
@@ -37,7 +37,7 @@ describe('Trigger Formatter tests', function(){
   });
   
 
-  it('Should show do replacement with all args given in order', function(done){
+  it('Should do replacement with all args given in order', function(done){
     var text = "%0% %1% %2% %3% %4% %5% %6% %7%";
     data.args = ['this', 'is', 'a', 'test', 'of', 'the', 'trigger', 'system'];
     var parsed = triggerFormatter(text, bot, data);
@@ -74,17 +74,17 @@ describe('Trigger Formatter tests', function(){
     done();
   });
 
-  it('should get the correct spreadsheet data', function(done){
-    var text = "%nmm.date% - %nmm.artist% - %nmm.album%";
-    bot.sheetsData = bot.sheetsData || {};
-    bot.sheetsData.nmm = {
-      date : '3/12/2018',
-      artist : 'Blockhead',
-      album : 'Funeral Balloons'
-    };
-    var parsed = triggerFormatter(text, bot, data);
-    expect(parsed).to.equal('3/12/2018 - Blockhead - Funeral Balloons');
-    done();
-  });
+  // it('should get the correct spreadsheet data', function(done){
+  //   var text = "%nmm.date% - %nmm.artist% - %nmm.album%";
+  //   bot.sheetsData = bot.sheetsData || {};
+  //   bot.sheetsData.nmm = {
+  //     date : '3/12/2018',
+  //     artist : 'Blockhead',
+  //     album : 'Funeral Balloons'
+  //   };
+  //   var parsed = triggerFormatter(text, bot, data);
+  //   expect(parsed).to.equal('3/12/2018 - Blockhead - Funeral Balloons');
+  //   done();
+  // });
 
 });

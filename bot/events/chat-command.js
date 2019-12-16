@@ -106,7 +106,7 @@ module.exports = function(bot, db) {
         Checks if command user has specified permission or above.
    */
   bot.on(bot.events.CHAT_COMMAND, (data) => {
-    console.log("CHAT_COMMAND", data);
+    // console.log("CHAT_COMMAND", data);
 
     // to make compatible wth DubAPI code
     data.trigger = data.trigger || data.command;

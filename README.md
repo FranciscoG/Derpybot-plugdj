@@ -2,9 +2,8 @@
 # DerpyBot 
 
 [![License](http://img.shields.io/:license-mit-blue.svg)](https://github.com/franciscog/DerpyBot/blob/master/LICENSE)
-[![build](https://travis-ci.org/FranciscoG/DerpyBot.svg)](https://travis-ci.org/FranciscoG/DerpyBot)
 
-A Dubtrack Bot using DubAPI
+A Plug.dj Bot using [plugAPI](https://github.com/plugCubed/plugAPI)
 
 [List of commands](#commands)
 

@@ -7,9 +7,11 @@ var config = require(process.cwd() + '/bot/config.js');
  */
 var bot = {
   sendChat : function(x) { 
-    // this doesn't return anything
-    return;
-  }, 
+    return x;
+  },
+  havePermission(id, roleId) {
+    return true;  // bot always has all the permissions
+  },
   getDJ : function() {
     // return DJ info object
     return {

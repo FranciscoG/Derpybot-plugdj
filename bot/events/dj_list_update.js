@@ -51,7 +51,7 @@ module.exports = function(bot, db) {
       return bot.log("error", "BOT", "DJ_LIST_UPDATE: data object missing");
     }
 
-    console.log("DJ_LIST_UPDATE", data);
+    // console.log("DJ_LIST_UPDATE", data);
 
     const djs = bot.getWaitList();
 

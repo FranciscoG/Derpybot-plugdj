@@ -110,7 +110,7 @@ module.exports = function(bot, db) {
     // if no data.media from the api then stop now because everything below needs it
     if(!data.media) { return; }
 
-    newSong.name = data.media.name;
+    newSong.name = data.media.title;
     newSong.id = data.media.cid;
     newSong.format = data.media.format;
     newSong.length = data.media.songLength;
