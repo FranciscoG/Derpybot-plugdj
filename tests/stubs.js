@@ -1,4 +1,15 @@
 'use strict';
+/*
+ * setup test db
+ */
+const _private = require(process.cwd() + "/private/get");
+const settings = _private.settings;
+const svcAcct = _private.svcAcct;
+
+var Database = require(process.cwd() + "/bot/db.js");
+var BASEURL = settings.FIREBASE.BASEURL;
+var db = new Database(svcAcct, BASEURL);
+
 var config = require(process.cwd() + '/bot/config.js');
 
 /**
@@ -57,7 +68,7 @@ var bot = {
   isResidentDJ : function(user){
     return user && user.niceRole && user.niceRole === 'residentdj';
   },
-  isSaff : function(user){
+  isStaff : function(user){
     return user && user.niceRole && user.niceRole === 'staff';
   },
   myconfig : config,
@@ -74,5 +85,6 @@ var dataResponse = {};
 
 module.exports = {
   bot : bot,
-  data : dataResponse
+  data : dataResponse,
+  db: db
 };

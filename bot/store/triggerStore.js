@@ -68,6 +68,7 @@ var TriggerStore = {
    * data = data from PlugAPI chat message
    * callback = fn
    * full [bool] = whether to return full trigger object or just the text
+   * @returns {string}
    */
   get: function(bot, db, data, callback, full) {
     var theReturn = null;
@@ -80,9 +81,7 @@ var TriggerStore = {
       theReturn = triggerFormatter(theReturn.Returns, bot, data);
     }
 
-    if (typeof callback === 'function') {
-      return callback(theReturn);
-    }
+    return theReturn;
   },
 
   append: function(bot, db, data, trig) {
@@ -180,6 +179,25 @@ var TriggerStore = {
         bot.log('error', 'BOT', 'error getting lastTrigger from firebase');
     });
 
+  },
+
+  /**  
+   * for unit testing
+   */
+  initSync: async function(bot, db) {
+    try {
+      var triggerRef = db.ref('triggers');
+
+      // gets all the triggers and stored them locally
+      const allTriggersSnap = await triggerRef.once('value');
+      const triggerVal = allTriggersSnap.val();
+      this.setTriggers.call(this,bot,triggerVal);
+
+      return Promise.resolve();
+    } catch (e) {
+      console.log(e);
+      return Promise.reject();
+    }
   }
 };
 

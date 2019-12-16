@@ -6,7 +6,12 @@ module.exports = function(bot, db) {
     var events = process.cwd() + "/bot/events";
     fs.readdirSync(events).forEach(function(file) {
         if (file.indexOf(".js") > -1) {
-            require(events + "/" + file)(bot, db);
+            var event = require(events + "/" + file);
+            if (typeof event === "function") {
+                event(bot, db);
+            } else if (typeof event === "object") {
+                event.main(bot, db);
+            }
         }
     });
 };

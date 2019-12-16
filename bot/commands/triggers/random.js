@@ -33,19 +33,18 @@ module.exports = function(bot, db, data) {
   if (results && results.length > 0) {
     let ran = results.random();
     // check if it's an exsiting trigger
-    triggerStore.get(bot, db, data, function(trig){
-      if (trig !== null) {
-        var last = trig.split(" ").pop();
-        var pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
-        if (pointCheck.test(last)) {
-          return triggerPoint(bot, db, data, trig, last);
-        } else {
-          return bot.sendChat(trig);
-        }
+    let trig = triggerStore.get(bot, db, data);
+    if (trig !== null) {
+      var last = trig.split(" ").pop();
+      var pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
+      if (pointCheck.test(last)) {
+        return triggerPoint(bot, db, data, trig, last);
       } else {
-        return bot.sendChat(`beep boop, *!${data.trigger}* is not a recognized command or trigger, beep boop`);
+        return bot.sendChat(trig);
       }
-    });
+    } else {
+      return bot.sendChat(`beep boop, *!${data.trigger}* is not a recognized command or trigger, beep boop`);
+    }
   } else {
     return bot.sendChat(`No results for the filter: ${data.args[0]}`);
   }
