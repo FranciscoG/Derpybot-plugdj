@@ -1,4 +1,6 @@
-module.exports = {
+const { cloneDeep } = require("lodash");
+
+const sampleUser = {
   avatarID: "",
   badge: "food05",
   blurb: undefined,
@@ -12,13 +14,21 @@ module.exports = {
   notifications: undefined,
   pp: undefined,
   pw: undefined,
-  rawun: "TestDJName",
+  rawun: "testDJname",
   role: 5000,
   silver: true,
   slug: null,
   status: 1,
   sub: 1,
-  username: "TestDJName",
+  username: "testDJname",
   vote: 1,
   xp: undefined
+};
+
+/**
+ * Always export a copy of data so that every call to this function produces
+ * new object and not a reference to the above object
+ */
+module.exports = function() {
+  return cloneDeep(sampleUser);
 };

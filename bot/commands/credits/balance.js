@@ -15,8 +15,9 @@ function sayTheirBalance(bot, whoAsked, user) {
   bot.sendChat(`@${whoAsked}, the user @${user.username} has ${user.props} prop${propS} :fist: and ${user.flow} flowpoint${flowS} :surfer:`);
 }
 
-function lookUpBalance(bot, db, whoAsked, whoFor, which){
-  repo.findUserById(db, whoFor.id, function(user){
+async function lookUpBalance(bot, db, whoAsked, whoFor, which){
+  try {
+    const user = await repo.findUserById(db, whoFor.id);
     if (user !== null) {
       if (user.props === void(0) || user.props === null) { user.props = 0; }
       if (user.flow === void(0) || user.flow === null) { user.flow = 0; }
@@ -29,8 +30,9 @@ function lookUpBalance(bot, db, whoAsked, whoFor, which){
     } else {
       bot.sendChat(`Strange, data for that was not found!`);
     }
-    
-  });
+  } catch (e) {
+    bot.sendChat(`Strange, data for that was not found!`);
+  }
 }
 
 module.exports = function(bot, db, data) {

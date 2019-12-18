@@ -75,17 +75,20 @@ var TriggerStore = {
    * @returns {string}
    */
   get: function(trigger, bot, data, full) {
-    var theReturn = null;
+    var found = null;
 
     if (this.triggers[trigger.toLowerCase() + ":"]) {
-      theReturn = this.triggers[trigger + ":"];
+      found = this.triggers[trigger + ":"];
     }
 
-    if (theReturn && !full){
-      theReturn = triggerFormatter(theReturn.Returns, bot, data);
+    if (found && !full){
+      found = triggerFormatter(found.Returns, bot, data);
     }
 
-    return theReturn;
+    if (typeof found === 'string') {
+      return found.trim();
+    }
+    return null;
   },
 
   append: function(bot, db, data, trig) {
@@ -200,7 +203,7 @@ var TriggerStore = {
       return Promise.resolve();
     } catch (e) {
       console.log(e);
-      return Promise.reject();
+      return Promise.reject(e.message);
     }
   }
 };

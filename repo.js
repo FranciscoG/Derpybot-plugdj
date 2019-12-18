@@ -7,16 +7,12 @@ var _ = require('lodash');
  * Find a user by user.id
  * @param  {Object}   db       Firebase object
  * @param  {int}      userid   
- * @param  {Function} callback
+ * @returns {Promise}
  */
-var findUserById = function(db, userid, callback) { 
-  var user = db.ref('users').child(userid);
-  user.once('value', function(snapshot){
-      var val = snapshot.val();
-      callback(val);
-    }, function(error){
-      log('error', 'REPO', 'findUserById :' + error.code);
-  });
+var findUserById = async function(db, userid) { 
+  const ref = db.ref('users').child(userid);
+  const snapshot = await ref.once('value');
+  return snapshot.val();
 };
 
 /**
@@ -121,7 +117,7 @@ var logUser = function(db, user, callback) {
       }
     })
     .catch(function(error){
-      log('error', 'REPO', 'logUser findUserById :' + error.code);
+      log('error', 'REPO', 'logUser :' + error.code);
     });
 };
 
@@ -131,48 +127,23 @@ var logUser = function(db, user, callback) {
  * @param  {Object}   db       Firebase Object
  * @param  {Object}   user     
  * @param  {String}   thing    The property to be incremented by
- * @param  {Function} callback [description]
+ * @returns {Promise}
  */
-var incrementUser = function(db, user, thing, callback) {
-  var incUser = db.ref('users/' + user.id + '/' + thing);
-  incUser.transaction(
-    // increment prop by 1
-    function (currentValue) {
-      return (currentValue || 0) + 1;
-    },
-    // completion handler
-    function (error) {
-      if (error) {
-        log('error', 'REPO', 'incrementUser:' + error);
-        callback(null);
-      } else {
-        findUserById(db, user.id, function(foundUser){
-          return callback(foundUser);
-        });
+var incrementUser = async function(db, user, thing, callback) {
+  const ref = db.ref('users/' + user.id + '/' + thing);
+
+  try {
+    await ref.transaction(
+      // increment prop by 1
+      function (currentValue) {
+        return (currentValue || 0) + 1;
       }
-    }
-  );
-};
-
-/**
- * Pass through to incrementUser function for props
- */
-var propsUser = function(db, user, callback) {
-  incrementUser(db, user, 'props', callback);
-};
-
-/**
- * Pass through to incrementUser function for hearts
- */
-var heartsUser = function(db, user, callback) {
-  incrementUser(db, user, 'hearts', callback);
-};
-
-/**
- * Pass through to incrementUser function for flow
- */
-var flowUser = function(db, user, callback) {
-  incrementUser(db, user, 'flow', callback);
+    );
+    return await findUserById(db, user.id);
+  } catch (e) {
+    log('error', 'REPO', 'incrementUser:' + e.message);
+    throw e;
+  }
 };
 
 /**
@@ -368,9 +339,6 @@ module.exports = {
   updateUser  : updateUser,
   updateAllUsers  : updateAllUsers,
   insertUser  : insertUser,
-  propsUser  : propsUser,
-  heartsUser  : heartsUser,
-  flowUser : flowUser,
   getLeaders : getLeaders,
   incrementUser : incrementUser,
   getTrigger : getTrigger,

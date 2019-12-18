@@ -1,4 +1,4 @@
-const user = require("./sample-user-object");
+const user = require("./sample-user-object")();
 const { cloneDeep } = require("lodash");
 
 var data = {

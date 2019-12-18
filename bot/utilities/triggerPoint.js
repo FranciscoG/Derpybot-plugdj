@@ -21,12 +21,15 @@ var noRepeatPointMsg = function(username, pointEmoji){
  * @param {Object} data      user info
  * @param {Object} recipient target user info
  */
-function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
-  repo.incrementUser(db, recipient, pointType, function(user){
+async function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
+  try {
+    const user = await repo.incrementUser(db, recipient, pointType);
     if (!user) {return;}
     userStore.addPoint( repeatCheck, data.from.id);
     bot.sendChat( successMsg(user, pointType, pointEmoji) );
-  });
+  } catch (e) {
+    bot.log('error', 'BOT', `triggerPoint addPoint incrementUser: ${e.message}`);
+  }
 }
 
 
@@ -70,10 +73,9 @@ module.exports = function(bot, db, data, trig, type) {
   // can not give points to self
   // but don't show a warning, just remain silent
   if(data.from.username === dj.username){
-    // return bot.sendChat( noSelfAwardingMsg(data.from.username) );
     return;
   }
-
-  return addPoint(bot, db, data, dj, pointType, repeatCheck, pointEmoji);
+  
+  addPoint(bot, db, data, dj, pointType, repeatCheck, pointEmoji);
 
 };

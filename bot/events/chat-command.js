@@ -3,6 +3,7 @@ const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 const triggerCode = require(process.cwd() + "/bot/utilities/triggerCode.js");
 
 var commands = {};
+const pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
 
 function unrecognized(bot, trigger) {
   let msg = `*!${trigger}* is not a recognized trigger. `;
@@ -22,6 +23,11 @@ function unrecognized(bot, trigger) {
 }
 
 var handleCommands = function(bot, db, data) {
+  // to make compatible wth old DubAPI code
+  data.trigger = data.trigger || data.command;
+  data.user = data.user || data.from;
+  data.args = data.args || []; // ensure always be an empty array
+  
   // first go through the commands in /commands to see if they exist
   if (typeof commands[data.command] !== "undefined") {
     return commands[data.command](bot, db, data);
@@ -37,8 +43,8 @@ var handleCommands = function(bot, db, data) {
       return trig;
     }
 
+    // checking if a trigger has a +prop or +flow
     var last = trig.split(" ").pop();
-    var pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
     if (pointCheck.test(last)) {
       triggerPoint(bot, db, data, trig, last);
     } else {
@@ -107,12 +113,6 @@ const main = function(bot, db) {
    */
   bot.on(bot.events.CHAT_COMMAND, data => {
     //console.log("CHAT_COMMAND", data);
-
-    // to make compatible wth old DubAPI code
-    data.trigger = data.trigger || data.command;
-    data.user = data.user || data.from;
-    data.args = data.args || []; // ensure always be an empty array
-
     handleCommands(bot, db, data);
   });
 };
