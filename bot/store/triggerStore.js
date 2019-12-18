@@ -192,19 +192,11 @@ var TriggerStore = {
    * for unit testing
    */
   initSync: async function(bot, db) {
-    try {
-      var triggerRef = db.ref('triggers');
-
-      // gets all the triggers and stored them locally
-      const allTriggersSnap = await triggerRef.once('value');
-      const triggerVal = allTriggersSnap.val();
-      this.setTriggers.call(this,bot,triggerVal);
-
-      return Promise.resolve();
-    } catch (e) {
-      console.log(e);
-      return Promise.reject(e.message);
-    }
+    var triggerRef = db.ref('triggers');
+    // gets all the triggers and stored them locally
+    const allTriggersSnap = await triggerRef.once('value');
+    const triggerVal = allTriggersSnap.val();
+    this.setTriggers.call(this,bot,triggerVal);
   }
 };
 

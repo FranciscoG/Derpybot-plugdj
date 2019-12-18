@@ -25,13 +25,15 @@ module.exports = function(bot, db) {
         guest: Boolean
       }
    */
-  bot.on(bot.events.USER_JOIN, function(user) {
+  bot.on(bot.events.USER_JOIN, async function(user) {
     
     if (!user || !user.id) { return ;}
-    repo.logUser(db, user, function(user){
-      var info = `[JOIN] ${user.username} | ${user.id} | ${user.logType}`;
-      bot.log('info', 'BOT', info);
-    });
 
+    try {
+      const u = await repo.logUser(db, user);
+      bot.log('info', 'BOT', `[JOIN] ${u.username} | ${u.id} | ${u.logType}`);
+    } catch (e) {
+      bot.log('error', 'BOT', `[JOIN] ${user.username}: ${e.message}`);
+    }
   });
 };

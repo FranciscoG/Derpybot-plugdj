@@ -44,5 +44,15 @@ A Plug.dj Bot using [plugAPI](https://github.com/plugCubed/plugAPI)
   - [YouTube Data Api](https://developers.google.com/youtube/v3/getting-started)
 
   Both are just used to get data for the currently playing song
+
+  ----
+  I'm slowly converting everything into async/await functions so here's something about the firebase calls in `repo.js`
+
+  With async/await you need to try/catch errors but I don't want to have a bunch of try/catches everywhere because that
+  will get unruly so this is what I'm doing:
+
+  in `repo.js` all of the functions should (eventually) by `async` and do not put any try/catch inside of them (with one caveat below). You should allow them to throw errors and put your try/catches in the modules that is calling them.
+
+  The one caveat is if it is an internal function that is only being called from within `repo.js`.  For example `insertUser` is internal so it needs a try/catch
 </details>
 

@@ -16,10 +16,13 @@ var noRepeatPointMsg = function(username, pointEmoji){
 
 /**
  * Save point to db and send chat message
- * @param {Object} bot       Dubapi instance
+ * @param {Object} bot       bot api instance
  * @param {Object} db        Firebase instance
- * @param {Object} data      user info
- * @param {Object} recipient target user info
+ * @param {Object} data      pass through of the data object from the event
+ * @param {Object} recipient target User who is getting the point
+ * @param {string} pointType what type of point: props or flow
+ * @param {string} repeatCheck property to check in the currently playing song
+ * @param {string} pointEmoji which emoji to display
  */
 async function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
   try {
@@ -68,6 +71,7 @@ module.exports = function(bot, db, data, trig, type) {
     }
   }
 
+  // the person being propped
   var dj = bot.getDJ();
   
   // can not give points to self

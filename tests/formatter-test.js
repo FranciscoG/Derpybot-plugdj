@@ -3,15 +3,14 @@
 const chai = require('chai');
 const expect = chai.expect;
 const should = chai.should;
+const makeData = require('./data/command-event-data');
 
 // stubs for bot functions
 const stubs = require('./stubs.js');
 const bot = stubs.bot;
 
 // DJ = testDJname;
-const data = {
-  from: { username: 'testUser' }
-};
+const data = makeData();
 
 // require our file to test
 const triggerFormatter = require('../bot/utilities/trigger-formatter.js');
@@ -32,7 +31,7 @@ describe('Trigger Formatter tests', function(){
     
     var text = "hello %0|dj%, do you know %1|me%, because %1|me% am %2|amazing%";
     var parsed = triggerFormatter(text, bot, data);
-    expect(parsed).to.equal('hello testDJname, do you know testUser, because testUser am amazing');
+    expect(parsed).to.equal(`hello ${bot.dj.username}, do you know ${data.from.username}, because ${data.from.username} am amazing`);
     done();
   });
   
@@ -49,7 +48,7 @@ describe('Trigger Formatter tests', function(){
     var text = "hey you %dj%, %0% said to %me% that you suck";
     data.args = ["yoda"];
     var parsed = triggerFormatter(text, bot, data);
-    expect(parsed).to.equal('hey you @testDJname, yoda said to testUser that you suck');
+    expect(parsed).to.equal(`hey you @${bot.dj.username}, yoda said to ${data.from.username} that you suck`);
     done();
   });
 

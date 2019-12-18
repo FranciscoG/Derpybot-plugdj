@@ -5,29 +5,18 @@
 const _private = require(process.cwd() + "/private/get");
 const settings = _private.settings;
 const svcAcct = _private.svcAcct;
-const makeUser = require("./sample-user-object");
-
-var Database = require(process.cwd() + "/bot/db.js");
-var BASEURL = settings.FIREBASE.BASEURL;
-var db = new Database(svcAcct, BASEURL);
-
-var config = require(process.cwd() + "/bot/config.js");
-
-// this will be the user returned by getDJ()
-// its username will be `testDJname`
-const djUser = makeUser();
-
-// this will be the "bot" user returned by getUser
-const testBotUser = makeUser();
-// change the username
-testBotUser.username = "TestBot";
+const Database = require(process.cwd() + "/bot/db.js");
+const BASEURL = settings.FIREBASE.BASEURL;
+const db = new Database(svcAcct, BASEURL);
+const config = require(process.cwd() + "/bot/config.js");
+const userObjects = require('./data/user-objects');
 
 /**
  * [bot description]
  * @type {Object}
  */
 var bot = {
-  dj: djUser,
+  dj: userObjects.dj,
 
   onSendChat: function(callback) {
     this.chatCallback = callback;
@@ -49,7 +38,7 @@ var bot = {
   },
 
   getUser: function() {
-    return testBotUser;
+    return userObjects.botUser;
   },
 
   getMedia: function() {

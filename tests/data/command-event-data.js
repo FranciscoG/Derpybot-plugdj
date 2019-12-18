@@ -1,4 +1,4 @@
-const user = require("./sample-user-object")();
+const userData = require('./user-objects');
 const { cloneDeep } = require("lodash");
 
 var data = {
@@ -26,9 +26,9 @@ var data = {
    *  data.from User
    *  The user object of the message sender
    */
-  from: user,
+  from: userData.rando,
   // I manually make copy from to user for backwards compat with previous dubapi code
-  user: user,
+  user: userData.rando,
 
   /**
    * data.raw Object

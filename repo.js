@@ -5,7 +5,7 @@ var _ = require('lodash');
 
 /**
  * Find a user by user.id
- * @param  {Object}   db       Firebase object
+ * @param  {Object}   db       Firebase database instance
  * @param  {int}      userid   
  * @returns {Promise}
  */
@@ -17,14 +17,14 @@ var findUserById = async function(db, userid) {
 
 /**
  * Update a users data in the db
- * @param  {Object}   db       Firebase object
- * @param  {int}      userid
+ * @param  {Object}   db       Firebase database instance
+ * @param  {number}   userid
  * @param  {Object}   data     Object containing key/values of what is to be updated
- * @param  {Function} callback
+ * @returns null
  */
-var updateUser = function(db, userid, data, callback) {
+var updateUser = async function(db, userid, data) {
   var updateRef = db.ref('users').child(userid);
-  updateRef.update(data, callback);
+  return await updateRef.update(data);
 };
 
 /**
@@ -64,19 +64,20 @@ function refineUser(data){
  * Pretty self explanatory
  * @param  {Object}   db       Firebase Object
  * @param  {Object}   user     DT user object
- * @param  {Function} callback 
+ * @returns null
  */
-var insertUser = function(db, user, callback) {
+var insertUser = async function(db, user) {
   var usersRef = db.ref('users');
   var extraStuff = refineUser(user);
   var finalNewUser = Object.assign({}, user, extraStuff);
 
+  // replace undefined with nulls becaue Firebase doesnt like undefined
   Object.keys(finalNewUser).forEach(function(key){
     if ( finalNewUser[key] === void(0)/* aka undefined */ ){ 
       finalNewUser[key] = null; 
     }
   });
-  return usersRef.child(user.id).set(finalNewUser, callback);
+  return await usersRef.child(user.id).set(finalNewUser);
 };
 
 
@@ -84,41 +85,26 @@ var insertUser = function(db, user, callback) {
  * Logs a user to the db
  * @param  {Object}   db       Firebase object
  * @param  {Object}   user     PlugAPI user object: https://plugcubed.github.io/plugAPI/#user
- * @param  {Function} callback the Firebase User object
+ * @returns {Object}  passs back the user object with logType property
  */
-var logUser = function(db, user, callback) {
-  callback = callback || function(){};
-  
-  let lookup = db.ref('users').child(user.id);
+var logUser = async function(db, user) {
+  const ref = db.ref('users');
+  const userRef = ref.child(user.id);
+  const snapshot = await userRef.once('value');
+  const val = snapshot.val();
 
-  lookup.once('value')
-    .then(function(snapshot){
-      var val = snapshot.val();
-
-      if (!val) {
-        let userLogInfo = refineUser(user);
-        insertUser(db, userLogInfo, function(error){
-          if (error) {
-            return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
-          }
-          user.logType = 'inserted';
-          return callback(user);
-        });
-      } else {
-        let userLogInfo = refineUser(val);
-        userLogInfo.username = user.username;
-        updateUser(db, user.id, userLogInfo, function(error){
-          if (error) {
-            return log('error', 'REPO', 'logUser:' + user.id + ' could not be saved');
-          }
-          user.logType = 'updated';
-          return callback(user);
-        });
-      }
-    })
-    .catch(function(error){
-      log('error', 'REPO', 'logUser :' + error.code);
-    });
+  if (!val) {
+    let userLogInfo = refineUser(user);
+    await insertUser(db, userLogInfo);
+    user.logType = 'inserted';
+    return user;
+  } else {
+    let userLogInfo = refineUser(val);
+    userLogInfo.username = user.username;
+    await updateUser(db, user.id, userLogInfo);
+    user.logType = 'updated';
+    return user;
+  }
 };
 
 
@@ -338,7 +324,6 @@ module.exports = {
   findUserById  : findUserById,
   updateUser  : updateUser,
   updateAllUsers  : updateAllUsers,
-  insertUser  : insertUser,
   getLeaders : getLeaders,
   incrementUser : incrementUser,
   getTrigger : getTrigger,
