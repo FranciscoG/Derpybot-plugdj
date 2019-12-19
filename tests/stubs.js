@@ -18,6 +18,23 @@ const userObjects = require('./data/user-objects');
 var bot = {
   dj: userObjects.dj,
 
+  users: [
+    userObjects.dj,
+    userObjects.rando,
+    userObjects.botUser,
+    userObjects.rando2
+  ],
+
+  // https://plugcubed.github.io/plugAPI/#plugapiroom_role
+  ROOM_ROLE : {
+    NONE: 0,
+    RESIDENTDJ: 1000,
+    BOUNCER: 2000,
+    MANAGER: 3000,
+    COHOST: 4000,
+    HOST: 5000
+  },
+
   onSendChat: function(callback) {
     this.chatCallback = callback;
   },
@@ -29,15 +46,20 @@ var bot = {
     return x;
   },
 
-  havePermission(id, roleId) {
-    return true; // bot always has all the permissions
+  havePermission(userId, roleId) {
+    const user = this.getUser(userId);
+    // console.log('havePermission', user.role, roleId);
+    return user.role >= roleId;
   },
 
   getDJ: function() {
     return this.dj;
   },
 
-  getUser: function() {
+  getUser: function(byId) { 
+    if (byId) {
+      return this.users.filter(x => x.id === byId)[0] || null;
+    } 
     return userObjects.botUser;
   },
 
@@ -62,6 +84,7 @@ var bot = {
   log: function() {
     console.log("bot.log: ", ...arguments);
   },
+  moderateDeleteChat: function(cid, callback) {},
   myconfig: config,
   commandedToDJ: false,
   isDJing: false

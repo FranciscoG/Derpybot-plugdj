@@ -1,6 +1,7 @@
 'use strict';
 var repo = require(process.cwd()+'/repo');
 var Verifier = require(process.cwd()+ '/bot/utilities/verify.js');
+const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 
 function displayHelp(bot){
   bot.sendChat('*create/update:* !trigger trigger_name trigger_text');
@@ -12,13 +13,13 @@ module.exports.extraCommands = ['triggers'];
 module.exports = function(bot, db, data) {
   const chatID = data.id;
   
-  if (!data || !data.user || !data.user.username) {
+  if (!data || !data.from || !data.from.username) {
     bot.log('error', 'BOT', '[TRIG] ERROR: Missing data or username');
     return bot.sendChat('An error occured, try again');
   }
 
-  const isMod = bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER);
-  const isResDJ = bot.havePermission(data.user.id, bot.ROOM_ROLE.RESIDENTDJ);
+  const isMod = bot.havePermission(data.from.id, bot.ROOM_ROLE.MANAGER);
+  const isResDJ = bot.havePermission(data.from.id, bot.ROOM_ROLE.RESIDENTDJ);
 
   // if just "!trigger" was used then we show the help info for using it
   if (data.args.length === 0) {
@@ -34,7 +35,10 @@ module.exports = function(bot, db, data) {
 
   let triggerText = data.args.slice(1).join(' ').trim();
 
-  repo.getTrigger(bot, db, triggerName, function(val){
+  data.triggerName = triggerName;
+  data.triggerText = triggerText;
+
+  repo.getTrigger(bot, db, triggerName, async function(val){
     
     /*********************************************************
      * Create Trigger
@@ -52,16 +56,18 @@ module.exports = function(bot, db, data) {
         return;
       }
 
-      return repo.insertTrigger(db, data)
-        .then(function(){
-          var inf = `[TRIG] ADDED by ${data.user.username} -> !${triggerName} -> ${triggerText}`;
-          bot.log('info', 'BOT', inf);
-          bot.moderateDeleteChat(chatID, function(){});
-          bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
-        })
-        .catch(function(err){
-          if (err) { bot.log('error', 'BOT',`[TRIG] ADD: ${err}`);}
-        });
+      try {
+        let newTrigger = await repo.insertTrigger(db, data);
+        triggerStore.addTrigger(newTrigger.fbkey, newTrigger);
+        var inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
+        bot.log('info', 'BOT', inf);
+        bot.moderateDeleteChat(chatID, function(){});
+        bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
+      } catch(e) {
+        bot.log('error', 'BOT',`[TRIG] ADD: ${e.message}`);
+        bot.sendChat('Error creating new trigger.');
+      } 
+      return;
     }
 
     // everything below this block is mod only action
@@ -77,23 +83,25 @@ module.exports = function(bot, db, data) {
 
     /*********************************************************
      * Update Trigger
-     * min role:  Mods
+     * min role:  Manager
      */
     var keys;
     var foundTrigger;
     if (val && triggerText) {
-      keys = Object.keys(val);
-      foundTrigger = val[keys[0]];
-      return repo.updateTrigger(db, data, keys[0], foundTrigger)
-        .then(function(){
-          var info = `[TRIG] UPDATE: ${data.user.username} changed !${triggerName} FROM-> ${foundTrigger.Returns} TO-> ${triggerText}`;
-          bot.log('info', 'BOT', info);
-          bot.moderateDeleteChat(chatID, function(){});
-          bot.sendChat(`trigger for *!${triggerName}* updated!`);
-        })
-        .catch(function(err){
-          if (err) { bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${err}`); }
-        });
+      let fbkey = Object.keys(val)[0];
+      foundTrigger = val[fbkey];
+      
+      try {
+        let updated = await repo.updateTrigger(db, data, fbkey, foundTrigger);
+        triggerStore.addTrigger(fbkey, updated);
+        var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${foundTrigger.Returns} TO-> ${triggerText}`;
+        bot.log('info', 'BOT', info);
+        bot.moderateDeleteChat(chatID, function(){});
+        bot.sendChat(`trigger for *!${triggerName}* updated!`);
+      } catch (e) {
+        bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${e.message}`); 
+      }
+      
     }
 
     /*********************************************************
@@ -114,7 +122,7 @@ module.exports = function(bot, db, data) {
 
           repo.deleteTrigger(db, keys[0], val[keys[0]])
             .then(function(){
-              var info = `[TRIG] DEL by ${data.user.username} -> !${triggerName}`;
+              var info = `[TRIG] DEL by ${data.from.username} -> !${triggerName}`;
               bot.log('info', 'BOT', info);
               bot.sendChat(`Trigger for *!${triggerName}* deleted`);
             })

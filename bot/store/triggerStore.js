@@ -91,34 +91,34 @@ var TriggerStore = {
     return null;
   },
 
-  append: function(bot, db, data, trig) {
-    // if not at least a MOD, GTFO!
-    if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER) ) {
-      return bot.sendChat('Sorry only mods (or above) can do this');
-    }
+  // append: function(bot, db, data, trig) {
+  //   // if not at least a MOD, GTFO!
+  //   if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER) ) {
+  //     return bot.sendChat('Sorry only mods (or above) can do this');
+  //   }
 
-    if (!this.triggers[data.trigger + ":"]) {
-      return bot.sendChat(`The trigger !${data.trigger} does not exist, ergo you can not append to it`);
-    }
+  //   if (!this.triggers[data.trigger + ":"]) {
+  //     return bot.sendChat(`The trigger !${data.trigger} does not exist, ergo you can not append to it`);
+  //   }
 
-    // first we need to remove the "+=" from the array
-    data.args.shift();
-    // move the trigger name for existing updateTrigger function
-    data.triggerName = data.trigger;
-    // combine old trigger value with new trigger value
-    data.triggerText = trig.Returns + ' ' + data.args.join(' ');
+  //   // first we need to remove the "+=" from the array
+  //   data.args.shift();
+  //   // move the trigger name for existing updateTrigger function
+  //   data.triggerName = data.trigger;
+  //   // combine old trigger value with new trigger value
+  //   data.triggerText = trig.Returns + ' ' + data.args.join(' ');
 
-    // updateTrigger = function(db, data, triggerKey, orignialValue){
-    repo.updateTrigger(db, data, data.trigger, trig)
-        .then(function(){
-          var info = `[TRIG] UPDATE: ${data.user.username} changed !${data.triggerName} FROM-> ${trig.Returns} TO-> ${data.triggerText}`;
-          bot.log('info', 'BOT', info);
-          bot.sendChat(`trigger for *!${data.triggerName}* updated!`);
-        })
-        .catch(function(err){
-          if (err) { bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${err}`); }
-        });
-  },
+  //   // updateTrigger = function(db, data, triggerKey, orignialValue){
+  //   repo.updateTrigger(db, data, data.trigger, trig)
+  //       .then(function(){
+  //         var info = `[TRIG] UPDATE: ${data.user.username} changed !${data.triggerName} FROM-> ${trig.Returns} TO-> ${data.triggerText}`;
+  //         bot.log('info', 'BOT', info);
+  //         bot.sendChat(`trigger for *!${data.triggerName}* updated!`);
+  //       })
+  //       .catch(function(err){
+  //         if (err) { bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${err}`); }
+  //       });
+  // },
 
   updateGivers : function(trig) {
     let val = trig.Returns;
@@ -142,13 +142,21 @@ var TriggerStore = {
         // reorganize the triggers in memory to remove the keys that Firebase makes
     Object.keys(val).forEach((key)=>{
       var thisTrig = val[key];
-      thisTrig.fbkey = key;
-      this.triggers[thisTrig.Trigger] = thisTrig;
-      
+      this.addTrigger(key, thisTrig);
       this.updateGivers(thisTrig);
     });
   },
 
+  /**  
+   * Adds or Updates trigger in the local store
+   * @param {string} key the firebase key 
+   * @param {object} trig the trigger data
+   */
+  addTrigger: function(key, trig) {
+    trig.fbkey = key; 
+    this.triggers[trig.Trigger] = trig;
+  },
+  
   removeTrigger : function(triggerName) {
     if (this.triggers[triggerName]) {
       delete this.triggers[triggerName];
@@ -192,11 +200,12 @@ var TriggerStore = {
    * for unit testing
    */
   initSync: async function(bot, db) {
-    var triggerRef = db.ref('triggers');
-    // gets all the triggers and stored them locally
-    const allTriggersSnap = await triggerRef.once('value');
-    const triggerVal = allTriggersSnap.val();
-    this.setTriggers.call(this,bot,triggerVal);
+    try {
+      const allTriggers = await repo.getAllTriggers(db);
+      this.setTriggers.call(this,bot,allTriggers);
+    } catch (e) {
+      bot.log('error', 'BOT', `error getting triggers from firebase: ${e.message}`);
+    }
   }
 };
 

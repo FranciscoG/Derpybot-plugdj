@@ -1,7 +1,7 @@
 'use strict';
-var log = require('jethro');
+const log = require('jethro');
 log.setTimestampFormat(null, 'YYYY-MM-DD HH:mm:ss:SSS');
-var _ = require('lodash');
+const _ = require('lodash');
 
 /**
  * Find a user by user.id
@@ -9,7 +9,7 @@ var _ = require('lodash');
  * @param  {int}      userid   
  * @returns {Promise}
  */
-var findUserById = async function(db, userid) { 
+const findUserById = async function(db, userid) { 
   const ref = db.ref('users').child(userid);
   const snapshot = await ref.once('value');
   return snapshot.val();
@@ -22,7 +22,7 @@ var findUserById = async function(db, userid) {
  * @param  {Object}   data     Object containing key/values of what is to be updated
  * @returns null
  */
-var updateUser = async function(db, userid, data) {
+const updateUser = async function(db, userid, data) {
   var updateRef = db.ref('users').child(userid);
   return await updateRef.update(data);
 };
@@ -33,7 +33,7 @@ var updateUser = async function(db, userid, data) {
  * @param {Object} data all user data
  * @returns {Promise}
  */
-var updateAllUsers = function(db, data) {
+const updateAllUsers = function(db, data) {
   if (db && data) {
     return db.ref('users').set(data);
   } else {
@@ -66,7 +66,7 @@ function refineUser(data){
  * @param  {Object}   user     DT user object
  * @returns null
  */
-var insertUser = async function(db, user) {
+const insertUser = async function(db, user) {
   var usersRef = db.ref('users');
   var extraStuff = refineUser(user);
   var finalNewUser = Object.assign({}, user, extraStuff);
@@ -87,7 +87,7 @@ var insertUser = async function(db, user) {
  * @param  {Object}   user     PlugAPI user object: https://plugcubed.github.io/plugAPI/#user
  * @returns {Object}  passs back the user object with logType property
  */
-var logUser = async function(db, user) {
+const logUser = async function(db, user) {
   const ref = db.ref('users');
   const userRef = ref.child(user.id);
   const snapshot = await userRef.once('value');
@@ -115,7 +115,7 @@ var logUser = async function(db, user) {
  * @param  {String}   thing    The property to be incremented by
  * @returns {Promise}
  */
-var incrementUser = async function(db, user, thing, callback) {
+const incrementUser = async function(db, user, thing, callback) {
   const ref = db.ref('users/' + user.id + '/' + thing);
 
   try {
@@ -139,13 +139,19 @@ var incrementUser = async function(db, user, thing, callback) {
  * @param  {int}      limit    
  * @param  {Function} callback 
  */
-var getLeaders = function(db, prop, limit, callback) {
+const getLeaders = function(db, prop, limit, callback) {
   return db.ref('users')
     .orderByChild(prop)
     .limitToLast(limit)
     .once('value', function(snapshot) {
       callback(snapshot.val());
     });
+};
+
+const getAllTriggers = async function(db) {
+  const ref = db.ref('triggers');
+  const snapshot = await ref.once('value');
+  return snapshot.val();
 };
 
 /**
@@ -155,8 +161,8 @@ var getLeaders = function(db, prop, limit, callback) {
  * @param  {String}   triggerName trigger to look up
  * @param  {Function} callback    
  */
-var getTrigger = function (bot, db, triggerName, callback) {
-  db.ref('triggers')
+const getTrigger = function (bot, db, triggerName, callback) {
+  return db.ref('triggers')
     .orderByChild('Trigger')
     .equalTo(triggerName.toLowerCase() + ':')
     .once('value', function(snapshot) {
@@ -167,6 +173,14 @@ var getTrigger = function (bot, db, triggerName, callback) {
   });
 };
 
+const getTriggerAsync = async function(db, triggerName) {
+  const ref = db.ref('triggers')
+      .orderByChild('Trigger')
+      .equalTo(triggerName.toLowerCase() + ':');
+  const snapshot = await ref.once('value');
+  return Promise.resolve(snapshot.val());
+};
+
 /**
  * Updates a trigger in the DB
  * @param  {Object} db   Firebase instance
@@ -174,8 +188,10 @@ var getTrigger = function (bot, db, triggerName, callback) {
  * @param {Object} orignialValue  original value from firebase of trigger
  * @return {Firebase.Promise}
  */
-var updateTrigger = function(db, data, triggerKey, orignialValue){
-  if (!triggerKey || !data || !data.triggerText || !data.triggerName) { return; }
+const updateTrigger = async function(db, data, triggerKey, orignialValue){
+  if (!triggerKey || !data || !data.triggerText || !data.triggerName) { 
+    throw new Error('missing some data trying to update trigger');
+  }
 
   if (!orignialValue) { orignialValue = {}; }
 
@@ -191,12 +207,13 @@ var updateTrigger = function(db, data, triggerKey, orignialValue){
     createdBy : orignialValue.createdBy || null
   };
 
-  // console.log(updateObj);
-
+  // update the last trigger in the background
   db.ref('lastTrigger').set(updateObj).then(function(err)  {
-    if (err) { console.log('repo.lastTrigger.set', err); }
+    if (err) { console.log('repo.lastTrigger.set', err.message); }
   });
-  return dbTrig.set(updateObj);
+
+  await dbTrig.set(updateObj);
+  return Promise.resolve(updateObj);
 };
 
 /**
@@ -205,8 +222,10 @@ var updateTrigger = function(db, data, triggerKey, orignialValue){
  * @param  {Object} data Trigger data, see function for details, needs {Author, Returns, Trigger}
  * @return {Firebase.Promise}
  */
-var insertTrigger  = function(db, data) {
-  if (!data || !data.triggerName || !data.triggerText) { return; }
+const insertTrigger  = async function(db, data) {
+  if (!data || !data.triggerName || !data.triggerText) {
+    throw new Error('missing triggerName or triggerText');
+  }
   
   var author = _.get(data, 'user.username', 'unknown');
 
@@ -220,22 +239,31 @@ var insertTrigger  = function(db, data) {
     createdBy : author
   };
 
+  // dont care to wait lastTrigger because it's not important
   db.ref('lastTrigger').set(newTrigger);
-  return db.ref('triggers').push().set(newTrigger);
+  const newRef = db.ref('triggers').push();
+  await newRef.set(newTrigger);
+  const snapshot = await newRef.once('value');
+  const val = snapshot.val();
+  val.fbkey = snapshot.key;
+  return Promise.resolve(val);
 };
 
 /**
  * Delete a trigger in the db
  * @param  {Object} db         Firebase Instance
  * @param  {String} triggerKey The key of the location of the trigger
+ * @param  {Object} oldTrigger 
  * @return {Firebase.Promise}  Returns a promise
  */
-var deleteTrigger = function(db, triggerKey, oldTrigger) {
+const deleteTrigger = function(db, triggerKey, oldTrigger) {
   if (!triggerKey) { return; }
 
-  oldTrigger.status = "deleted";
-  db.ref('lastTrigger').set(oldTrigger);
-  return db.ref('triggers/' + triggerKey).set(null);
+  if (typeof oldTrigger === 'object') {
+    oldTrigger.status = "deleted";
+    db.ref('lastTrigger').set(oldTrigger);
+  }
+  return db.ref('triggers/' + triggerKey).remove();
 };
 
 /**
@@ -244,7 +272,7 @@ var deleteTrigger = function(db, triggerKey, oldTrigger) {
  * @param  {Object} data Trigger data returned from Firebase
  * @return {Firebase.Promise}
  */
-var logTriggerHistory  = function(db, msg, data) {
+const logTriggerHistory  = function(db, msg, data) {
   if (!data || !data.triggerName || !data.triggerText) { return; }
   
   var author = _.get(data, 'user.username', 'unknown');
@@ -269,7 +297,7 @@ var logTriggerHistory  = function(db, msg, data) {
  * @param  {String} reason      what the issue was
  * @param  {Function} callback 
  */
-var trackSongIssues = function(db, ytResponse, media, reason) {
+const trackSongIssues = function(db, ytResponse, media, reason) {
   var songIssues = db.ref('/song_issues');
   
   ytResponse.reason = reason;
@@ -285,7 +313,7 @@ var trackSongIssues = function(db, ytResponse, media, reason) {
   });
 };
 
-var getSongIssue = function(db, cid){
+const getSongIssue = function(db, cid){
   return db.ref('song_issues')
     .child(cid)
     .once('value');
@@ -293,7 +321,7 @@ var getSongIssue = function(db, cid){
 
 
 
-var saveSong = function(db, cid, saveObj) {
+const saveSong = function(db, cid, saveObj) {
   var song_stats = db.ref('song_stats');
   song_stats.child(cid)
     .set(saveObj, function(err){
@@ -303,7 +331,7 @@ var saveSong = function(db, cid, saveObj) {
     });
 };
 
-var getSong = function(db, cid) {
+const getSong = function(db, cid) {
   return db.ref('song_stats')
     .child(cid)
     .once('value');
@@ -315,7 +343,7 @@ var getSong = function(db, cid) {
  * @param  {string}   id       Leader id whic is a combination of month + year
  * @param  {Object}   leaderObj Leaderboard information
  */
-var insertLeaderMonth = function(db, id, leaderObj) {
+const insertLeaderMonth = function(db, id, leaderObj) {
   return db.ref('leaderboard').child(id).set(leaderObj);
 };
 
@@ -327,6 +355,7 @@ module.exports = {
   getLeaders : getLeaders,
   incrementUser : incrementUser,
   getTrigger : getTrigger,
+  getTriggerAsync: getTriggerAsync,
   updateTrigger : updateTrigger,
   insertTrigger : insertTrigger,
   deleteTrigger : deleteTrigger,
@@ -335,5 +364,6 @@ module.exports = {
   saveSong : saveSong,
   getSong : getSong,
   insertLeaderMonth : insertLeaderMonth,
-  logTriggerHistory :logTriggerHistory 
+  logTriggerHistory :logTriggerHistory,
+  getAllTriggers: getAllTriggers
 };
