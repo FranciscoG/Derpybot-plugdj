@@ -37,9 +37,9 @@ var handleCommands = async function(bot, db, data) {
   data.args = data.args || []; // ensure always be an empty array
   
   // first go through the commands in /commands to see if they exist
-  // TODO: convert commands into async that pass their chat texts here
   if (typeof commands[data.command] !== "undefined") {
-    return commands[data.command](bot, db, data);
+    commands[data.command](bot, db, data);
+    return;
   }
 
   // check if it's an exsiting trigger
@@ -47,7 +47,14 @@ var handleCommands = async function(bot, db, data) {
   
   if (trig && /^\{.+\}$/.test(trig)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
-    triggerCode(bot, trig, data);
+    try {
+      console.log(trig);
+      let codeResult = await triggerCode(trig, data);
+      chat_messages.push(codeResult);
+    } catch (e) {
+      bot.log('error', 'BOT', `${e.message}`);
+      chat_messages.push(`Sorry, an error occured with !${trig}. Try again later`);
+    }
   } else if (trig) {
     // checking if a trigger has a +prop or +flow
     var last = trig.split(" ").pop();

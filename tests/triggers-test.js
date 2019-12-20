@@ -1,8 +1,10 @@
 "use strict";
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
-const triggerCommand = require(process.cwd() + "/bot/commands/triggers/trigger.js");
-const repo = require(process.cwd()+'/repo');
-const { handleCommands } = require(process.cwd() +"/bot/events/chat-command.js");
+const triggerCommand = require(process.cwd() +
+  "/bot/commands/triggers/trigger.js");
+const repo = require(process.cwd() + "/repo");
+const { handleCommands } = require(process.cwd() +
+  "/bot/events/chat-command.js");
 const chai = require("chai");
 const expect = chai.expect;
 const should = chai.should;
@@ -11,7 +13,7 @@ const should = chai.should;
 const stubs = require("./stubs.js");
 const { bot, db } = stubs;
 
-const makeData = require('./data/command-event-data');
+const makeData = require("./data/command-event-data");
 
 /* global it, describe, before, after */
 describe("Triggers commands from chat tests", function() {
@@ -25,8 +27,8 @@ describe("Triggers commands from chat tests", function() {
     data.command = "beepboop";
 
     let result = await handleCommands(bot, db, data);
-    expect(result).to.be.an('array');
-    result.forEach(item => expect(item).to.be.a('string'));
+    expect(result).to.be.an("array");
+    result.forEach(item => expect(item).to.be.a("string"));
   });
 
   it("should return unrecognized trigger string", async () => {
@@ -34,9 +36,9 @@ describe("Triggers commands from chat tests", function() {
     data.command = "fleebleflarpflopflooblenSnap";
 
     let result = await handleCommands(bot, db, data);
-    expect(result).to.be.an('array');
-    result.forEach(item => expect(item).to.be.a('string'));
-    expect(result.join(' ')).to.include(`is not a recognized trigger`);
+    expect(result).to.be.an("array");
+    result.forEach(item => expect(item).to.be.a("string"));
+    expect(result.join(" ")).to.include(`is not a recognized trigger`);
   });
 
   it("Bot sending a +prop chat msg should not be able to award points", async () => {
@@ -45,25 +47,27 @@ describe("Triggers commands from chat tests", function() {
     data.from = bot.getUser(); // make the "from" person the bot
 
     let result = await handleCommands(bot, db, data);
-    expect(result).to.be.an('array');
-    result.forEach(item => expect(item).to.be.a('string'));
-    expect(result).to.include('I am not allowed to award points');
+    expect(result).to.be.an("array");
+    result.forEach(item => expect(item).to.be.a("string"));
+    expect(result).to.include("I am not allowed to award points");
   });
 
   it("triggers ending with +prop should add a prop to the dj", async () => {
     const data = makeData();
     data.command = "prap";
-    
+
     let result = await handleCommands(bot, db, data);
-    expect(result.join(' ')).to.include(`now has 1 props :fist:`);
+    expect(result.join(" ")).to.include(`now has 1 props :fist:`);
   });
 
   it("Trigger +prop from same user can not give another prop", async () => {
     const data = makeData();
     data.command = "prap";
-      
+
     let result = await handleCommands(bot, db, data);
-    expect(result.join(' ')).to.include(`you have already given a :fist: for this song`);
+    expect(result.join(" ")).to.include(
+      `you have already given a :fist: for this song`
+    );
   });
 
   it("Trigger +prop from different user adds another prop point", async () => {
@@ -71,14 +75,30 @@ describe("Triggers commands from chat tests", function() {
     data.command = "prap";
     data.from.username = "AnotherPerson";
     data.from.id = "1234";
-        
+
     let result = await handleCommands(bot, db, data);
-    expect(result.join(' ')).to.include(`now has 2 props :fist:`);  
+    expect(result.join(" ")).to.include(`now has 2 props :fist:`);
   });
 
   after(async function() {
-    const ref = db.ref('users').child(bot.dj.id);
+    const ref = db.ref("users").child(bot.dj.id);
     await ref.set(null);
+  });
+});
+
+describe("Trigger code tests", function() {
+  before(async () => {
+    await triggerStore.initSync(bot, db);
+    await repo.logUser(db, bot.dj);
+  });
+
+  it("Special trigger code should return result", async () => {
+    const data = makeData();
+    data.command = "dadjoke";
+
+    let result = await handleCommands(bot, db, data);
+    expect(result).to.be.an("array");
+    result.forEach(item => expect(item).to.be.a("string"));
   });
 });
 
@@ -97,15 +117,14 @@ describe("Triggers commands from chat tests", function() {
 //   it("should show help if just !trigger was sent", async () => {
 //     const data = makeData();
 //     data.from.role = 1000; // make them a resDJ so they can add new triggers
-    
+
 //     triggerCommand(bot, db, data);
 //     expect(msg).to.equal('*create/update:* !trigger trigger_name trigger_text');
 //   });
 
-
 //   it("should create a new trigger", async () => {
 //     const data = makeData();
-    
+
 //     data.args = [
 //       triggerName,
 //       'this', 'is', 'a', 'test'
@@ -132,7 +151,7 @@ describe("Triggers commands from chat tests", function() {
 
 //   it("Trying to update a trigger but without proper access fails", async () => {
 //     const data = makeData();
-    
+
 //     data.args = [
 //       triggerName,
 //       'this', 'is', 'not', 'a', 'test'
@@ -150,7 +169,7 @@ describe("Triggers commands from chat tests", function() {
 //   it("Successfully update a trigger", async () => {
 //     const data = makeData();
 //     data.from.role = 3000; // room manager
-    
+
 //     data.args = [
 //       triggerName,
 //       'this', 'is', 'not', 'a', 'test'
