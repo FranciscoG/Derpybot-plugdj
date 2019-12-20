@@ -20,108 +20,60 @@ describe("Triggers commands from chat tests", function() {
     await repo.logUser(db, bot.dj);
   });
 
-  it("should grab a simple non-pointing trigger from the database", done => {
+  it("should grab a simple non-pointing trigger from the database", async () => {
     const data = makeData();
     data.command = "beepboop";
 
-    let result = handleCommands(bot, db, data);
-    expect(result).to.be.string;
-    done();
+    let result = await handleCommands(bot, db, data);
+    expect(result).to.be.an('array');
+    result.forEach(item => expect(item).to.be.a('string'));
   });
 
-  it("should return unrecognized trigger string", done => {
+  it("should return unrecognized trigger string", async () => {
     const data = makeData();
     data.command = "fleebleflarpflopflooblenSnap";
 
-    let result = handleCommands(bot, db, data);
-    expect(result).to.include(`is not a recognized trigger`);
-    done();
+    let result = await handleCommands(bot, db, data);
+    expect(result).to.be.an('array');
+    result.forEach(item => expect(item).to.be.a('string'));
+    expect(result.join(' ')).to.include(`is not a recognized trigger`);
   });
 
-  it("Bot sending a +prop chat msg should not be able to award points", done => {
+  it("Bot sending a +prop chat msg should not be able to award points", async () => {
     const data = makeData();
     data.command = "prap";
-    // make the "from" person the bot
-    data.from = bot.getUser();
+    data.from = bot.getUser(); // make the "from" person the bot
 
-    bot.onSendChat(msg => {
-      expect(msg).to.include(`not allowed to award points`);
-    });
-
-    let result = handleCommands(bot, db, data);
-    expect(result).to.include(`+prop`);
-    done();
+    let result = await handleCommands(bot, db, data);
+    expect(result).to.be.an('array');
+    result.forEach(item => expect(item).to.be.a('string'));
+    expect(result).to.include('I am not allowed to award points');
   });
 
-  it("triggers ending with +prop should add a prop to the dj", done => {
+  it("triggers ending with +prop should add a prop to the dj", async () => {
     const data = makeData();
     data.command = "prap";
     
-    // prap will invoke 2 separate calls to sendChat.  
-    // the first one we can ignore because it's the trigger message
-    // the 2nd one is the one we want because it's the success msg adding props to the dj
-    let i = 0;
-    bot.onSendChat(msg => {
-      // console.log(msg);
-      if (i === 0) { 
-        i++;
-        return; 
-      }
-      expect(msg).to.include(`now has 1 props :fist:`);
-      done();
-    });
-
-    let result = handleCommands(bot, db, data);
-    expect(result).to.include(`+prop`);
-  
+    let result = await handleCommands(bot, db, data);
+    expect(result.join(' ')).to.include(`now has 1 props :fist:`);
   });
 
-  it("Trigger +prop from same user can not give another prop", done => {
+  it("Trigger +prop from same user can not give another prop", async () => {
     const data = makeData();
     data.command = "prap";
-    
-    // prap will invoke 2 separate calls to sendChat.  
-    // the first one we can ignore because it's the trigger message
-    // the 2nd one is the one we want because it's the success msg adding props to the dj
-    let i = 0;
-    bot.onSendChat(msg => {
-      // console.log(msg);
-      if (i === 0) { 
-        i++;
-        return; 
-      }
-      expect(msg).to.include(`you have already given a :fist: for this song`);
-      done();
-    });
-
-    let result = handleCommands(bot, db, data);
-    expect(result).to.include(`+prop`);
-  
+      
+    let result = await handleCommands(bot, db, data);
+    expect(result.join(' ')).to.include(`you have already given a :fist: for this song`);
   });
 
-  it("Trigger +prop from different user adds another prop point", done => {
+  it("Trigger +prop from different user adds another prop point", async () => {
     const data = makeData();
     data.command = "prap";
     data.from.username = "AnotherPerson";
     data.from.id = "1234";
-    
-    // prap will invoke 2 separate calls to sendChat.  
-    // the first one we can ignore because it's the trigger message
-    // the 2nd one is the one we want because it's the success msg adding props to the dj
-    let i = 0;
-    bot.onSendChat(msg => {
-      // console.log(msg);
-      if (i === 0) { 
-        i++;
-        return; 
-      }
-      expect(msg).to.include(`now has 2 props :fist:`);
-      done();
-    });
-
-    let result = handleCommands(bot, db, data);
-    expect(result).to.include(`+prop`);
-  
+        
+    let result = await handleCommands(bot, db, data);
+    expect(result.join(' ')).to.include(`now has 2 props :fist:`);  
   });
 
   after(async function() {
@@ -130,108 +82,104 @@ describe("Triggers commands from chat tests", function() {
   });
 });
 
-describe("Creating, Updating, Deleting Triggers", function(){
-  const triggerName = 'temp_test_trigger_019';
+// describe("Creating, Updating, Deleting Triggers", function(){
+//   const triggerName = 'temp_test_trigger_019';
 
-  before(async () => {
-    await triggerStore.initSync(bot, db);
-    const trig = await repo.getTriggerAsync(db, triggerName);
-    if (trig) {
-      var key = Object.keys(trig)[0];
-      repo.deleteTrigger(db, key);
-    }
-  });
+//   before(async () => {
+//     await triggerStore.initSync(bot, db);
+//     const trig = await repo.getTriggerAsync(db, triggerName);
+//     if (trig) {
+//       var key = Object.keys(trig)[0];
+//       repo.deleteTrigger(db, key);
+//     }
+//   });
 
-  it("should show help if just !trigger was sent", done => {
-    const data = makeData();
-    data.from.role = 1000; // make them a resDJ so they can add new triggers
-
-    bot.onSendChat(msg => {
-      expect(msg).to.equal('*create/update:* !trigger trigger_name trigger_text');
-      done();
-    });
-
-    triggerCommand(bot, db, data);
-  });
-
-
-  it("should create a new trigger", done => {
-    const data = makeData();
+//   it("should show help if just !trigger was sent", async () => {
+//     const data = makeData();
+//     data.from.role = 1000; // make them a resDJ so they can add new triggers
     
-    data.args = [
-      triggerName,
-      'this', 'is', 'a', 'test'
-    ];
+//     triggerCommand(bot, db, data);
+//     expect(msg).to.equal('*create/update:* !trigger trigger_name trigger_text');
+//   });
 
-    bot.onSendChat(msg => {
-      expect(msg).to.equal(`trigger for *!${triggerName}* created, try it out!`);
-      done();
-      bot.onSendChat(null);
-    });
 
-    triggerCommand(bot, db, data);
-  });
-
-  it("newly CREATED trigger should exist in the TriggerStore", done => {
-    const data = makeData();
-    data.command = triggerName;
-
-    let result = handleCommands(bot, db, data);
-    expect(result).to.be.string;
-    expect(result).to.equal("this is a test");
-    done();
-  });
-
-  it("Trying to update a trigger but without proper access fails", done => {
-    const data = makeData();
+//   it("should create a new trigger", async () => {
+//     const data = makeData();
     
-    data.args = [
-      triggerName,
-      'this', 'is', 'not', 'a', 'test'
-    ];
+//     data.args = [
+//       triggerName,
+//       'this', 'is', 'a', 'test'
+//     ];
 
-    bot.onSendChat(msg => {
-      expect(msg).to.equal(`Sorry only Mods and above can update or delete a triggers`);
-      done();
-      bot.onSendChat(null);
-    });
+//     bot.onSendChat(msg => {
+//       expect(msg).to.equal(`trigger for *!${triggerName}* created, try it out!`);
+//       ;
+//       bot.onSendChat(null);
+//     });
 
-    triggerCommand(bot, db, data);
-  });
+//     triggerCommand(bot, db, data);
+//   });
 
-  it("Successfully update a trigger", done => {
-    const data = makeData();
-    data.from.role = 3000; // room manager
+//   it("newly CREATED trigger should exist in the TriggerStore", async () => {
+//     const data = makeData();
+//     data.command = triggerName;
+
+//     let result = await handleCommands(bot, db, data);
+//     expect(result).to.be.string;
+//     expect(result).to.equal("this is a test");
+//     ;
+//   });
+
+//   it("Trying to update a trigger but without proper access fails", async () => {
+//     const data = makeData();
     
-    data.args = [
-      triggerName,
-      'this', 'is', 'not', 'a', 'test'
-    ];
+//     data.args = [
+//       triggerName,
+//       'this', 'is', 'not', 'a', 'test'
+//     ];
 
-    bot.onSendChat(msg => {
-      expect(msg).to.equal(`trigger for *!${triggerName}* updated!`);
-      done();
-      bot.onSendChat(null);
-    });
+//     bot.onSendChat(msg => {
+//       expect(msg).to.equal(`Sorry only Mods and above can update or delete a triggers`);
+//       ;
+//       bot.onSendChat(null);
+//     });
 
-    triggerCommand(bot, db, data);
-  });
+//     triggerCommand(bot, db, data);
+//   });
 
-  it("newly UPDATED trigger should exist in the TriggerStore", done => {
-    const data = makeData();
-    data.command = triggerName;
+//   it("Successfully update a trigger", async () => {
+//     const data = makeData();
+//     data.from.role = 3000; // room manager
+    
+//     data.args = [
+//       triggerName,
+//       'this', 'is', 'not', 'a', 'test'
+//     ];
 
-    let result = handleCommands(bot, db, data);
-    expect(result).to.be.string;
-    expect(result).to.equal("this is not a test");
-    done();
-  });
+//     bot.onSendChat(msg => {
+//       expect(msg).to.equal(`trigger for *!${triggerName}* updated!`);
+//       ;
+//       bot.onSendChat(null);
+//     });
 
-  after(async function(){
-    const trig = await repo.getTriggerAsync(db, triggerName);
-    if (trig) {
-      var key = Object.keys(trig)[0];
-      repo.deleteTrigger(db, key);
-    }
-  });
-});
+//     triggerCommand(bot, db, data);
+//   });
+
+//   it("newly UPDATED trigger should exist in the TriggerStore", async () => {
+//     const data = makeData();
+//     data.command = triggerName;
+
+//     let result = await handleCommands(bot, db, data);
+//     expect(result).to.be.string;
+//     expect(result).to.equal("this is not a test");
+//     ;
+//   });
+
+//   after(async function(){
+//     const trig = await repo.getTriggerAsync(db, triggerName);
+//     if (trig) {
+//       var key = Object.keys(trig)[0];
+//       repo.deleteTrigger(db, key);
+//     }
+//   });
+// });

@@ -6,7 +6,7 @@ var commands = {};
 const pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
 
 function unrecognized(bot, trigger) {
-  let msg = `*!${trigger}* is not a recognized trigger. `;
+  let msg = `*!${trigger}* is not a recognized trigger`;
 
   let results = triggerStore.recursiveSearch(trigger, 5);
 
@@ -22,41 +22,48 @@ function unrecognized(bot, trigger) {
   return msg + moreMsg;
 }
 
-var handleCommands = function(bot, db, data) {
+function handleChat(bot, messages) {
+  messages.forEach(msg => {
+    bot.sendChat(msg);
+  });
+}
+
+var handleCommands = async function(bot, db, data) {
+  let chat_messages = [];
+
   // to make compatible wth old DubAPI code
   data.trigger = data.trigger || data.command;
   data.user = data.user || data.from;
   data.args = data.args || []; // ensure always be an empty array
   
   // first go through the commands in /commands to see if they exist
+  // TODO: convert commands into async that pass their chat texts here
   if (typeof commands[data.command] !== "undefined") {
     return commands[data.command](bot, db, data);
   }
 
   // check if it's an exsiting trigger
   let trig = triggerStore.get(data.command, bot, data);
-
-  if (trig) {
+  
+  if (trig && /^\{.+\}$/.test(trig)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
-    if (/^\{.+\}$/.test(trig)) {
-      triggerCode(bot, trig, data);
-      return trig;
-    }
-
+    triggerCode(bot, trig, data);
+  } else if (trig) {
     // checking if a trigger has a +prop or +flow
     var last = trig.split(" ").pop();
     if (pointCheck.test(last)) {
-      triggerPoint(bot, db, data, trig, last);
+      let pointInfo = await triggerPoint(bot, db, data, trig, last);
+      chat_messages = chat_messages.concat(pointInfo);
     } else {
-      bot.sendChat(trig);
+      chat_messages.push(trig);
     }
-
-    return trig;
   } else {
-    let cantFindMsg = unrecognized(bot, data.trigger);
-    bot.sendChat(cantFindMsg);
-    return cantFindMsg;
+    chat_messages.push( unrecognized(bot, data.trigger) );
   }
+
+  // handle sending the chat messages here
+  handleChat(bot, chat_messages);
+  return Promise.resolve(chat_messages);
 };
 
 const main = function(bot, db) {

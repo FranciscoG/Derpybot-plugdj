@@ -23,22 +23,30 @@ var noRepeatPointMsg = function(username, pointEmoji){
  * @param {string} pointType what type of point: props or flow
  * @param {string} repeatCheck property to check in the currently playing song
  * @param {string} pointEmoji which emoji to display
+ * @returns {Promise} with success message
  */
 async function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
-  try {
-    const user = await repo.incrementUser(db, recipient, pointType);
-    if (!user) {return;}
-    userStore.addPoint( repeatCheck, data.from.id);
-    bot.sendChat( successMsg(user, pointType, pointEmoji) );
-  } catch (e) {
-    bot.log('error', 'BOT', `triggerPoint addPoint incrementUser: ${e.message}`);
-  }
+  const user = await repo.incrementUser(db, recipient, pointType);
+  if (!user) {Promise.reject('user not found');}
+  userStore.addPoint( repeatCheck, data.from.id);
+  return Promise.resolve( successMsg(user, pointType, pointEmoji) );
 }
 
+/**
+ * @param {object} bot PlugAPI instance
+ * @param {object} db Firebase admin database instance
+ * @param {object} data event object from bot.events.CHAT_COMMAND
+ * @param {string} trig the current trigger text being processed
+ * @param {string} type string indicating which type of prop to give 
+ *                      +prop, +flow, +prop=fire, +flow=surfer
+ * @returns {Promise.resolve<array>} array of strings that will be sent to the chat
+ */
+module.exports = async function(bot, db, data, trig, type) {
+  const messages = [];
 
-module.exports = function(bot, db, data, trig, type) {
   if (data.from.username === bot.getUser().username) {
-    return bot.sendChat('I am not allowed to award points');
+    messages.push('I am not allowed to award points');
+    return Promise.resolve(messages);
   }
 
   type = type.split('=');
@@ -57,17 +65,19 @@ module.exports = function(bot, db, data, trig, type) {
   var re = new RegExp("\\+"+pointType+"?(=[a-z0-9_-]+)?$", "i");
   var strippedMsg = trig.replace(re,"");
   if (strippedMsg !== '') {
-    bot.sendChat(strippedMsg);
+    messages.push(strippedMsg);
   }
 
   if(!bot.getDJ()) {
-    return bot.sendChat('There is no DJ playing!');
+    messages.push('There is no DJ playing!');
+    return Promise.resolve(messages);
   }
 
   if (!bot.myconfig.allow_multi_prop ) {
     // no repeat giving
     if ( userStore.hasId( repeatCheck, data.from.id ) ) {
-      return bot.sendChat( noRepeatPointMsg(data.from.username, pointEmoji) );
+      messages.push(noRepeatPointMsg(data.from.username, pointEmoji));
+      return Promise.resolve(messages);
     }
   }
 
@@ -77,9 +87,15 @@ module.exports = function(bot, db, data, trig, type) {
   // can not give points to self
   // but don't show a warning, just remain silent
   if(data.from.username === dj.username){
-    return;
+    return Promise.resolve(messages);
   }
   
-  addPoint(bot, db, data, dj, pointType, repeatCheck, pointEmoji);
-
+  try {
+    let pointMsg = await addPoint(bot, db, data, dj, pointType, repeatCheck, pointEmoji);
+    messages.push(pointMsg);
+  } catch (e) {
+    bot.log('error', 'BOT', `triggerPoint could not incrementUser: ${e.message}`);
+  }
+  
+  return Promise.resolve(messages);
 };
