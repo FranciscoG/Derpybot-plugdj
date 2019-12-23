@@ -3,7 +3,6 @@ var repo = require(process.cwd() + "/repo");
 const triggerFormatter = require(process.cwd() +
   "/bot/utilities/trigger-formatter.js");
 const _ = require("lodash");
-const fuzzy = require("fuzzy");
 const fuzzysort = require("fuzzysort");
 
 var TriggerStore = {
