@@ -1,72 +1,96 @@
-'use strict';
-var repo = require(process.cwd()+'/repo');
-const triggerFormatter = require(process.cwd()+ '/bot/utilities/trigger-formatter.js');
-const _ = require('lodash');
-const fuzzy = require('fuzzy');
+"use strict";
+var repo = require(process.cwd() + "/repo");
+const triggerFormatter = require(process.cwd() +
+  "/bot/utilities/trigger-formatter.js");
+const _ = require("lodash");
+const fuzzy = require("fuzzy");
+const fuzzysort = require("fuzzysort");
 
 var TriggerStore = {
-  triggers : {},
-  propGivers : {},
-  flowGivers : {},
-  lastTrigger : {},
+  triggers: {},
+  propGivers: {},
+  flowGivers: {},
+  lastTrigger: {},
 
-
-  getRandom : function (bot, data) {
+  getRandom: function(bot, data) {
     var trigKeys = Object.keys(this.triggers);
-    var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
+    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
     var trig = this.triggers[randKey];
     var theReturn = null;
-    if (trig){
+    if (trig) {
       theReturn = triggerFormatter(trig.Returns, bot, data);
     }
-    return {Trigger: trig.Trigger, Returns: theReturn};
+    return { Trigger: trig.Trigger, Returns: theReturn };
   },
 
-  randomProp : function() {
+  randomProp: function() {
     var trigKeys = Object.keys(this.propGivers);
-    var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
+    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
     return this.propGivers[randKey];
   },
 
-  randomFlow : function() {
+  randomFlow: function() {
     var trigKeys = Object.keys(this.flowGivers);
-    var randKey = trigKeys[Math.floor((Math.random()*trigKeys.length))];
+    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
     return this.flowGivers[randKey];
   },
 
-  /**  
+  /**
+   * Using fuzzy search algo to search through all the triggers
    * @param {string} term what to search for, can be partial word
    * @param {number} returnLimit some searches produce too many values, use this to limit the total returned
    * @returns {array}
    */
-  search : function(term, returnLimit) {
-    if (!term || term ==='') {return [];}
-    var trigKeys = Object.keys(this.triggers);
-    var finds = fuzzy.filter(term, trigKeys);
-    if (returnLimit) {
-      finds = finds.slice(0,returnLimit);
+  search: function(term, returnLimit) {
+    if (!term) {
+      return [];
     }
-    return finds.map(function(el) { return el.string.replace(/\:$/, ''); });
+
+    const options = {
+      limit: returnLimit,
+      allowTypo: true, // if you don't care about allowing typos
+      threshold: -10000 // don't return bad results
+    };
+
+    var results = fuzzysort.go(term, Object.keys(this.triggers), options);
+    return results.map(function(el) {
+      return el.target.replace(/\:$/, "");
+    });
   },
 
-  recursiveSearch : function(term, returnLimit) {
-    if (!term || term ==='') {return [];}
-    var trigKeys = Object.keys(this.triggers);
-    var finds = fuzzy.filter(term, trigKeys);
+  /**
+   * If search returns zero results it will remove a letter and try again untl
+   * there are only 3 letters left.
+   * @param {string} term what to search for
+   * @param {number} returnLimit limit amount returned
+   * @returns {array}
+   */
+  recursiveSearch: function(term, returnLimit) {
+    if (!term) {
+      return [];
+    }
+
+    const options = {
+      limit: returnLimit,
+      allowTypo: true, // if you don't care about allowing typos
+      threshold: -10000 // don't return bad results
+    };
+
+    var finds = fuzzysort.go(term, Object.keys(this.triggers), options);
     if (finds.length === 0 && term.length > 3) {
-      term = term.slice(0, term.length-1);
+      term = term.slice(0, term.length - 1);
       return this.recursiveSearch(term, returnLimit);
     }
-    if (returnLimit) {
-      finds = finds.slice(0,returnLimit);
-    }
-    return finds.map(function(el) { return el.string.replace(/\:$/, ''); });
+
+    return finds.map(function(el) {
+      return el.target.replace(/\:$/, "");
+    });
   },
 
-  getLast: function(){
+  getLast: function() {
     return this.lastTrigger;
   },
-  
+
   /**
    * @param {string} trigger the trigger to look up
    * @param {object} bot PlugAPI object
@@ -81,11 +105,11 @@ var TriggerStore = {
       found = this.triggers[trigger + ":"];
     }
 
-    if (found && !full){
+    if (found && !full) {
       found = triggerFormatter(found.Returns, bot, data);
     }
 
-    if (typeof found === 'string') {
+    if (typeof found === "string") {
       return found.trim();
     }
     return null;
@@ -120,94 +144,116 @@ var TriggerStore = {
   //       });
   // },
 
-  updateGivers : function(trig) {
+  updateGivers: function(trig) {
     let val = trig.Returns;
 
     // because there was a trigger that returned as a num
-    if (typeof val === 'number') {
-      val = val+''; // coerce to a number
+    if (typeof val === "number") {
+      val = val + ""; // coerce to a number
     }
     // just in case it's not still not a string
-    if (typeof val !== 'string') { return; }
+    if (typeof val !== "string") {
+      return;
+    }
 
-    if (val.indexOf('+flow') >= 0) {
+    if (val.indexOf("+flow") >= 0) {
       this.flowGivers[trig.Trigger] = trig;
-    } else if (val.indexOf('+prop') >= 0) {
+    } else if (val.indexOf("+prop") >= 0) {
       this.propGivers[trig.Trigger] = trig;
     }
   },
 
-  setTriggers : function(bot, val) {
-    bot.log('info', 'BOT', 'Trigger cache updated');
-        // reorganize the triggers in memory to remove the keys that Firebase makes
-    Object.keys(val).forEach((key)=>{
+  /**
+   * Takes in the data from firebase and processes it so that we can easily
+   * access it from within this object and also prepare for fuzzy search
+   * @param {object} bot PlugAPI instance
+   * @param {object} val raw return from firebase db all the entire Trigger storage
+   */
+  setTriggers: function(bot, val) {
+    bot.log("info", "BOT", "Trigger cache updated");
+
+    Object.keys(val).forEach(key => {
       var thisTrig = val[key];
       this.addTrigger(key, thisTrig);
       this.updateGivers(thisTrig);
     });
   },
 
-  /**  
+  /**
    * Adds or Updates trigger in the local store
-   * @param {string} key the firebase key 
+   * @param {string} key the firebase key
    * @param {object} trig the trigger data
    */
   addTrigger: function(key, trig) {
-    trig.fbkey = key; 
+    trig.fbkey = key;
     this.triggers[trig.Trigger] = trig;
   },
-  
-  removeTrigger : function(triggerName) {
+
+  removeTrigger: function(triggerName) {
     if (this.triggers[triggerName]) {
       delete this.triggers[triggerName];
     }
   },
 
-  init : function(bot, db){
-    var triggers = db.ref('triggers');
+  init: function(bot, db) {
+    var triggers = db.ref("triggers");
 
     // Get ALL triggers and store them locally
     // this will run everytime a trigger is updated or created
-    triggers.on('value', (snapshot)=>{
+    triggers.on(
+      "value",
+      snapshot => {
         let val = snapshot.val();
-        this.setTriggers.call(this,bot,val);
-      }, (error)=>{
-        bot.log('error', 'BOT', 'error getting triggers from firebase');
-    });
+        this.setTriggers.call(this, bot, val);
+      },
+      error => {
+        bot.log("error", "BOT", "error getting triggers from firebase");
+      }
+    );
 
     // remove deleted from local store of triggers
-    triggers.on("child_removed", (snapshot)=>{
+    triggers.on("child_removed", snapshot => {
       let triggerDeleted = snapshot.val();
-      if (typeof triggerDeleted !== "object" || !triggerDeleted.Trigger) { 
-        bot.log('error', 'BOT', 'error from triggers child_removed event: ' + triggerDeleted);
-        return; 
+      if (typeof triggerDeleted !== "object" || !triggerDeleted.Trigger) {
+        bot.log(
+          "error",
+          "BOT",
+          "error from triggers child_removed event: " + triggerDeleted
+        );
+        return;
       }
       this.removeTrigger.call(this, triggerDeleted.Trigger);
     });
 
-    var lastTrigger = db.ref('lastTrigger');
-    lastTrigger.on('value', (snapshot)=>{
-      var val = snapshot.val();
-      bot.log('info', 'BOT', 'lastTrigger updated');
-      this.lastTrigger = val;
-    }, function(error){
-        bot.log('error', 'BOT', 'error getting lastTrigger from firebase');
-    });
-
+    var lastTrigger = db.ref("lastTrigger");
+    lastTrigger.on(
+      "value",
+      snapshot => {
+        var val = snapshot.val();
+        bot.log("info", "BOT", "lastTrigger updated");
+        this.lastTrigger = val;
+      },
+      function(error) {
+        bot.log("error", "BOT", "error getting lastTrigger from firebase");
+      }
+    );
   },
 
-  /**  
+  /**
    * for unit testing
    */
   initSync: async function(bot, db) {
     try {
       const allTriggers = await repo.getAllTriggers(db);
-      this.setTriggers.call(this,bot,allTriggers);
+      this.setTriggers.call(this, bot, allTriggers);
     } catch (e) {
-      bot.log('error', 'BOT', `error getting triggers from firebase: ${e.message}`);
+      bot.log(
+        "error",
+        "BOT",
+        `error getting triggers from firebase: ${e.message}`
+      );
     }
   }
 };
 
 module.exports = TriggerStore;
-
