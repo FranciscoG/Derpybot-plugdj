@@ -18,7 +18,7 @@ module.exports = function(bot, db, data, isBrad = false) {
     trigger = trigger.substring(1);
   }
 
-  repo.getTrigger(bot, db, trigger, function(val) {
+  repo.getTrigger(db, trigger, function(val) {
     if (val !== null) {
       var keys = Object.keys(val);
       var result = val[keys[0]];

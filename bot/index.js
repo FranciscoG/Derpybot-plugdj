@@ -1,16 +1,12 @@
 "use strict";
 require("./extend/array-extensions.js");
-const _private = require(process.cwd() + "/private/get");
-const settings = _private.settings;
-const svcAcct = _private.svcAcct;
-
 const PlugAPI = require("plugapi");
-var Database = require(process.cwd() + "/bot/db.js");
-var config = require(process.cwd() + "/bot/config.js");
+const { settings } = require(process.cwd() + "/private/get");
 
+var config = require(process.cwd() + "/bot/config.js");
 config.botName = settings.USERNAME;
-var BASEURL = settings.FIREBASE.BASEURL;
-var db = new Database(svcAcct, BASEURL);
+
+const db = require(process.cwd() + "/bot/db.js");
 
 const bot = new PlugAPI({
   email: settings.USERNAME,
@@ -67,6 +63,14 @@ process.on("message", function(msg) {
   if (msg === "shutdown") {
     onExit();
   }
+});
+
+process.on("unhandledRejection", (reason, promise) => {
+  bot.log(
+    "error",
+    "BOT",
+    `Unhandled Rejection at: ${promise}, reason: ${reason}`
+  );
 });
 
 // Load all events

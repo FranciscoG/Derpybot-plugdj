@@ -1,15 +1,7 @@
 "use strict";
-/*
- * setup test db
- */
-const _private = require(process.cwd() + "/private/get");
-const settings = _private.settings;
-const svcAcct = _private.svcAcct;
-const Database = require(process.cwd() + "/bot/db.js");
-const BASEURL = settings.FIREBASE.BASEURL;
-const db = new Database(svcAcct, BASEURL);
+const db = require(process.cwd() + "/bot/db.js");
 const config = require(process.cwd() + "/bot/config.js");
-const userObjects = require('./data/user-objects');
+const userObjects = require("./data/user-objects");
 
 /**
  * [bot description]
@@ -26,7 +18,7 @@ var bot = {
   ],
 
   // https://plugcubed.github.io/plugAPI/#plugapiroom_role
-  ROOM_ROLE : {
+  ROOM_ROLE: {
     NONE: 0,
     RESIDENTDJ: 1000,
     BOUNCER: 2000,
@@ -40,7 +32,7 @@ var bot = {
   },
 
   sendChat: function(x) {
-    if (typeof this.chatCallback === 'function') {
+    if (typeof this.chatCallback === "function") {
       this.chatCallback(x);
     }
     return x;
@@ -56,10 +48,10 @@ var bot = {
     return this.dj;
   },
 
-  getUser: function(byId) { 
+  getUser: function(byId) {
     if (byId) {
       return this.users.filter(x => x.id === byId)[0] || null;
-    } 
+    }
     return userObjects.botUser;
   },
 

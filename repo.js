@@ -1,6 +1,5 @@
 "use strict";
-const log = require("jethro");
-log.setTimestampFormat(null, "YYYY-MM-DD HH:mm:ss:SSS");
+const log = require(process.cwd() + "/bot/utilities/logger");
 const _ = require("lodash");
 
 /**
@@ -160,12 +159,11 @@ const getAllTriggers = async function(db) {
 
 /**
  * Get a trigger from the database
- * @param  {Object}   bot         dubapi instance
  * @param  {Object}   db          Firebase instance
  * @param  {String}   triggerName trigger to look up
  * @param  {Function} callback
  */
-const getTrigger = function(bot, db, triggerName, callback) {
+const getTrigger = function(db, triggerName, callback) {
   return db
     .ref("triggers")
     .orderByChild("Trigger")
