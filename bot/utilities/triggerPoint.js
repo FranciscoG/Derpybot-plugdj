@@ -23,7 +23,7 @@ var noRepeatPointMsg = function(username, pointEmoji){
  * @param {string} pointType what type of point: props or flow
  * @param {string} repeatCheck property to check in the currently playing song
  * @param {string} pointEmoji which emoji to display
- * @returns {Promise} with success message
+ * @returns {Promise.resolve<string>} with success message
  */
 async function addPoint(bot, db, data, recipient, pointType, repeatCheck, pointEmoji) {
   const user = await repo.incrementUser(db, recipient, pointType);

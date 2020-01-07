@@ -1,6 +1,5 @@
 "use strict";
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
-const repo = require(process.cwd() + "/repo");
 const chai = require("chai");
 const expect = chai.expect;
 

@@ -114,35 +114,6 @@ var TriggerStore = {
     return null;
   },
 
-  // append: function(bot, db, data, trig) {
-  //   // if not at least a MOD, GTFO!
-  //   if ( !bot.havePermission(data.user.id, bot.ROOM_ROLE.MANAGER) ) {
-  //     return bot.sendChat('Sorry only mods (or above) can do this');
-  //   }
-
-  //   if (!this.triggers[data.trigger + ":"]) {
-  //     return bot.sendChat(`The trigger !${data.trigger} does not exist, ergo you can not append to it`);
-  //   }
-
-  //   // first we need to remove the "+=" from the array
-  //   data.args.shift();
-  //   // move the trigger name for existing updateTrigger function
-  //   data.triggerName = data.trigger;
-  //   // combine old trigger value with new trigger value
-  //   data.triggerText = trig.Returns + ' ' + data.args.join(' ');
-
-  //   // updateTrigger = function(db, data, triggerKey, orignialValue){
-  //   repo.updateTrigger(db, data, data.trigger, trig)
-  //       .then(function(){
-  //         var info = `[TRIG] UPDATE: ${data.user.username} changed !${data.triggerName} FROM-> ${trig.Returns} TO-> ${data.triggerText}`;
-  //         bot.log('info', 'BOT', info);
-  //         bot.sendChat(`trigger for *!${data.triggerName}* updated!`);
-  //       })
-  //       .catch(function(err){
-  //         if (err) { bot.log('error', 'BOT',`[TRIG] UPDATE ERROR: ${err}`); }
-  //       });
-  // },
-
   updateGivers: function(trig) {
     let val = trig.Returns;
 

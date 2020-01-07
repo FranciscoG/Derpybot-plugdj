@@ -2,6 +2,13 @@
 const log = require(process.cwd() + "/bot/utilities/logger");
 
 /**
+ * This is not being used right now but I was tracking songs that 
+ * had issues so I could have some bad tracks to test with. I gathered up
+ * a good enough list of stuff that I stopped using it. Leaving this here
+ * just in case I need this again later.
+ */
+
+/**
  * Pretty self explanatory
  * @param  {Object}   db       Firebase Object
  * @param  {Object}   media    DubApi's current media info object

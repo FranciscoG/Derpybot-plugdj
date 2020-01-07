@@ -57,6 +57,7 @@ module.exports = function(bot, db) {
     // ff.schedule(bot);
 
     // store user info locally on load and when any user data changes
+    // TODO: don't access db.ref directly here, move to repo and create function
     db.ref("users").on(
       "value",
       function(snapshot) {

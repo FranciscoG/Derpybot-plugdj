@@ -2,6 +2,53 @@
 const moment = require('moment');
 const repo = require(process.cwd()+'/repo');
 
+function flipObj(obj) {
+  return Object.keys(obj).reduce((ret, key) => {
+    let val = obj[key];
+    if (typeof val === 'string' || typeof val === 'number') {
+      ret[val] = key;
+      return ret;
+    } else {
+      throw new Error(`Object.flip only works with values that are numbers or strings. Value type for key ${key} is a ${typeof val}`);
+    }
+  }, {});
+}
+
+// firebase forbids these special characters in object keys so creating this 
+// simple pairing to encode/decode them since these don't have html entities or glyphs
+
+const CHAR_ENCODE = {
+  "." : "*!period!*",
+  "$" : "*!dollar!*",
+  "[" : "*!lbracket!*",
+  "]" : "*!rbracket!*",
+  "#" : "*!hash!*",
+  "/" : "*!forwadslash!*"
+};
+
+// swap the keys with the values
+const CHAR_DECODE = flipObj(CHAR_ENCODE);
+
+function encodeUsername(str) {
+  let keys = Object.keys(CHAR_ENCODE);
+  return str.split('').reduce((acc, char) => {
+    if (keys.includes(char)) {
+      return acc + CHAR_ENCODE[char];
+    } else {
+      return acc + char;
+    }
+  }, "");
+}
+
+function decodeUsername(str) {
+  return Object.keys(CHAR_DECODE).reduce( (acc, key) => {
+    if (acc.includes(key)) {
+      return acc.split(key).join(CHAR_DECODE[key]);
+    }
+    return acc;
+  }, str);
+}
+
 function getTop3(bot, prop) {
   var arr = [];
   
@@ -46,7 +93,8 @@ function updateLeaderboard(bot, db) {
   props.forEach(function(user){
     if (user.props > 0) {
       propsArr.push(user.username + ' (' + user.props + ')');
-      leaderObj.propsObj[user.username] = user.props;
+      let encodedUserName = encodeUsername(user.username);
+      leaderObj.propsObj[encodedUserName] = user.props;
     }
   });
   if (propsArr.length === 0){
@@ -61,7 +109,8 @@ function updateLeaderboard(bot, db) {
   flow.forEach(function(user){
     if (user.flow > 0) {
       flowArr.push(user.username + ' (' + user.flow + ')');
-      leaderObj.flowObj[user.username] = user.flow;
+      let encodedUserName = encodeUsername(user.username);
+      leaderObj.flowObj[encodedUserName] = user.flow;
     }
   });
   if (flowArr.length === 0){
@@ -114,14 +163,16 @@ function allTimeLeaders(bot) {
     
     // add up all the flows
     for (let user in month_year.flowObj) {
-      if (!flows[user]) { flows[user] = month_year.flowObj[user]; }
-      else { flows[user] += month_year.flowObj[user]; }
+      let u = decodeUsername(user);
+      if (!flows[u]) { flows[u] = month_year.flowObj[user]; }
+      else { flows[u] += month_year.flowObj[user]; }
     }
 
     // add up all the props
     for (let user in month_year.propsObj) {
-      if (!props[user]) { props[user] = month_year.propsObj[user]; }
-      else { props[user] += month_year.propsObj[user]; }
+      let u = decodeUsername(user);
+      if (!props[u]) { props[u] = month_year.propsObj[user]; }
+      else { props[u] += month_year.propsObj[user]; }
     }
   });
 
