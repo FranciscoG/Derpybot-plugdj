@@ -1,7 +1,6 @@
 'use strict';
 const chai = require('chai');
 const expect = chai.expect;
-const should = chai.should;
 
 // stubs for bot functions
 const stubs = require('./stubs.js');
@@ -21,7 +20,7 @@ IDs of confirmed broken songs
 80963599 - 404 error
 270048143 - 404 error
 
-IDs of working sonds (as of May 2018)
+IDs of working songs (as of May 2018)
 223456028 - Mz Boom Bap - Fast Life (Instrumental)
 
 276516174 - https://soundcloud.com/pryced/grown - why did the bot skip this song?

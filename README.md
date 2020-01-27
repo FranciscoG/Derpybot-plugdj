@@ -62,7 +62,7 @@ in `repo.js` all of the functions should (eventually) by `async` and do not put 
 TODO:
 
 - I want to remove all of the `db` that is being passed around as arguments everywhere and have all db interactions go
-  through `repo.js` (not sure why I didn't do that a lont time ago)
+  through `repo.js` (not sure why I didn't do that a long time ago)
 - convert everything to TypeScript and follow [SOLID principles and Repository + Data Mapper pattern](https://dev.to/remojansen/implementing-the-onion-architecture-in-nodejs-with-typescript-and-inversifyjs-10ad)
 - covnert to ES6 modules (export/import instead of require)
   </details>
