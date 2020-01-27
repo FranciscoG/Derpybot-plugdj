@@ -19,7 +19,7 @@ bot.commandedToDJ = false;
 bot.isDJing = false;
 bot.isConnected = false;
 bot.multiLine = true;
-bot.multiLineLimit = 10;
+bot.multiLineLimit = 20;
 
 if (bot.myconfig.muted) {
   bot.sendChat = function(x) {
