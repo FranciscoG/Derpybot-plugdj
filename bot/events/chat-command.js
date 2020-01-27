@@ -22,10 +22,19 @@ function unrecognized(bot, trigger) {
   return msg + moreMsg;
 }
 
+/**
+ * 
+ * @param {Object} bot plug.dj bot instance
+ * @param {string|string[]} messages string or an array of strings
+ */
 function handleChat(bot, messages) {
-  messages.forEach(msg => {
-    bot.sendChat(msg);
-  });
+  if (Array.isArray(messages)) {
+    bot.sendChat(
+      messages.join(' \n')
+    );
+  } else {
+    bot.sendChat(messages);
+  }
 }
 
 var handleCommands = async function(bot, db, data) {
@@ -48,7 +57,6 @@ var handleCommands = async function(bot, db, data) {
   if (trig && /^\{.+\}$/.test(trig)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
     try {
-      console.log(trig);
       let codeResult = await triggerCode(trig, data);
       chat_messages.push(codeResult);
     } catch (e) {
