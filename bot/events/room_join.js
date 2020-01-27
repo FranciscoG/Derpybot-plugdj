@@ -1,11 +1,11 @@
 "use strict";
-const mediaStore = require(process.cwd() + "/bot/store/mediaInfo.js");
-const historyStore = require(process.cwd() + "/bot/store/history.js");
-const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
-const leaderUtils = require(process.cwd() + "/bot/utilities/leaderUtils.js");
-const repo = require(process.cwd() + "/repo");
-const pointReset = require(process.cwd() + "/bot/utilities/point-reset.js");
-const sleep = require(process.cwd() + "/bot/utilities/sleep.js");
+const mediaStore = require("../store/mediaInfo.js");
+const historyStore = require("../store/history.js");
+const triggerStore = require("../store/triggerStore.js");
+const leaderUtils = require("../utilities/leaderUtils.js");
+const repo = require("../../repo");
+const pointReset = require("../utilities/point-reset.js");
+const sleep = require("../utilities/sleep.js");
 
 module.exports = function(bot, db) {
   bot.on(bot.events.ROOM_JOIN, async function(roomname) {

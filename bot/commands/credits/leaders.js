@@ -6,6 +6,7 @@
 const leaderUtils = require(process.cwd() + '/bot/utilities/leaderUtils.js');
 const moment = require('moment');
 const _get = require('lodash/get');
+const handleChat = require("../../utilities/handleChat");
 
 module.exports = function(bot, db, data) {
   if (!bot.leaderboard) {
@@ -28,10 +29,14 @@ module.exports = function(bot, db, data) {
       return a += `${v[0]} (${v[1]}), `;
     }, '').replace(/, $/, '');
 
-    bot.sendChat(`All time prop leaders are:`);
-    bot.sendChat(propString);
-    bot.sendChat(`All time flow leaders are:`);
-    bot.sendChat(flowString);
+    handleChat(
+      [
+        `All time prop leaders are:`,
+        propString,
+        `All time flow leaders are:`,
+        flowString
+      ]
+    );
     return;
   }
 
@@ -50,12 +55,15 @@ module.exports = function(bot, db, data) {
   var month = moment().format('MMM');
   var month_full = moment().format('MMMM');
 
-  bot.sendChat( `Current leaders for ${month_full} ${year} are:` );
+  const chat_msg = [
+    `Current leaders for ${month_full} ${year} are:`
+  ];
 
   let current_board = bot.leaderboard[ month + year ];
 
   if (!current_board) {
-    return bot.sendChat(`Error accessing data for ${month_full} ${year}`);
+    chat_msg.push(`Error accessing data for ${month_full} ${year}`);
+    return handleChat(bot, chat_msg);
   }
 
   let info = `By *props* :heart: :musical_note: :fist: :fire: etc...
@@ -64,6 +72,7 @@ module.exports = function(bot, db, data) {
     ${ current_board.flow }
     points will reset at the end of every month
   `;
-  bot.sendChat(info);
+  chat_msg.push(info);
+  handleChat(bot, chat_msg);
 };
 

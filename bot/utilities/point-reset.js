@@ -4,9 +4,8 @@
  */
 'use strict';
 const schedule = require('node-schedule');
-const repo = require(process.cwd()+'/repo');
-const leaders = require(process.cwd() + '/bot/commands/credits/leaders.js');
-const setTimeout = require('timers').setTimeout;
+const repo = require('../../repo');
+const leaders = require('../commands/credits/leaders.js');
 
 var resetAllUserPoints = function(bot, db){
   if (!bot.myconfig.reset_points) { return; }

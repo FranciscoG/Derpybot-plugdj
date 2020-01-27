@@ -2,6 +2,13 @@
 const moment = require('moment');
 const repo = require(process.cwd()+'/repo');
 
+/**
+ * Takes a flat JS Object with values that are only strings or numbers and flips
+ * the keys and values. 
+ * For example, this: { test: "flip" } 
+ * will become this: { flip: "test" }
+ * @param {Object} obj 
+ */
 function flipObj(obj) {
   return Object.keys(obj).reduce((ret, key) => {
     let val = obj[key];
@@ -23,7 +30,8 @@ const CHAR_ENCODE = {
   "[" : "*!lbracket!*",
   "]" : "*!rbracket!*",
   "#" : "*!hash!*",
-  "/" : "*!forwadslash!*"
+  "/" : "*!forwadslash!*",
+  " " : "*!space!*"
 };
 
 // swap the keys with the values

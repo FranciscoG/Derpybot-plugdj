@@ -1,6 +1,7 @@
-const triggerPoint = require(process.cwd() + "/bot/utilities/triggerPoint.js");
-const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
-const triggerCode = require(process.cwd() + "/bot/utilities/triggerCode.js");
+const triggerPoint = require("../utilities/triggerPoint.js");
+const triggerStore = require("../store/triggerStore.js");
+const triggerCode = require("../utilities/triggerCode.js");
+const handleChat = require("../utilities/handleChat");
 
 var commands = {};
 const pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
@@ -20,21 +21,6 @@ function unrecognized(bot, trigger) {
   }
   moreMsg += results.join(", ");
   return msg + moreMsg;
-}
-
-/**
- * 
- * @param {Object} bot plug.dj bot instance
- * @param {string|string[]} messages string or an array of strings
- */
-function handleChat(bot, messages) {
-  if (Array.isArray(messages)) {
-    bot.sendChat(
-      messages.join(' \n')
-    );
-  } else {
-    bot.sendChat(messages);
-  }
 }
 
 var handleCommands = async function(bot, db, data) {
