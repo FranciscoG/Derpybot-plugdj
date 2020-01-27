@@ -82,7 +82,7 @@ function getLink(bot, media, callback) {
     // if body is null then response.statusCode is most likely 403 forbidden
     // meaning owner of the track has disabled API request for their song
     // we can definitely skip the track if this is the case
-    if (!body) {
+    if (!body || body === '{}') {
       customResponse.reason = 'Soundcloud link is broken';
       customResponse.skippable = true;
       customResponse.error_message = `${response.statusCode} - probably forbidden`;
@@ -91,7 +91,7 @@ function getLink(bot, media, callback) {
 
     try {
       // this is where it gets tricky.  if body.errors exists, then we skip
-      // anything else means probably means a good response
+      // anything else probably means a good response
       var json = JSON.parse(body);
       var error404 = _.get(json, 'errors[0].error_message');
       if (error404) {
