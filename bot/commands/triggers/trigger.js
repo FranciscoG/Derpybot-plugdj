@@ -2,6 +2,8 @@
 var repo = require(process.cwd() + "/repo");
 var Verifier = require(process.cwd() + "/bot/utilities/verify.js");
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
+const TriggerModel = require('../../models/trigger-model');
+const triggersRepo = require("../../../repos/triggers");
 
 function displayHelp(bot) {
   bot.sendChat("*create/update:* !trigger trigger_name trigger_text");
@@ -26,6 +28,7 @@ module.exports = function(bot, db, data) {
     return displayHelp(bot);
   }
 
+  const model = new TriggerModel();
   let triggerName = data.args[0];
 
   // remove the leading "!" if there is one
@@ -93,8 +96,10 @@ module.exports = function(bot, db, data) {
       foundTrigger = val[fbkey];
 
       try {
-        let updated = await repo.updateTrigger(db, data, fbkey, foundTrigger);
-        triggerStore.addTrigger(fbkey, updated);
+        model.validate(data); // will throw if fails
+        model.fromUpdate(data, fbkey, foundTrigger);
+        await triggersRepo.updateTrigger(db, model);
+        triggerStore.addTrigger(fbkey, model.data);
         var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${foundTrigger.Returns} TO-> ${triggerText}`;
         bot.log("info", "BOT", info);
         bot.moderateDeleteChat(chatID, function() {});

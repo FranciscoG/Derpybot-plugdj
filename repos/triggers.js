@@ -1,6 +1,6 @@
 "use strict";
 const log = require(process.cwd() + "/bot/utilities/logger");
-const _ = require("lodash");
+const _get = require("lodash/get");
 
 /**
  *
@@ -44,42 +44,26 @@ const getTriggerAsync = async function(db, triggerName) {
 /**
  * Updates a trigger in the DB
  * @param  {Object} db   Firebase instance
- * @param  {Object} data Trigger data, see function for details, needs {Author, Returns, Trigger}
- * @param {Object} orignialValue  original value from firebase of trigger
+ * @param  {TriggerModel} model instance of TriggerModel
  * @return {Firebase.Promise}
  */
-const updateTrigger = async function(db, data, triggerKey, orignialValue) {
-  if (!triggerKey || !data || !data.triggerText || !data.triggerName) {
+const updateTrigger = async function(db, model) {
+  if (!model || !model.key || !model.data.Returns || !model.data.Trigger) {
     throw new Error("missing some data trying to update trigger");
   }
 
-  if (!orignialValue) {
-    orignialValue = {};
-  }
-
-  var dbTrig = db.ref("triggers/" + triggerKey);
-
-  var updateObj = {
-    Author: data.user.username,
-    Returns: data.triggerText || orignialValue.Returns,
-    Trigger: data.triggerName.toLowerCase() + ":",
-    status: "updated",
-    lastUpdated: Date.now(),
-    createdOn: orignialValue.createdOn || null,
-    createdBy: orignialValue.createdBy || null
-  };
+  var dbTrig = db.ref("triggers/" + model.key);
 
   // update the last trigger in the background
   db.ref("lastTrigger")
-    .set(updateObj)
+    .set(model.data)
     .then(function(err) {
       if (err) {
         console.log("repo.lastTrigger.set", err.message);
       }
     });
 
-  await dbTrig.set(updateObj);
-  return Promise.resolve(updateObj);
+  return dbTrig.set(model.data);
 };
 
 /**
@@ -93,7 +77,7 @@ const insertTrigger = async function(db, data) {
     throw new Error("missing triggerName or triggerText");
   }
 
-  var author = _.get(data, "user.username", "unknown");
+  var author = _get(data, "user.username", "unknown");
 
   let newTrigger = {
     Author: author,

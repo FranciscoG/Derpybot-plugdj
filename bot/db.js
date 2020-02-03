@@ -1,6 +1,6 @@
 "use strict";
 var admin = require("firebase-admin");
-const config = require(process.cwd() + "/private/get");
+const config = require("../private/get");
 const settings = config.settings;
 const svcAcct = config.svcAcct;
 var BASEURL = settings.FIREBASE.BASEURL;

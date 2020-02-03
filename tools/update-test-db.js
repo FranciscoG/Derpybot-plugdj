@@ -2,7 +2,7 @@
 /**
  * Copy live db to test db
  * completely replaces test data
- * always only way one
+ * always only one way
  * Live -> test
  */
 
