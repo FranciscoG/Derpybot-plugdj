@@ -3,8 +3,9 @@ const triggerStore = require("../store/triggerStore.js");
 const triggerCode = require("../utilities/triggerCode.js");
 const handleChat = require("../utilities/handleChat");
 
+const commandDTO = require("../models/command-dto");
+
 var commands = {};
-const pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
 
 function unrecognized(bot, trigger) {
   let msg = `*!${trigger}* is not a recognized trigger`;
@@ -23,43 +24,54 @@ function unrecognized(bot, trigger) {
   return msg + moreMsg;
 }
 
-var handleCommands = async function(bot, db, data) {
+/**
+ *
+ * @param {Object} bot
+ * @param {Object} db
+ * @param {BotCommand} model
+ */
+var handleCommands = async function(bot, db, model) {
   let chat_messages = [];
 
-  // to make compatible wth old DubAPI code
-  data.trigger = data.trigger || data.command;
-  data.user = data.user || data.from;
-  data.args = data.args || []; // ensure always be an empty array
-  
   // first go through the commands in /commands to see if they exist
-  if (typeof commands[data.command] !== "undefined") {
-    commands[data.command](bot, db, data);
+  if (typeof commands[model.command] !== "undefined") {
+    commands[model.command](bot, db, model.data);
     return;
   }
 
   // check if it's an exsiting trigger
-  let trig = triggerStore.get(data.command, bot, data);
-  
+  let trig = triggerStore.get(model.command, bot, model.data);
+
   if (trig && /^\{.+\}$/.test(trig)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
     try {
-      let codeResult = await triggerCode(trig, data);
+      let codeResult = await triggerCode(trig, model.data);
       chat_messages.push(codeResult);
     } catch (e) {
-      bot.log('error', 'BOT', `${e.message}`);
-      chat_messages.push(`Sorry, an error occured with !${trig}. Try again later`);
+      bot.log("error", "BOT", `${e.message}`);
+      chat_messages.push(
+        `Sorry, an error occured with !${trig}. Try again later`
+      );
     }
   } else if (trig) {
     // checking if a trigger has a +prop or +flow
-    var last = trig.split(" ").pop();
-    if (pointCheck.test(last)) {
-      let pointInfo = await triggerPoint(bot, db, data, trig, last);
+    if (trig.givesProp || trig.givesFlow) {
+      const type = trig.givesProp ? "prop" : "flow";
+      const emoji = trig.propEmoji ? trig.propEmoji : trig.flowEmoji;
+      let pointInfo = await triggerPoint(
+        bot,
+        db,
+        model.data,
+        trig,
+        type,
+        emoji
+      );
       chat_messages = chat_messages.concat(pointInfo);
     } else {
       chat_messages.push(trig);
     }
   } else {
-    chat_messages.push( unrecognized(bot, data.trigger) );
+    chat_messages.push(unrecognized(bot, model.trigger));
   }
 
   // handle sending the chat messages here
@@ -105,7 +117,7 @@ const main = function(bot, db) {
         If the user is muted.
 
         data.type String
-        The message type (mention, emote, messaage)
+        The message type (mention, emote, message)
 
         data.isFrom Function
         Checks if the message sender is from the inputted array of IDs or ID
@@ -120,8 +132,8 @@ const main = function(bot, db) {
         Checks if command user has specified permission or above.
    */
   bot.on(bot.events.CHAT_COMMAND, data => {
-    //console.log("CHAT_COMMAND", data);
-    handleCommands(bot, db, data);
+    const commandModel = commandDTO(data);
+    handleCommands(bot, db, commandModel);
   });
 };
 

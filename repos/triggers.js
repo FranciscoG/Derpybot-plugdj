@@ -3,6 +3,10 @@ const log = require(process.cwd() + "/bot/utilities/logger");
 const _get = require("lodash/get");
 
 /**
+ * @typedef {import('../bot/models/trigger-model').TriggerModelData} TriggerModelData
+ */
+
+/**
  *
  * @param {object} db firebase db instance
  * @returns {array}
@@ -44,7 +48,7 @@ const getTriggerAsync = async function(db, triggerName) {
 /**
  * Updates a trigger in the DB
  * @param  {Object} db   Firebase instance
- * @param  {TriggerModel} model instance of TriggerModel
+ * @param  {TriggerModelData} model instance of TriggerModel
  * @return {Firebase.Promise}
  */
 const updateTrigger = async function(db, model) {

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /* eslint no-console: 0 */
 /************************************************************************
 
@@ -10,34 +10,31 @@ require:
 make sure you update the dataFile location and name 
 
 ************************************************************************/
+const path = require("path");
+const db = require(path.resolve(__dirname, "../bot/db.js"));
 
-var dataFile = require('./temp.js');
+const file = process.argv[2];
+const dataFile = require(file);
 
-var firebase = require('firebase');
-var settings = require('../private/settings.js');
-var fbCreds  = require('../private/serviceAccountCredentials.json');
+dataFile.forEach(function (el, i) {
+  db.ref("triggers")
+    .push()
+    .set(
+      {
+        Author: el.Author,
+        Returns: el.Returns,
+        Trigger: el.Trigger,
+      },
+      function (err) {
+        if (err) {
+          console.log(err);
+        }
 
-firebase.initializeApp({
-  serviceAccount: fbCreds,
-  databaseURL: settings.FIREBASE.BASEURL
+        if (i + 1 >= dataFile.length) {
+          setTimeout(function () {
+            process.exit();
+          }, 3000);
+        }
+      }
+    );
 });
-
-var db = firebase.database();
-
-
-dataFile.forEach(function(el,i){
-  db.ref('triggers').push().set({
-    Author: el.Author,
-    Returns: el.Returns,
-    Trigger: el.Trigger
-  }, function(err){
-    if (err) { console.log(err);}
-    
-    if (i + 1 >=  dataFile.length) {
-      setTimeout(function(){ process.exit(); }, 3000);
-    }
-
-  });
-});
-
-

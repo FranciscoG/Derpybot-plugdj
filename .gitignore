@@ -4,8 +4,7 @@ private/*
 !private/README.md
 !private/get.js
 .DS_Store
-tool/*.json
-tool/temp.js
+tools/*.json
 npm-debug.log
 .vscode
 

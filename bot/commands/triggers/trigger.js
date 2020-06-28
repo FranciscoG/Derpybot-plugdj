@@ -96,7 +96,7 @@ module.exports = function(bot, db, data) {
       foundTrigger = val[fbkey];
 
       try {
-        model.validate(data); // will throw if fails
+        model.validate(data, fbkey); // will throw if fails
         model.fromUpdate(data, fbkey, foundTrigger);
         await triggersRepo.updateTrigger(db, model);
         triggerStore.addTrigger(fbkey, model.data);

@@ -6,14 +6,15 @@ const fs = require('fs');
 
 Plan:
 move "users" out of "dev" and place it at root
-go through ALL the triggers and change their keys to be the Trigger instead
+go through ALL the triggers and change their keys to be the Trigger instead of
+the firebase generated key
 
 require:
 make sure you update the dataFile location and name 
 
 ************************************************************************/
 
-var dataFile = fs.readFileSync(process.cwd() + '/backup-1486435528386.json');
+var dataFile = fs.readFileSync(`${__dirname}/backup-6-28-2020-3-10-46-PM.json`, { encoding: 'utf8'});
 
 var data = JSON.parse(dataFile);
 
@@ -33,4 +34,4 @@ Object.keys(data.triggers).forEach((key)=>{
   newData.triggers[key] = thisTrig;
 });
 
-fs.writeFileSync(process.cwd() + '/restructured-data.json', JSON.stringify( newData ));
+fs.writeFileSync(`${__dirname}/restructured-data.json`, JSON.stringify( newData ));
