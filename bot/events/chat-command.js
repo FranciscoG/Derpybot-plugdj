@@ -5,9 +5,9 @@ const handleChat = require("../utilities/handleChat");
 
 const commandDTO = require("../models/command-dto");
 
-var commands = {};
+let commands = {};
 
-function unrecognized(bot, trigger) {
+function unrecognized(trigger) {
   let msg = `*!${trigger}* is not a recognized trigger`;
 
   let results = triggerStore.recursiveSearch(trigger, 5);
@@ -30,56 +30,56 @@ function unrecognized(bot, trigger) {
  * @param {Object} db
  * @param {BotCommand} model
  */
-var handleCommands = async function(bot, db, model) {
+var handleCommands = async function (bot, db, commandModel) {
   let chat_messages = [];
 
   // first go through the commands in /commands to see if they exist
-  if (typeof commands[model.command] !== "undefined") {
-    commands[model.command](bot, db, model.data);
+  if (typeof commands[commandModel.command] !== "undefined") {
+    commands[commandModel.command](bot, db, commandModel.data);
     return;
   }
 
   // check if it's an exsiting trigger
-  let trig = triggerStore.get(model.command, bot, model.data);
+  let trig = triggerStore.get(commandModel.command);
 
-  if (trig && /^\{.+\}$/.test(trig)) {
+  if (!trig) {
+    chat_messages.push(unrecognized(commandModel.command));
+    return chat_messages;
+  }
+
+  const { data: triggerData } = trig;
+  
+  if (/^\{.+\}$/.test(triggerData.Returns)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
     try {
-      let codeResult = await triggerCode(trig, model.data);
+      let codeResult = await triggerCode(triggerData.Returns, commandModel.data);
       chat_messages.push(codeResult);
     } catch (e) {
       bot.log("error", "BOT", `${e.message}`);
-      chat_messages.push(
-        `Sorry, an error occured with !${trig}. Try again later`
-      );
+      chat_messages.push(`Sorry, an error occured with !${triggerData.Trigger}. Try again`);
     }
-  } else if (trig) {
-    // checking if a trigger has a +prop or +flow
-    if (trig.givesProp || trig.givesFlow) {
-      const type = trig.givesProp ? "prop" : "flow";
-      const emoji = trig.propEmoji ? trig.propEmoji : trig.flowEmoji;
-      let pointInfo = await triggerPoint(
-        bot,
-        db,
-        model.data,
-        trig,
-        type,
-        emoji
-      );
-      chat_messages = chat_messages.concat(pointInfo);
-    } else {
-      chat_messages.push(trig);
-    }
-  } else {
-    chat_messages.push(unrecognized(bot, model.trigger));
+
+    return chat_messages;
   }
 
-  // handle sending the chat messages here
-  handleChat(bot, chat_messages);
-  return Promise.resolve(chat_messages);
+  // sets trig.formatted
+  trig.format(bot, commandModel.data);
+  const { formatted } = trig;
+
+  if (triggerData.givesProp) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "prop", triggerData.propEmoji);
+    chat_messages = chat_messages.concat(pointInfo);
+  } else if (triggerData.givesFlow) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "flow", triggerData.flowEmoji);
+    chat_messages = chat_messages.concat(pointInfo);
+  } else {
+    chat_messages.push(formatted);
+  }
+
+  return chat_messages;
 };
 
-const main = function(bot, db) {
+const main = function (bot, db) {
   commands = require(process.cwd() + "/bot/loadCommands.js");
 
   // docs: https://plugcubed.github.io/plugAPI/#plugapieventcommand
@@ -131,13 +131,14 @@ const main = function(bot, db) {
         data.havePermission Function
         Checks if command user has specified permission or above.
    */
-  bot.on(bot.events.CHAT_COMMAND, data => {
+  bot.on(bot.events.CHAT_COMMAND, async (data) => {
     const commandModel = commandDTO(data);
-    handleCommands(bot, db, commandModel);
+    const chat_messages = await handleCommands(bot, db, commandModel);
+    handleChat(bot, chat_messages);
   });
 };
 
 module.exports = {
   main: main,
-  handleCommands: handleCommands
+  handleCommands: handleCommands,
 };

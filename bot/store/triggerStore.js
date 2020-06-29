@@ -1,8 +1,9 @@
 "use strict";
-var repo = require(process.cwd() + "/repo");
-const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
 const _ = require("lodash");
 const fuzzysort = require("fuzzysort");
+const repo = require(process.cwd() + "/repo");
+const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
+const TriggerModel = require("../models/trigger-model");
 
 var TriggerStore = {
   triggers: {},
@@ -91,22 +92,16 @@ var TriggerStore = {
 
   /**
    * @param {string} trigger the trigger to look up
-   * @param {object} bot PlugAPI object
-   * @param {object} data data from PlugAPI chat message
-   * @param {boolean} full whether to return full trigger object or just the text
-   * @returns {string}
+   * @returns {TriggerModel?}
    */
-  get: function (trigger, bot, data, full) {
+  get: function (trigger) {
     let found = this.triggers[trigger] || null;
 
-    if (found && !full) {
-      found = triggerFormatter(found.Returns, bot, data);
+    if (!found) {
+      return null;
     }
 
-    if (typeof found === "string") {
-      return found.trim();
-    }
-    return null;
+    return new TriggerModel(found);
   },
 
   updateGivers: function (trig) {

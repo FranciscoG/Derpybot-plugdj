@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Verifier
+ * Verify
  * Utility to add a "are you sure?" functionality 
  * it waits for a 'yes/no' response within in given amount of time
  */
@@ -11,7 +11,7 @@ const clearInterval = require('timers').clearInterval;
 const responseTime = 30; // in seconds
 const countLimit = 3; // how many times within the alotted response time you want to remind the user
 
-module.exports = function Verifier(bot, data, actionText) {
+module.exports = function verify(bot, data, actionText) {
   if (!bot || !data) {
     return;
   }
@@ -64,7 +64,7 @@ module.exports = function Verifier(bot, data, actionText) {
         bot.removeListener(bot.events.CHAT, verifyListner);
         bot.sendChat(`@${user}: you have not responded in time, cancelling _${actionText}_`);
         clearInterval(check);
-        reject();
+        reject(new Error('cancelled by timeout'));
         return;
       }
       

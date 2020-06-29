@@ -3,7 +3,7 @@
 Restore from backup
 ************************************************************************/
 "use strict";
-process.env.ENV = "test";
+process.env.ENV = process.env.ENV || "test";
 const path = require("path");
 const db = require(path.resolve(__dirname, "../bot/db.js"));
 

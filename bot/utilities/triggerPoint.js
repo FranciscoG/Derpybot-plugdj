@@ -44,7 +44,7 @@ async function addPoint(
 /**
  * @param {object} bot PlugAPI instance
  * @param {object} db Firebase admin database instance
- * @param {object} data event object from bot.events.CHAT_COMMAND
+ * @param {BotCommand} data event object from bot.events.CHAT_COMMAND
  * @param {string} trig the current trigger text being processed
  * @param {"prop"|"flow"} type
  * @param {string} [emoji]

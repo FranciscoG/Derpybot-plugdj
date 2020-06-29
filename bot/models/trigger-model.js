@@ -1,15 +1,19 @@
 require('../utilities/typedefs');
 const _get = require("lodash/get");
+const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
 
  /**
   * Model to represent insert or update into the db
   */
 class TriggerModel {
-  constructor() {
+  /**
+   * @param {TriggerModelData} data 
+   */
+  constructor(data = {}) {
     /**
      * @type {TriggerModelData} blank trigger object
      */
-    this.data = {
+    const emptyTrig = {
       Author: "",
       Returns: "",
       Trigger: "",
@@ -20,8 +24,13 @@ class TriggerModel {
       givesProp: false,
       propEmoji: "fist",
       givesFlow: false,
-      flowEmoji: "surfer"
+      flowEmoji: "surfer",
     };
+    this.data = Object.assign({}, emptyTrig, data);
+  }
+
+  format(bot, data) {
+    this.formatted = triggerFormatter(this.data.Returns, bot, data);
   }
 
   /**
@@ -34,21 +43,6 @@ class TriggerModel {
     this.data.Returns = data.triggerText;
     this.data.Trigger = data.triggerName;
     this.data.createdBy = author;
-  }
-  
-  /**
-   * @param {TriggerUpdate} newData 
-   */
-  validate(newData) {
-    const missing = ["triggerText", "triggerName"].filter(path => {
-      return !_get(newData, path);
-    });
-    
-    if (missing.length > 0) {
-      throw new Error(
-        `Trigger data is missing required: ${missing.join(", ")}`
-      );
-    }
   }
 
   /**
