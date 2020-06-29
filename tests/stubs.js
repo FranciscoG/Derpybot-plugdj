@@ -82,15 +82,8 @@ var bot = {
   isDJing: false
 };
 
-// need different kind of data responses
-// 1. one without any params
-// 2. one with params but just 1 item in the array
-// 3. one with more items in the array
-// 4. one without username
-var dataResponse = {};
-
 module.exports = {
-  bot: bot,
-  data: dataResponse,
-  db: db
+  bot,
+  data: {},
+  db
 };

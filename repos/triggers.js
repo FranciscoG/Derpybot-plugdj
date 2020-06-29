@@ -25,8 +25,8 @@ const getAllTriggers = async function (db) {
  */
 const getTrigger = async function (db, triggerName) {
   try {
-    const val = await db.ref("triggers/" + triggerName).val();
-    return [null, val];
+    const snapshot = await db.ref("triggers/" + triggerName);
+    return [null, snapshot.val()];
   } catch (err) {
     return [err, null];
   }
@@ -82,7 +82,6 @@ function updateLastTrigger(db, data) {
 
 module.exports = {
   getTrigger: getTrigger,
-  getTriggerAsync: getTriggerAsync,
   insertTrigger: insertTrigger,
   deleteTrigger: deleteTrigger,
   getAllTriggers: getAllTriggers,

@@ -4,13 +4,16 @@ const verify = require(process.cwd() + "/bot/utilities/verify.js");
 // const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 const TriggerModel = require("../../models/trigger-model");
 
-const re = new RegExp("[\\.\\$\\[\\]#\\/]", "g");
+const badKeyChars = new RegExp("[\\.\\$\\[\\]#\\/]", "g");
 
 function displayHelp(bot) {
-  bot.sendChat("*create/update:* !trigger trigger_name trigger_text");
-  bot.sendChat("*delete:* !trigger trigger_name");
-  bot.sendChat('Don\'t add the "!" before trigger_name');
-  bot.sendChat(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  const chats = [
+    "*create/update:* !trigger trigger_name trigger_text",
+    "*delete:* !trigger trigger_name",
+    'Don\'t add the "!" before trigger_name',
+    `Trigger names can NOT contain the following characters: . $ [ ] # /`
+  ];
+  return bot.sendChat(chats.join(`\n`));
 }
 
 module.exports.extraCommands = ["triggers"];
@@ -64,7 +67,7 @@ module.exports = async function (bot, db, data) {
       return;
     }
 
-    if (re.test(triggerName)) {
+    if (badKeyChars.test(triggerName)) {
       bot.sendChat(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
       return;
     }
