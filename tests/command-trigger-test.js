@@ -39,7 +39,7 @@ describe("Creating, Updating, Deleting Triggers", function () {
 
   it("can not create a trigger with invalid characters", async () => {
     const data = makeData();
-    data.args = ['[])', "this", "is", "a", "test"];
+    data.args = ["[])", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
     expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
@@ -49,6 +49,18 @@ describe("Creating, Updating, Deleting Triggers", function () {
     data.args = [triggerName, "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
     expect(msg).to.include(`trigger for *!${triggerName}* created`);
+  });
+
+  it("Trying to create a trigger without proper access fails", async () => {
+    const data = makeData();
+
+    // change to a user with only ResDJ role
+    data.from = userObjects.rando2;
+
+    // try updating
+    data.args = ["does_not_matter", "this", "is", "not", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal("Sorry only ResidentDJs and above can create triggers");
   });
 
   it("Trying to update a trigger but without proper access fails", async () => {
