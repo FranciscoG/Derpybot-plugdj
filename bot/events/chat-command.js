@@ -3,10 +3,11 @@ const triggerStore = require("../store/triggerStore.js");
 const triggerCode = require("../utilities/triggerCode.js");
 const handleChat = require("../utilities/handleChat");
 
-var commands = {};
-const pointCheck = new RegExp("\\+(props?|flow)(=[a-z0-9_-]+)?", "i");
+const commandDTO = require("../models/command-dto");
 
-function unrecognized(bot, trigger) {
+let commands = {};
+
+function unrecognized(trigger) {
   let msg = `*!${trigger}* is not a recognized trigger`;
 
   let results = triggerStore.recursiveSearch(trigger, 5);
@@ -23,51 +24,62 @@ function unrecognized(bot, trigger) {
   return msg + moreMsg;
 }
 
-var handleCommands = async function(bot, db, data) {
+/**
+ *
+ * @param {Object} bot
+ * @param {Object} db
+ * @param {BotCommand} model
+ */
+var handleCommands = async function (bot, db, commandModel) {
   let chat_messages = [];
 
-  // to make compatible wth old DubAPI code
-  data.trigger = data.trigger || data.command;
-  data.user = data.user || data.from;
-  data.args = data.args || []; // ensure always be an empty array
-  
   // first go through the commands in /commands to see if they exist
-  if (typeof commands[data.command] !== "undefined") {
-    commands[data.command](bot, db, data);
+  if (typeof commands[commandModel.command] !== "undefined") {
+    commands[commandModel.command](bot, db, commandModel.data);
     return;
   }
 
   // check if it's an exsiting trigger
-  let trig = triggerStore.get(data.command, bot, data);
-  
-  if (trig && /^\{.+\}$/.test(trig)) {
-    // if this is a special code trigger that is wrapped in brackets "{ }"
-    try {
-      let codeResult = await triggerCode(trig, data);
-      chat_messages.push(codeResult);
-    } catch (e) {
-      bot.log('error', 'BOT', `${e.message}`);
-      chat_messages.push(`Sorry, an error occured with !${trig}. Try again later`);
-    }
-  } else if (trig) {
-    // checking if a trigger has a +prop or +flow
-    var last = trig.split(" ").pop();
-    if (pointCheck.test(last)) {
-      let pointInfo = await triggerPoint(bot, db, data, trig, last);
-      chat_messages = chat_messages.concat(pointInfo);
-    } else {
-      chat_messages.push(trig);
-    }
-  } else {
-    chat_messages.push( unrecognized(bot, data.trigger) );
+  let trig = triggerStore.get(commandModel.command);
+
+  if (!trig) {
+    chat_messages.push(unrecognized(commandModel.command));
+    return chat_messages;
   }
 
-  // handle sending the chat messages here
-  handleChat(bot, chat_messages);
-  return Promise.resolve(chat_messages);
+  const { data: triggerData } = trig;
+  
+  if (/^\{.+\}$/.test(triggerData.Returns)) {
+    // if this is a special code trigger that is wrapped in brackets "{ }"
+    try {
+      let codeResult = await triggerCode(triggerData.Returns, commandModel.data);
+      chat_messages.push(codeResult);
+    } catch (e) {
+      bot.log("error", "BOT", `${e.message}`);
+      chat_messages.push(`Sorry, an error occured with !${triggerData.Trigger}. Try again`);
+    }
+
+    return chat_messages;
+  }
+
+  // sets trig.formatted
+  trig.format(bot, commandModel.data);
+  const { formatted } = trig;
+
+  if (triggerData.givesProp) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "prop", triggerData.propEmoji);
+    chat_messages = chat_messages.concat(pointInfo);
+  } else if (triggerData.givesFlow) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "flow", triggerData.flowEmoji);
+    chat_messages = chat_messages.concat(pointInfo);
+  } else {
+    chat_messages.push(formatted);
+  }
+
+  return chat_messages;
 };
 
-const main = function(bot, db) {
+const main = function (bot, db) {
   commands = require(process.cwd() + "/bot/loadCommands.js");
 
   // docs: https://plugcubed.github.io/plugAPI/#plugapieventcommand
@@ -105,7 +117,7 @@ const main = function(bot, db) {
         If the user is muted.
 
         data.type String
-        The message type (mention, emote, messaage)
+        The message type (mention, emote, message)
 
         data.isFrom Function
         Checks if the message sender is from the inputted array of IDs or ID
@@ -119,13 +131,14 @@ const main = function(bot, db) {
         data.havePermission Function
         Checks if command user has specified permission or above.
    */
-  bot.on(bot.events.CHAT_COMMAND, data => {
-    //console.log("CHAT_COMMAND", data);
-    handleCommands(bot, db, data);
+  bot.on(bot.events.CHAT_COMMAND, async (data) => {
+    const commandModel = commandDTO(data);
+    const chat_messages = await handleCommands(bot, db, commandModel);
+    handleChat(bot, chat_messages);
   });
 };
 
 module.exports = {
   main: main,
-  handleCommands: handleCommands
+  handleCommands: handleCommands,
 };

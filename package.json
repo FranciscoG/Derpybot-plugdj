@@ -8,6 +8,7 @@
     "start-muted": "MUTED=1 ENV=test nodemon index.js",
     "live": "ENV=prod nodemon index.js",
     "test": "ENV=test mocha -c -t 10000 --reporter=spec tests --exit",
+    "test:debug": "ENV=test mocha -c -t 10000 --reporter=spec tests --exit --debug-brk",
     "secrets": "tar cvf secrets.tar private && travis encrypt-file secrets.tar && rm secrets.tar"
   },
   "dependencies": {

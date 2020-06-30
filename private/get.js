@@ -2,8 +2,9 @@
 /** 
  * Return the proper private items based on environment variables
 */
+const env = process.env.ENV || 'prod';
 module.exports = {
-  settings : require( process.cwd() + `/private/${process.env.ENV||'prod'}/settings.js`),
-  svcAcct : require(process.cwd() + `/private/${process.env.ENV||'prod'}/serviceAccountCredentials.json`)
+  settings : require( `./${env}/settings.js`),
+  svcAcct : require(`./${env}/serviceAccountCredentials.json`)
 };
 

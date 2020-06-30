@@ -1,5 +1,6 @@
 'use strict';
 const repo = require(process.cwd()+'/repo');
+const userDTO = require('../models/user-dto');
 
 /**
  * When a new user joins the room, we log their info to the db and we begin storing
@@ -25,9 +26,11 @@ module.exports = function(bot, db) {
         guest: Boolean
       }
    */
-  bot.on(bot.events.USER_JOIN, async function(user) {
+  bot.on(bot.events.USER_JOIN, async function(plugUser) {
     
-    if (!user || !user.id) { return ;}
+    if (!plugUser || !plugUser.id) { return ;}
+
+    const user = userDTO(plugUser);
 
     try {
       const u = await repo.logUser(db, user);

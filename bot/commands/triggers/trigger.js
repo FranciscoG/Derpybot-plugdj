@@ -1,16 +1,29 @@
 "use strict";
-var repo = require(process.cwd() + "/repo");
-var Verifier = require(process.cwd() + "/bot/utilities/verify.js");
-const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
+const repo = require("../../../repos/triggers");
+const verify = require(process.cwd() + "/bot/utilities/verify.js");
+const TriggerModel = require("../../models/trigger-model");
+const badKeyChars = new RegExp("[\\.\\$\\[\\]#\\/]", "g");
+
+/**
+ * !trigger
+ * Create/Update/Delete a trigger
+ * 
+ * only ResDJ and up can create a trigger
+ * only Managers and up can update or delete them
+ */
 
 function displayHelp(bot) {
-  bot.sendChat("*create/update:* !trigger trigger_name trigger_text");
-  bot.sendChat("*delete:* !trigger trigger_name");
-  bot.sendChat('Don\'t add the "!" before trigger_name');
+  const chats = [
+    "*create/update:* !trigger trigger_name trigger_text",
+    "*delete:* !trigger trigger_name",
+    'Don\'t add the "!" before trigger_name',
+    `Trigger names can NOT contain the following characters: . $ [ ] # /`
+  ];
+  return bot.sendChat(chats.join(`\n`));
 }
 
 module.exports.extraCommands = ["triggers"];
-module.exports = function(bot, db, data) {
+module.exports = async function (bot, db, data) {
   const chatID = data.id;
 
   if (!data || !data.from || !data.from.username) {
@@ -33,113 +46,103 @@ module.exports = function(bot, db, data) {
     triggerName = triggerName.substring(1);
   }
 
-  let triggerText = data.args
-    .slice(1)
-    .join(" ")
-    .trim();
+  let triggerText = data.args.slice(1).join(" ").trim();
 
   data.triggerName = triggerName;
   data.triggerText = triggerText;
 
-  repo.getTrigger(db, triggerName, async function(val) {
-    /*********************************************************
-     * Create Trigger
-     * min role:  Resident DJs
-     */
-    if (!val && triggerText) {
-      if (/^\{.+\}$/.test(triggerText) && !isMod) {
-        bot.sendChat("Sorry only Mods can create code triggers");
-        return;
+  if (badKeyChars.test(triggerName)) {
+    return bot.sendChat(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  }
+
+  const [getErr, existingTrigger] = await repo.getTrigger(db, triggerName);
+
+  if (getErr) {
+    console.error(getErr);
+    return;
+  }
+
+  /*********************************************************
+   * Create Trigger
+   * min role:  Resident DJs
+   */
+  if (!existingTrigger && triggerText) {
+    if (/^\{.+\}$/.test(triggerText) && !isMod) {
+      return bot.sendChat("Sorry only Mods can create code triggers");
+    }
+
+    if (!isResDJ) {
+      return bot.sendChat("Sorry only ResidentDJs and above can create triggers");
+    }
+
+    try {
+      const newTrigModel = new TriggerModel();
+      newTrigModel.fromNew(data);
+
+      await repo.insertTrigger(db, newTrigModel);
+
+      var inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
+      bot.log("info", "BOT", inf);
+      bot.moderateDeleteChat(chatID, function () {});
+      return bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
+    } catch (e) {
+      bot.log("error", "BOT", `[TRIG] ADD: ${e.message}`);
+      return bot.sendChat("Error creating new trigger.");
+    }
+  }
+
+  // everything below this block is mod only action
+  if (!isMod) {
+    return bot.sendChat("Sorry only Mods and above can update or delete a triggers");
+  }
+
+  if (!existingTrigger && !triggerText) {
+    // trying to delete a trigger that doesn't exist
+    return bot.sendChat("You can't delete a trigger that doesn't exist");
+  }
+
+  /*********************************************************
+   * Update Trigger
+   * min role:  Manager
+   */
+
+  if (existingTrigger && triggerText) {
+    try {
+      const updateModel = new TriggerModel();
+      updateModel.fromUpdate(data, existingTrigger);
+
+      await repo.insertTrigger(db, updateModel);
+
+      var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${existingTrigger.Returns} TO-> ${triggerText}`;
+      bot.log("info", "BOT", info);
+      bot.moderateDeleteChat(chatID, function () {});
+      return bot.sendChat(`trigger for *!${triggerName}* updated!`);
+    } catch (e) {
+      return bot.log("error", "BOT", `[TRIG] UPDATE ERROR: ${e.message}`);
+    }
+  }
+
+  /*********************************************************
+   * Delete Trigger Section
+   * min role:  Mods
+   */
+  if (existingTrigger && !triggerText) {
+    try {
+      const userChoice = verify(bot, data, "delete trigger " + triggerName);
+
+      if (!userChoice) {
+        return bot.sendChat(`ok, \`${triggerName}\` trigger delete canceled`);
       }
 
-      if (!isResDJ) {
-        bot.sendChat("Sorry only ResidentDJs and above can create triggers");
-        return;
+      await repo.deleteTrigger(db, existingTrigger);
+      const info = `[TRIG] DEL by ${data.from.username} -> !${triggerName}`;
+      bot.log("info", "BOT", info);
+      return bot.sendChat(`Trigger *!${triggerName}* deleted`);
+    } catch (err) {
+      if (err.message === "cancelled by timeout") {
+        bot.log("info", "BOT", `${triggerName} - trigger delete cancelled by timeout`);
       }
-
-      try {
-        let newTrigger = await repo.insertTrigger(db, data);
-        triggerStore.addTrigger(newTrigger.fbkey, newTrigger);
-        var inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
-        bot.log("info", "BOT", inf);
-        bot.moderateDeleteChat(chatID, function() {});
-        bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
-      } catch (e) {
-        bot.log("error", "BOT", `[TRIG] ADD: ${e.message}`);
-        bot.sendChat("Error creating new trigger.");
-      }
-      return;
+      bot.log("error", "BOT", `[TRIG] DEL ERROR: ${err}`);
     }
-
-    // everything below this block is mod only action
-    if (!isMod) {
-      bot.sendChat("Sorry only Mods and above can update or delete a triggers");
-      return;
-    }
-
-    if (!val && !triggerText) {
-      // trying to delete a trigger that doesn't exist
-      return bot.sendChat("You can't delete a trigger that doesn't exist");
-    }
-
-    /*********************************************************
-     * Update Trigger
-     * min role:  Manager
-     */
-    var keys;
-    var foundTrigger;
-    if (val && triggerText) {
-      let fbkey = Object.keys(val)[0];
-      foundTrigger = val[fbkey];
-
-      try {
-        let updated = await repo.updateTrigger(db, data, fbkey, foundTrigger);
-        triggerStore.addTrigger(fbkey, updated);
-        var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${foundTrigger.Returns} TO-> ${triggerText}`;
-        bot.log("info", "BOT", info);
-        bot.moderateDeleteChat(chatID, function() {});
-        bot.sendChat(`trigger for *!${triggerName}* updated!`);
-      } catch (e) {
-        bot.log("error", "BOT", `[TRIG] UPDATE ERROR: ${e.message}`);
-      }
-    }
-
-    /*********************************************************
-     * Delete Trigger Section
-     * min role:  Mods
-     */
-    if (val && !triggerText) {
-      keys = Object.keys(val);
-
-      let verify = new Verifier(bot, data, "delete trigger " + triggerName);
-
-      verify
-        .then(userChoice => {
-          if (!userChoice) {
-            bot.sendChat(`ok, \`${triggerName}\` trigger delete canceled`);
-            return;
-          }
-
-          repo
-            .deleteTrigger(db, keys[0], val[keys[0]])
-            .then(function() {
-              var info = `[TRIG] DEL by ${data.from.username} -> !${triggerName}`;
-              bot.log("info", "BOT", info);
-              bot.sendChat(`Trigger for *!${triggerName}* deleted`);
-            })
-            .catch(function(err) {
-              if (err) {
-                bot.log("error", "BOT", `[TRIG] DEL ERROR: ${err}`);
-              }
-            });
-        })
-        .catch(() => {
-          bot.log(
-            "info",
-            "BOT",
-            `${triggerName} - trigger delete cancelled by timeout`
-          );
-        });
-    }
-  });
+  }
 };
