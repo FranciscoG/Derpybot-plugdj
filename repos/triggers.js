@@ -21,12 +21,16 @@ const getAllTriggers = async function (db) {
  * Get a trigger from the database
  * @param  {Object}   db          Firebase instance
  * @param  {String}   triggerName trigger to look up
- * @returns {Promise.resolve<[Error, TriggerModelData]>}
+ * @returns {Promise<[Error?, TriggerModelData?]>}
  */
 const getTrigger = async function (db, triggerName) {
   try {
-    const snapshot = await db.ref("triggers/" + triggerName);
-    return [null, snapshot.val()];
+    const snapshot = await db.ref("triggers").child(triggerName).once("value");
+    if (snapshot && snapshot.val) {
+      return [null, snapshot.val()];
+    } else {
+      return [null, null];
+    }
   } catch (err) {
     return [err, null];
   }

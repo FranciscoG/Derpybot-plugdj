@@ -1,5 +1,4 @@
 const userData = require('./user-objects');
-const { cloneDeep } = require("lodash");
 
 var data = {
   // guid string
@@ -71,15 +70,7 @@ var data = {
    * Same as data.respond, except it has an additional parameter to delete
    * the message after specified amount of time in seconds.
    */
-  respondTime: function() {},
-
-  /**
-   * data.havePermission Function
-   * Checks if command user has specified permission or above.
-   */
-  havePermission: function(permission, callback) {
-    return callback(true);
-  }
+  respondTime: function() {}
 };
 
 /**
@@ -87,5 +78,5 @@ var data = {
  * new object and not a reference to the above object
  */
 module.exports = function() {
-  return cloneDeep(data);
+  return Object.assign({}, data);
 };
