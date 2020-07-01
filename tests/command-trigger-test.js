@@ -37,9 +37,44 @@ describe("Creating, Updating, Deleting Triggers", function () {
     expect(msg).to.include("!trigger trigger_name trigger_text");
   });
 
-  it("can not create a trigger with invalid characters", async () => {
+  it("can not create a trigger with invalid character: [", async () => {
     const data = makeData();
-    data.args = ["[])", "this", "is", "a", "test"];
+    data.args = ["[)", "this", "is", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  });
+  
+  it("can not create a trigger with invalid character: ]", async () => {
+    const data = makeData();
+    data.args = ["])", "this", "is", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  });
+  
+  it("can not create a trigger with invalid character: .", async () => {
+    const data = makeData();
+    data.args = ["help...", "this", "is", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  });
+  
+  it("can not create a trigger with invalid character: $", async () => {
+    const data = makeData();
+    data.args = ["mo$ney", "this", "is", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  });
+  
+  it("can not create a trigger with invalid character: #", async () => {
+    const data = makeData();
+    data.args = ["no#1", "this", "is", "a", "test"];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+  });
+  
+  it("can not create a trigger with invalid character: /", async () => {
+    const data = makeData();
+    data.args = ["slash/dot", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
     expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
@@ -77,9 +112,21 @@ describe("Creating, Updating, Deleting Triggers", function () {
 
   it("Successfully update a trigger", async () => {
     const data = makeData();
-    data.from.role = 3000; // room manager
+    data.from = userObjects.botUser;
     data.args = [triggerName, "this", "is", "not", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
     expect(msg).to.equal(`trigger for *!${triggerName}* updated!`);
+  });
+
+  it("Trying to delete a trigger but without proper access fails", async () => {
+    const data = makeData();
+
+    // change to a user with only ResDJ role
+    data.from = userObjects.rando;
+
+    // try updating
+    data.args = [triggerName];
+    const msg = await triggerCommand(bot, db, data);
+    expect(msg).to.equal(`Sorry only Mods and above can update or delete a triggers`);
   });
 });

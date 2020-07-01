@@ -16,6 +16,8 @@ var bot = {
   // https://plugcubed.github.io/plugAPI/#plugapiroom_role
   ROOM_ROLE: PlugAPI.ROOM_ROLE,
 
+  events: PlugAPI.events,
+
   onSendChat: function (callback) {
     this.chatCallback = callback;
   },

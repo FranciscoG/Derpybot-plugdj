@@ -2,7 +2,7 @@
 const repo = require("../../../repos/triggers");
 const verify = require(process.cwd() + "/bot/utilities/verify.js");
 const TriggerModel = require("../../models/trigger-model");
-const badKeyChars = new RegExp("[\\.\\$\\[\\]#\\/]", "g");
+const badKeyChars = new RegExp("[\\.$\\[\\]#/]");
 
 /**
  * !trigger
@@ -128,7 +128,7 @@ module.exports = async function (bot, db, data) {
    */
   if (existingTrigger && !triggerText) {
     try {
-      const userChoice = verify(bot, data, "delete trigger " + triggerName);
+      const userChoice = await verify(bot, data, "delete trigger " + triggerName);
 
       if (!userChoice) {
         return bot.sendChat(`ok, \`${triggerName}\` trigger delete canceled`);

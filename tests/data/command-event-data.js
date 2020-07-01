@@ -1,4 +1,5 @@
 const userData = require('./user-objects');
+const cloneDeep = require('lodash/cloneDeep');
 
 var data = {
   // guid string
@@ -78,5 +79,5 @@ var data = {
  * new object and not a reference to the above object
  */
 module.exports = function() {
-  return Object.assign({}, data);
+  return cloneDeep(data);
 };

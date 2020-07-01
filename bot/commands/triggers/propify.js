@@ -1,14 +1,13 @@
 "use strict";
-const triggerStore = require("../../store/triggerStore");
-const handleChat = require("../../utilities/handleChat");
-const triggersRepo = require("../../../repos/triggers");
+const repo = require("../../../repos/triggers");
 const TriggerModel = require("../../models/trigger-model");
 
 function displayHelp(bot) {
-  handleChat([
+  const chats = [
     "Make a trigger give a prop points",
     "!propify <trigger_name> [optional_emoji]"
-  ]);
+  ];
+  return bot.sendChat(chats.join(`\n`));
 }
 
 module.exports = async function(bot, db, data) {
@@ -30,30 +29,34 @@ module.exports = async function(bot, db, data) {
     return displayHelp(bot);
   }
 
-  let triggerName = data.args[0].replace(/^!/, "");
+  let [ triggerName, propEmoji ] = data.args;
 
-  // check if the trigger exists
-  const foundTrigger = triggerStore.triggers[triggerName + ":"];
+  triggerName = triggerName.replace(/^!/, "");
+
+  const [getErr, foundTrigger] = await repo.getTrigger(db, triggerName);
+  if (getErr) {
+    bot.log("error", "BOT", `[TRIG] GET ERROR: ${getErr.message}`);
+    return bot.sendChat('An error occured :-(');
+  }
 
   if (!foundTrigger) {
     return bot.sendChat(`Trigger ${triggerName} does not exist `);
   }
 
   foundTrigger.givesProp = true;
-  if (data.args[1]) {
-    foundTrigger.propEmoji = data.args[1].replace(/^:/, "").replace(/:$/, "");
+  if (propEmoji) {
+    foundTrigger.propEmoji = propEmoji.replace(/^:/, "").replace(/:$/, "");
   }
 
   const model = new TriggerModel();
-  model.fromUpdate(data, foundTrigger.fbkey, foundTrigger);
+  model.fromUpdate(data, foundTrigger);
 
   try {
-    await triggersRepo.updateTrigger(db, model);
-    triggerStore.addTrigger(foundTrigger.fbkey, model.data);
-    var info = `[TRIG] UPDATE: ${data.from.username} propified !${triggerName}`;
+    await repo.insertTrigger(db, model);
+    const info = `[TRIG] UPDATE: ${data.from.username} propified !${triggerName}`;
     bot.log("info", "BOT", info);
     bot.moderateDeleteChat(chatID, function() {});
-    bot.sendChat(`trigger for *!${triggerName}* updated!`);
+    return bot.sendChat(`trigger *!${triggerName}* propified!`);
   } catch (e) {
     bot.log("error", "BOT", `[TRIG] UPDATE ERROR: ${e.message}`);
   }
