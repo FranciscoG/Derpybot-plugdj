@@ -1,17 +1,17 @@
 "use strict";
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 const triggerCommand = require(process.cwd() + "/bot/commands/triggers/trigger.js");
-const triggerRepo = require("../repos/triggers.js");
+const triggerRepo = require("../../repos/triggers.js");
 
 const chai = require("chai");
 const expect = chai.expect;
 
 // stubs for bot functions
-const stubs = require("./stubs.js");
-const userObjects = require("./data/user-objects");
+const stubs = require("../stubs.js");
+const userObjects = require("../data/user-objects");
 const { bot, db } = stubs;
 
-const makeData = require("./data/command-event-data");
+const makeData = require("../data/command-event-data");
 
 async function deleteTrigByName(triggerName) {
   const [err, trig] = await triggerRepo.getTrigger(db, triggerName);
@@ -21,7 +21,7 @@ async function deleteTrigByName(triggerName) {
 }
 
 /* global it, describe, before, after */
-describe("Creating, Updating, Deleting Triggers", function () {
+describe("!trigger tests", function () {
   const triggerName = "temp_test_trigger_001";
 
   before(async () => {

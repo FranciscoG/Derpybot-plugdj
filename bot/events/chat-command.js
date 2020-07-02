@@ -63,8 +63,7 @@ var handleCommands = async function (bot, db, commandModel) {
   }
 
   // sets trig.formatted
-  trig.format(bot, commandModel.data);
-  const { formatted } = trig;
+  const formatted = triggerStore.format(triggerData.Returns, bot, commandModel.data);
 
   if (triggerData.givesProp) {
     let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "prop", triggerData.propEmoji);

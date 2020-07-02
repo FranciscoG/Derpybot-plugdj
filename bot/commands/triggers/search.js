@@ -1,6 +1,5 @@
 "use strict";
-
-const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
+const triggerStore = require('../../store/triggerStore.js');
 
 module.exports = function(bot, db, data) {
   if (!data) {
@@ -11,19 +10,21 @@ module.exports = function(bot, db, data) {
     return bot.sendChat("*usage:* !search <name, minimum 3 letters>");
   }
 
-  if (data.args[0].length < 3) {
+  const [ searchTerm ] = data.args;
+
+  if (searchTerm.length < 3) {
     return bot.sendChat(
-      "Your search term should be at least 3 letters or more"
+      "Your search term should be at least 3 characters or more"
     );
   }
 
-  var results = triggerStore.search(data.args[0], 50);
+  var results = triggerStore.search(searchTerm, 50);
 
   if (results && results.length > 0) {
     bot.sendChat("only showing first 50 results: ");
     let str = results.join(", ");
     bot.sendChat(str);
   } else {
-    bot.sendChat(`no results for ${data.args[0]}`);
+    bot.sendChat(`no results for ${searchTerm}`);
   }
 };

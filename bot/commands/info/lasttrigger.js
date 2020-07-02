@@ -11,7 +11,7 @@ module.exports = function(bot, db, data) {
   var lastTrig = triggerStore.getLast();
 
   if (lastTrig) {
-    let trigname = lastTrig.Trigger.replace(/:$/, '');
+    let trigname = lastTrig.Trigger;
     bot.sendChat(`!${trigname} was the most recently ${lastTrig.status} trigger by ${lastTrig.Author}`);
   }
 

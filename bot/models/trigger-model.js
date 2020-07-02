@@ -29,10 +29,6 @@ class TriggerModel {
     this.data = Object.assign({}, emptyTrig, data);
   }
 
-  format(bot, data) {
-    this.formatted = triggerFormatter(this.data.Returns, bot, data);
-  }
-
   /**
    * Populate the model with data for a new Trigger
    * @param {Object} data 
@@ -54,7 +50,7 @@ class TriggerModel {
     const finalData = {
       Author: _get(newData, "user.username", "unknown"),
       Returns: newData.triggerText || orignialValue.Returns,
-      Trigger: newData.triggerName,
+      Trigger: newData.triggerName || orignialValue.Trigger,
       status: "updated",
       lastUpdated: Date.now(),
       propEmoji: newData.propEmoji || orignialValue.propEmoji,

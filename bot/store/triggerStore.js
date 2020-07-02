@@ -1,5 +1,4 @@
 "use strict";
-const _ = require("lodash");
 const fuzzysort = require("fuzzysort");
 const repo = require(process.cwd() + "/repo");
 const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
@@ -10,27 +9,26 @@ var TriggerStore = {
   propGivers: {},
   flowGivers: {},
   lastTrigger: {},
+  format: triggerFormatter,
 
   getRandom: function (bot, data) {
-    var trigKeys = Object.keys(this.triggers);
-    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
-    var trig = this.triggers[randKey];
-    var theReturn = null;
-    if (trig) {
-      theReturn = triggerFormatter(trig.Returns, bot, data);
-    }
-    return { Trigger: trig.Trigger, Returns: theReturn };
+    const trigKeys = Object.keys(this.triggers);
+    const randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
+    const trig = this.triggers[randKey];
+
+    if (!trig) return null;
+    return trig;
   },
 
   randomProp: function () {
-    var trigKeys = Object.keys(this.propGivers);
-    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
+    const trigKeys = Object.keys(this.propGivers);
+    const randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
     return this.propGivers[randKey];
   },
 
   randomFlow: function () {
-    var trigKeys = Object.keys(this.flowGivers);
-    var randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
+    const trigKeys = Object.keys(this.flowGivers);
+    const randKey = trigKeys[Math.floor(Math.random() * trigKeys.length)];
     return this.flowGivers[randKey];
   },
 
@@ -100,7 +98,7 @@ var TriggerStore = {
     if (!found) {
       return null;
     }
-
+    
     return new TriggerModel(found);
   },
 
