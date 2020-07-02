@@ -1,16 +1,21 @@
 'use strict';
 var skipService = require(process.cwd() + '/bot/utilities/skips');
 
+function doSkip(bot) {
+  bot.moderateForceSkip(function(err){
+    if (err) {
+      bot.log('error','BOT', `error skipping song ${err.message}`);
+      bot.sendChat("Sorry I couldn't skip this song.");
+    }
+  });
+}
+
 module.exports = function(bot, db, data) {
 
   // if just !skip
   // or if too many arguments, then just plain skipping
   if (data.args.length === 0 || data.args.length > 1) {
-    bot.moderateForceSkip(function(success){
-      if (!success) {
-        return bot.sendChat("Sorry I couldn't skip this song.");
-      }
-    });
+    doSkip(bot);
     return;
   }
 
@@ -36,11 +41,7 @@ module.exports = function(bot, db, data) {
         skipService.troll(bot, db, data);
         break;
     default:
-      bot.moderateForceSkip(function(success){
-        if (!success) {
-          bot.sendChat("Sorry I couldn't skip this song.");
-        }
-      });
+      doSkip(bot);
         break;
   }
 
