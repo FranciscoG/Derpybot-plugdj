@@ -1,5 +1,6 @@
 module.exports = {
     'rules': {
+        "no-console": "off",
         'linebreak-style': [
             1,
             'unix'
