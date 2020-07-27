@@ -1,6 +1,6 @@
 "use strict";
-const repo = require("../../../repos/triggers");
-const TriggerModel = require("../../models/trigger-model");
+const repos = require("../../../repos");
+const triggerModel = require("../../models/trigger-model");
 
 function displayHelp(bot) {
   const chats = [
@@ -33,7 +33,7 @@ module.exports = async function(bot, db, data) {
 
   triggerName = triggerName.replace(/^!/, "");
 
-  const [getErr, foundTrigger] = await repo.getTrigger(db, triggerName);
+  const [getErr, foundTrigger] = await repos.triggers.getTrigger(db, triggerName);
   if (getErr) {
     bot.log("error", "BOT", `[TRIG] GET ERROR: ${getErr.message}`);
     return bot.sendChat('An error occured :-(');
@@ -48,11 +48,10 @@ module.exports = async function(bot, db, data) {
     foundTrigger.propEmoji = propEmoji.replace(/^:/, "").replace(/:$/, "");
   }
 
-  const model = new TriggerModel();
-  model.fromUpdate(data, foundTrigger);
+  const model = triggerModel(bot, data, foundTrigger);
 
   try {
-    await repo.insertTrigger(db, model);
+    await repos.triggers.insertTrigger(db, model);
     const info = `[TRIG] UPDATE: ${data.from.username} propified !${triggerName}`;
     bot.log("info", "BOT", info);
     bot.moderateDeleteChat(chatID, function() {});

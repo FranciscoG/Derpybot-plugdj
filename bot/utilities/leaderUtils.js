@@ -1,37 +1,39 @@
-'use strict';
-const moment = require('moment');
-const repo = require(process.cwd()+'/repo');
+"use strict";
+const moment = require("moment");
+const repos = require("../../repos");
 
 /**
  * Takes a flat JS Object with values that are only strings or numbers and flips
- * the keys and values. 
- * For example, this: { test: "flip" } 
+ * the keys and values.
+ * For example, this: { test: "flip" }
  * will become this: { flip: "test" }
- * @param {Object} obj 
+ * @param {Object} obj
  */
 function flipObj(obj) {
   return Object.keys(obj).reduce((ret, key) => {
     let val = obj[key];
-    if (typeof val === 'string' || typeof val === 'number') {
+    if (typeof val === "string" || typeof val === "number") {
       ret[val] = key;
       return ret;
     } else {
-      throw new Error(`Object.flip only works with values that are numbers or strings. Value type for key ${key} is a ${typeof val}`);
+      throw new Error(
+        `Object.flip only works with values that are numbers or strings. Value type for key ${key} is a ${typeof val}`
+      );
     }
   }, {});
 }
 
-// firebase forbids these special characters in object keys so creating this 
+// firebase forbids these special characters in object keys so creating this
 // simple pairing to encode/decode them since these don't have html entities or glyphs
 
 const CHAR_ENCODE = {
-  "." : "*!period!*",
-  "$" : "*!dollar!*",
-  "[" : "*!lbracket!*",
-  "]" : "*!rbracket!*",
-  "#" : "*!hash!*",
-  "/" : "*!forwadslash!*",
-  " " : "*!space!*"
+  ".": "*!period!*",
+  $: "*!dollar!*",
+  "[": "*!lbracket!*",
+  "]": "*!rbracket!*",
+  "#": "*!hash!*",
+  "/": "*!forwadslash!*",
+  " ": "*!space!*",
 };
 
 // swap the keys with the values
@@ -39,7 +41,7 @@ const CHAR_DECODE = flipObj(CHAR_ENCODE);
 
 function encodeUsername(str) {
   let keys = Object.keys(CHAR_ENCODE);
-  return str.split('').reduce((acc, char) => {
+  return str.split("").reduce((acc, char) => {
     if (keys.includes(char)) {
       return acc + CHAR_ENCODE[char];
     } else {
@@ -49,7 +51,7 @@ function encodeUsername(str) {
 }
 
 function decodeUsername(str) {
-  return Object.keys(CHAR_DECODE).reduce( (acc, key) => {
+  return Object.keys(CHAR_DECODE).reduce((acc, key) => {
     if (acc.includes(key)) {
       return acc.split(key).join(CHAR_DECODE[key]);
     }
@@ -59,15 +61,14 @@ function decodeUsername(str) {
 
 function getTop3(bot, prop) {
   var arr = [];
-  
-  Object.keys(bot.allUsers)
-    .forEach( userId => {
-      arr.push(bot.allUsers[userId]);
-    });
+
+  Object.keys(bot.allUsers).forEach((userId) => {
+    arr.push(bot.allUsers[userId]);
+  });
 
   // help from: http://stackoverflow.com/a/1129270/395414
-  arr.sort(function (a,b) {
-    if (a[prop] < b[prop]) { 
+  arr.sort(function (a, b) {
+    if (a[prop] < b[prop]) {
       return -1;
     }
     if (a[prop] > b[prop]) {
@@ -85,61 +86,60 @@ function getTop3(bot, prop) {
 }
 
 function updateLeaderboard(bot, db) {
-  var year = moment().format('Y');
-  var month = moment().format('MMM');
+  var year = moment().format("Y");
+  var month = moment().format("MMM");
   var leaderObj = {
     month: month,
     year: year,
-    props : '',
-    propsObj : {},
-    flow : '',
-    flowObj : {}
+    props: "",
+    propsObj: {},
+    flow: "",
+    flowObj: {},
   };
-  
+
   var propsArr = [];
-  var props = getTop3(bot, 'props');
-  props.forEach(function(user){
+  var props = getTop3(bot, "props");
+  props.forEach(function (user) {
     if (user.props > 0) {
-      propsArr.push(user.username + ' (' + user.props + ')');
+      propsArr.push(user.username + " (" + user.props + ")");
       let encodedUserName = encodeUsername(user.username);
       leaderObj.propsObj[encodedUserName] = user.props;
     }
   });
-  if (propsArr.length === 0){
-    leaderObj.props = 'nobody got any props';
+  if (propsArr.length === 0) {
+    leaderObj.props = "nobody got any props";
   } else {
-    leaderObj.props = propsArr.join(', ');
+    leaderObj.props = propsArr.join(", ");
   }
-  
 
   var flowArr = [];
-  var flow = getTop3(bot, 'flow');
-  flow.forEach(function(user){
+  var flow = getTop3(bot, "flow");
+  flow.forEach(function (user) {
     if (user.flow > 0) {
-      flowArr.push(user.username + ' (' + user.flow + ')');
+      flowArr.push(user.username + " (" + user.flow + ")");
       let encodedUserName = encodeUsername(user.username);
       leaderObj.flowObj[encodedUserName] = user.flow;
     }
   });
-  if (flowArr.length === 0){
-    leaderObj.flow = 'there are currently no flow leaders';
+  if (flowArr.length === 0) {
+    leaderObj.flow = "there are currently no flow leaders";
   } else {
-    leaderObj.flow = flowArr.join(', ');
+    leaderObj.flow = flowArr.join(", ");
   }
-  
 
-  repo.insertLeaderMonth(db, month + year, leaderObj)
-    .then(function() {
+  repos.leaderboard
+    .insertLeaderMonth(db, month + year, leaderObj)
+    .then(function () {
       // bot.log('info', 'BOT', month + year + ': Leaderboard updated');
     })
-    .catch(function(error) {
-      bot.log('error', 'BOT', 'error updating leaderboard');
+    .catch(function (error) {
+      bot.log("error", "BOT", "error updating leaderboard");
     });
 }
 /**
  * Work in progress
  * Update the All Time Leaders board
- * 
+ *
  * @param {Obect} bot instance of DubAPI
  */
 function allTimeLeaders(bot) {
@@ -161,39 +161,47 @@ function allTimeLeaders(bot) {
           user3: total
   */
 
-
   var flows = {};
   var props = {};
 
-  // build our list of flows and props 
-  Object.keys(bot.leaderboard).forEach((key)=>{
+  // build our list of flows and props
+  Object.keys(bot.leaderboard).forEach((key) => {
     let month_year = bot.leaderboard[key];
-    
+
     // add up all the flows
     for (let user in month_year.flowObj) {
       let u = decodeUsername(user);
-      if (!flows[u]) { flows[u] = month_year.flowObj[user]; }
-      else { flows[u] += month_year.flowObj[user]; }
+      if (!flows[u]) {
+        flows[u] = month_year.flowObj[user];
+      } else {
+        flows[u] += month_year.flowObj[user];
+      }
     }
 
     // add up all the props
     for (let user in month_year.propsObj) {
       let u = decodeUsername(user);
-      if (!props[u]) { props[u] = month_year.propsObj[user]; }
-      else { props[u] += month_year.propsObj[user]; }
+      if (!props[u]) {
+        props[u] = month_year.propsObj[user];
+      } else {
+        props[u] += month_year.propsObj[user];
+      }
     }
   });
 
-  // sort all the flows by this method: 
+  // sort all the flows by this method:
   // https://stackoverflow.com/a/1069840/395414
   var flow_sortable = [];
   for (let u in flows) {
     flow_sortable.push([u, flows[u]]);
   }
 
-  var top3Flow = flow_sortable.sort(function(a, b) {
+  var top3Flow = flow_sortable
+    .sort(function (a, b) {
       return a[1] - b[1];
-  }).reverse().slice(0, 3);
+    })
+    .reverse()
+    .slice(0, 3);
 
   // sort all the props
   var props_sortable = [];
@@ -201,13 +209,16 @@ function allTimeLeaders(bot) {
     props_sortable.push([u, props[u]]);
   }
 
-  var top3Props = props_sortable.sort(function(a, b) {
+  var top3Props = props_sortable
+    .sort(function (a, b) {
       return a[1] - b[1];
-  }).reverse().slice(0, 3);
+    })
+    .reverse()
+    .slice(0, 3);
 
   return {
-    props : top3Props,
-    flows : top3Flow
+    props: top3Props,
+    flows: top3Flow,
   };
 }
 
@@ -218,7 +229,7 @@ const alphaRegex = new RegExp("[^a-z]+", "ig");
 function formatMonth(str) {
   str = str.replace(alphaRegex, ""); // sanitize
   const first = str.charAt(0).toUpperCase();
-  return (first +  str.toLowerCase().substr(1)).replace(/([a-z]{3}).+/i, '$1');
+  return (first + str.toLowerCase().substr(1)).replace(/([a-z]{3}).+/i, "$1");
 }
 
 function getLeadersByMonthYear(bot, month, year) {
@@ -244,8 +255,8 @@ function getLeadersByMonthYear(bot, month, year) {
 }
 
 module.exports = {
-  getTop3 : getTop3,
-  updateLeaderboard : updateLeaderboard,
+  getTop3: getTop3,
+  updateLeaderboard: updateLeaderboard,
   allTimeLeaders: allTimeLeaders,
-  getLeadersByMonthYear: getLeadersByMonthYear
+  getLeadersByMonthYear: getLeadersByMonthYear,
 };

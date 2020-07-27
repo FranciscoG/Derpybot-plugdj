@@ -1,7 +1,8 @@
 const triggerPoint = require("../utilities/triggerPoint.js");
 const triggerStore = require("../store/triggerStore.js");
 const triggerCode = require("../utilities/triggerCode.js");
-const handleChat = require("../utilities/handleChat");
+const handleChat = require("../utilities/handleChat.js");
+const formatter = require('../utilities/trigger-formatter.js');
 
 const commandDTO = require("../models/command-dto");
 
@@ -35,41 +36,39 @@ var handleCommands = async function (bot, db, commandModel) {
 
   // first go through the commands in /commands to see if they exist
   if (typeof commands[commandModel.command] !== "undefined") {
-    commands[commandModel.command](bot, db, commandModel.data);
+    commands[commandModel.command](bot, db, commandModel._data);
     return;
   }
 
   // check if it's an exsiting trigger
-  let trig = triggerStore.get(commandModel.command);
+  let trigger = triggerStore.get(commandModel.command);
 
-  if (!trig) {
+  if (!trigger) {
     chat_messages.push(unrecognized(commandModel.command));
     return chat_messages;
   }
 
-  const { data: triggerData } = trig;
-  
-  if (/^\{.+\}$/.test(triggerData.Returns)) {
+  if (/^\{.+\}$/.test(trigger.Returns)) {
     // if this is a special code trigger that is wrapped in brackets "{ }"
     try {
-      let codeResult = await triggerCode(triggerData.Returns, commandModel.data);
+      let codeResult = await triggerCode(trigger.Returns, commandModel.data);
       chat_messages.push(codeResult);
     } catch (e) {
       bot.log("error", "BOT", `${e.message}`);
-      chat_messages.push(`Sorry, an error occured with !${triggerData.Trigger}. Try again`);
+      chat_messages.push(`Sorry, an error occured with !${trigger.Trigger}. Try again`);
     }
 
     return chat_messages;
   }
 
   // sets trig.formatted
-  const formatted = triggerStore.format(triggerData.Returns, bot, commandModel.data);
+  const formatted = formatter(trigger.Returns, bot, commandModel);
 
-  if (triggerData.givesProp) {
-    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "prop", triggerData.propEmoji);
+  if (trigger.givesProp) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "prop", trigger.propEmoji);
     chat_messages = chat_messages.concat(pointInfo);
-  } else if (triggerData.givesFlow) {
-    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "flow", triggerData.flowEmoji);
+  } else if (trigger.givesFlow) {
+    let pointInfo = await triggerPoint(bot, db, commandModel, formatted, "flow", trigger.flowEmoji);
     chat_messages = chat_messages.concat(pointInfo);
   } else {
     chat_messages.push(formatted);

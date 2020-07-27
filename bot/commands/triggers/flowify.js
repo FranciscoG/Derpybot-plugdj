@@ -1,16 +1,13 @@
 "use strict";
-const repo = require("../../../repos/triggers");
-const TriggerModel = require("../../models/trigger-model");
+const repos = require("../../../repos");
+const triggerModel = require("../../models/trigger-model");
 
 function displayHelp(bot) {
-  const chats = [
-    "Make a trigger give a flow point",
-    "!flowify <trigger_name> [optional_emoji]"
-  ];
+  const chats = ["Make a trigger give a flow point", "!flowify <trigger_name> [optional_emoji]"];
   return bot.sendChat(chats.join(`\n`));
 }
 
-module.exports = async function(bot, db, data) {
+module.exports = async function (bot, db, data) {
   const chatID = data.id;
 
   if (!data || !data.from || !data.args) {
@@ -29,14 +26,14 @@ module.exports = async function(bot, db, data) {
     return displayHelp(bot);
   }
 
-  let [ triggerName, flowEmoji ] = data.args;
+  let [triggerName, flowEmoji] = data.args;
 
   triggerName = triggerName.replace(/^!/, "");
 
-  const [getErr, foundTrigger] = await repo.getTrigger(db, triggerName);
+  const [getErr, foundTrigger] = await repos.triggers.getTrigger(db, triggerName);
   if (getErr) {
     bot.log("error", "BOT", `[TRIG] GET ERROR: ${getErr.message}`);
-    return bot.sendChat('An error occured :-(');
+    return bot.sendChat("An error occured :-(");
   }
 
   if (!foundTrigger) {
@@ -48,14 +45,13 @@ module.exports = async function(bot, db, data) {
     foundTrigger.flowEmoji = flowEmoji.replace(/^:/, "").replace(/:$/, "");
   }
 
-  const model = new TriggerModel();
-  model.fromUpdate(data, foundTrigger);
+  const model = triggerModel(bot, data, foundTrigger);
 
   try {
-    await repo.insertTrigger(db, model);
+    await repos.triggers.insertTrigger(db, model);
     const info = `[TRIG] UPDATE: ${data.from.username} flowified !${triggerName}`;
     bot.log("info", "BOT", info);
-    bot.moderateDeleteChat(chatID, function() {});
+    bot.moderateDeleteChat(chatID, function () {});
     return bot.sendChat(`trigger *!${triggerName}* flowified!`);
   } catch (e) {
     bot.log("error", "BOT", `[TRIG] UPDATE ERROR: ${e.message}`);

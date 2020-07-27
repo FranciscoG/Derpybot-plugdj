@@ -1,6 +1,6 @@
 "use strict";
-var repo = require(process.cwd() + "/repo");
-var moment = require("moment");
+const moment = require("moment");
+const repos = require('../../../repos');
 
 module.exports = function(bot, db, data, isBrad = false) {
   if (data.args === void 0 || data.args.length < 1) {
@@ -18,7 +18,7 @@ module.exports = function(bot, db, data, isBrad = false) {
     trigger = trigger.substring(1);
   }
 
-  repo.getTrigger(db, trigger, function(val) {
+  repos.triggers.getTrigger(db, trigger, function(val) {
     if (val !== null) {
       var keys = Object.keys(val);
       var result = val[keys[0]];

@@ -15,7 +15,15 @@ function hasPermission(bot, user) {
   return true;
 }
 
+/**
+ * !shuffleplaylist - shuffles the bot's playlist
+ * @param {PlugApi} bot
+ * @param {object} db
+ * @param {import('../../utilities/typedefs').BotCommand} data
+ */
 module.exports = function(bot, db, data) {
+  return bot.sendChat("This command is currently disabled");
+  
   const { user } = data;
   
   if (!hasPermission(bot,user)) return;
@@ -24,7 +32,7 @@ module.exports = function(bot, db, data) {
     bot.myconfig.playlistID,
     function(code, _data){
       if (code === 200) {
-        bot.sendChat('Ok I shuffled my one and only playlist.');
+        bot.sendChat('Ok I shuffled my playlist.');
       } else {
          bot.log('error','BOT', `Could not shuffle playlist - code: ${code}`);
          bot.sendChat("Got an errror shuffling playlist for some reasons (probably API error), try again.");
@@ -34,5 +42,3 @@ module.exports = function(bot, db, data) {
 
   
 };
-
-module.exports.extraCommands = ['sp'];

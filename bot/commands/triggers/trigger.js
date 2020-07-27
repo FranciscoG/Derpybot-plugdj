@@ -1,7 +1,7 @@
 "use strict";
-const repo = require("../../../repos/triggers");
+const repos = require("../../../repos");
 const verify = require(process.cwd() + "/bot/utilities/verify.js");
-const TriggerModel = require("../../models/trigger-model");
+const triggerModel = require("../../models/trigger-model");
 const badKeyChars = new RegExp("[\\.$\\[\\]#/]");
 
 /**
@@ -55,7 +55,7 @@ module.exports = async function (bot, db, data) {
     return bot.sendChat(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
   }
 
-  const [getErr, existingTrigger] = await repo.getTrigger(db, triggerName);
+  const [getErr, existingTrigger] = await repos.triggers.getTrigger(db, triggerName);
 
   if (getErr) {
     console.error(getErr);
@@ -76,10 +76,9 @@ module.exports = async function (bot, db, data) {
     }
 
     try {
-      const newTrigModel = new TriggerModel();
-      newTrigModel.fromNew(data);
-
-      await repo.insertTrigger(db, newTrigModel);
+      const newTrigModel = triggerModel(bot, data);
+  
+      await repos.triggers.insertTrigger(db, newTrigModel);
 
       var inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
       bot.log("info", "BOT", inf);
@@ -108,10 +107,9 @@ module.exports = async function (bot, db, data) {
 
   if (existingTrigger && triggerText) {
     try {
-      const updateModel = new TriggerModel();
-      updateModel.fromUpdate(data, existingTrigger);
+      const updateModel = triggerModel(bot, data, existingTrigger);
 
-      await repo.insertTrigger(db, updateModel);
+      await repos.triggers.insertTrigger(db, updateModel);
 
       var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${existingTrigger.Returns} TO-> ${triggerText}`;
       bot.log("info", "BOT", info);
@@ -134,7 +132,7 @@ module.exports = async function (bot, db, data) {
         return bot.sendChat(`ok, \`${triggerName}\` trigger delete canceled`);
       }
 
-      await repo.deleteTrigger(db, existingTrigger);
+      await repos.triggers.deleteTrigger(db, existingTrigger);
       const info = `[TRIG] DEL by ${data.from.username} -> !${triggerName}`;
       bot.log("info", "BOT", info);
       return bot.sendChat(`Trigger *!${triggerName}* deleted`);

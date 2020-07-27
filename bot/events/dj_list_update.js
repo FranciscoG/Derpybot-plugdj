@@ -7,9 +7,7 @@
  */
 
 "use strict";
-const checkHistory = require(process.cwd() + "/bot/utilities/checkHistory.js");
-const _ = require("lodash");
-const repo = require(process.cwd() + "/repo");
+const repos = require("../../repos");
 
 function searchUsersObj(bot, uid) {
   for (let key in bot.allUsers) {
@@ -33,7 +31,7 @@ function checkNewUser(bot, db, user) {
       `${user.username} is new to the mixer, and just joined the queue. Let's all be supportive!`
     );
     cachedUser[1].introduced = true;
-    repo.updateUser(db, cachedUser[0], cachedUser[1], function(err) {
+    repos.users.updateUser(db, cachedUser[0], cachedUser[1], function(err) {
       if (err) {
         bot.log(
           "error",

@@ -1,5 +1,6 @@
 'use strict';
-const repo = require(process.cwd()+'/repo');
+// const repo = require(process.cwd()+'/repo');
+const repos = require('../../repos');
 const userDTO = require('../models/user-dto');
 
 /**
@@ -33,7 +34,7 @@ module.exports = function(bot, db) {
     const user = userDTO(plugUser);
 
     try {
-      const u = await repo.logUser(db, user);
+      const u = await repos.users.logUser(db, user);
       bot.log('info', 'BOT', `[JOIN] ${u.username} | ${u.id} | ${u.logType}`);
     } catch (e) {
       bot.log('error', 'BOT', `[JOIN] ${user.username}: ${e.message}`);

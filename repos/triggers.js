@@ -1,7 +1,4 @@
 "use strict";
-const log = require(process.cwd() + "/bot/utilities/logger");
-const _get = require("lodash/get");
-
 /**
  * @typedef {import('../bot/models/trigger-model').TriggerModelData} TriggerModelData
  */
@@ -9,12 +6,16 @@ const _get = require("lodash/get");
 /**
  *
  * @param {object} db firebase db instance
- * @returns {array}
+ * @returns {Promise<Error?, TriggerModelData[]?>}
  */
 const getAllTriggers = async function (db) {
-  const ref = db.ref("triggers");
-  const snapshot = await ref.once("value");
-  return snapshot.val();
+  try {
+    const ref = db.ref("triggers");
+    const snapshot = await ref.once("value");
+    return [null, snapshot.val()];
+  } catch (err) {
+    return [err, null];
+  }
 };
 
 /**
@@ -26,11 +27,7 @@ const getAllTriggers = async function (db) {
 const getTrigger = async function (db, triggerName) {
   try {
     const snapshot = await db.ref("triggers").child(triggerName).once("value");
-    if (snapshot && snapshot.val) {
-      return [null, snapshot.val()];
-    } else {
-      return [null, null];
-    }
+    return [null, snapshot.val()];
   } catch (err) {
     return [err, null];
   }
@@ -44,14 +41,14 @@ const getTrigger = async function (db, triggerName) {
  * @throws
  */
 const insertTrigger = async function (db, model) {
-  if (!model || !model.data.Returns || !model.data.Trigger) {
+  if (!model || !model.Returns || !model.Trigger) {
     throw new Error("missing triggerText or TriggerName");
   }
 
-  updateLastTrigger(db, model.data);
+  updateLastTrigger(db, model);
 
-  const newRef = await db.ref("triggers/" + model.data.Trigger);
-  await newRef.set(model.data);
+  const newRef = await db.ref("triggers/" + model.Trigger);
+  await newRef.set(model);
   return true;
 };
 

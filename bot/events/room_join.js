@@ -3,7 +3,7 @@ const mediaStore = require("../store/mediaInfo.js");
 const historyStore = require("../store/history.js");
 const triggerStore = require("../store/triggerStore.js");
 const leaderUtils = require("../utilities/leaderUtils.js");
-const repo = require("../../repo");
+const repos = require("../../repos");
 const pointReset = require("../utilities/point-reset.js");
 const sleep = require("../utilities/sleep.js");
 
@@ -24,7 +24,7 @@ module.exports = function(bot, db) {
       .getUsers()
       .forEach(async function(user) {
         try {
-          await repo.logUser(db, user);
+          await repos.users.logUser(db, user);
         } catch (e) {
           bot.log('error', 'BOT', `error logging user ${user.username}: ${e.message}`);
         }

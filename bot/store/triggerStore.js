@@ -1,8 +1,7 @@
 "use strict";
 const fuzzysort = require("fuzzysort");
-const repo = require(process.cwd() + "/repo");
+const repos = require('../../repos');
 const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
-const TriggerModel = require("../models/trigger-model");
 
 var TriggerStore = {
   triggers: {},
@@ -90,7 +89,7 @@ var TriggerStore = {
 
   /**
    * @param {string} trigger the trigger to look up
-   * @returns {TriggerModel?}
+   * @returns {TriggerModelData?}
    */
   get: function (trigger) {
     let found = this.triggers[trigger] || null;
@@ -98,8 +97,8 @@ var TriggerStore = {
     if (!found) {
       return null;
     }
-    
-    return new TriggerModel(found);
+
+    return found;
   },
 
   updateGivers: function (trig) {
@@ -175,12 +174,12 @@ var TriggerStore = {
    * for unit testing
    */
   initSync: async function (bot, db) {
-    try {
-      const allTriggers = await repo.getAllTriggers(db);
-      this.setTriggers.call(this, bot, allTriggers);
-    } catch (e) {
-      bot.log("error", "BOT", `error getting triggers from firebase: ${e.message}`);
+    const [err, allTriggers] = await repos.triggers.getAllTriggers(db);
+    if (err) {
+      bot.log("error", "BOT", `error getting triggers from firebase: ${err.message}`);
+      return;
     }
+    this.setTriggers.call(this, bot, allTriggers);
   },
 };
 

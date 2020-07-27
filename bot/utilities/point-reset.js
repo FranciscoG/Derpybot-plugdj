@@ -4,7 +4,7 @@
  */
 'use strict';
 const schedule = require('node-schedule');
-const repo = require('../../repo');
+const repos = require('../../repos');
 const leaders = require('../commands/credits/leaders.js');
 
 var resetAllUserPoints = function(bot, db){
@@ -18,7 +18,7 @@ var resetAllUserPoints = function(bot, db){
     updatedUsers[key].props = 0;
   });
 
-  repo.updateAllUsers(db, updatedUsers)
+  repos.users.updateAllUsers(db, updatedUsers)
     .then(function(err){
       if (err) {
         console.log('updateAllUsers', err);

@@ -1,10 +1,11 @@
-var request = require('request');
-var _get = require('lodash/get');
+/// require('../utilities/typedefs');
+var request = require("request");
+var _get = require("lodash/get");
 
 /**
  * Mini programming language for triggers
  * usage:
- * 
+ *
  * Single Command per line
  * {ACTION jsonPath FROM source}
  *  - must be surround in brackets with nothing outside the brackets
@@ -13,11 +14,11 @@ var _get = require('lodash/get');
  *    to the nested json property you want to get
  *  - FROM  = just for clarity to indicate the next item is the source
  *  - source = must be a URL that returns a JSON response and does not need authentication
- * 
+ *
  * example: '{ GET obj[0].name FROM http://blabla.com/{0} }'
  */
 
- /* 
+/* 
   example:
   
   create trigger like this:
@@ -25,18 +26,17 @@ var _get = require('lodash/get');
 
   then use it like this:
   !wiki black+cats
- */ 
+ */
 
- /**
-  *
-  *
-  * @param {array} trig trigger text 
-  * @returns
-  */
- function parseTrigger(trig) {
-   // remove open/close brackets
-  const nodes =  trig
-    .substring(1, trig.length - 1)
+/**
+ *
+ *
+ * @param {array} trig trigger text
+ * @returns
+ */
+function parseTrigger(trig) {
+  const nodes = trig
+    .substring(1, trig.length - 1) // remove open/close brackets
     .trim()
     .split(" ");
 
@@ -44,48 +44,51 @@ var _get = require('lodash/get');
    * For now this is super super simple and only handles GET requests
    * nodes[0] should always always === "GET"
    * nodes[2] should always always === "FROM"
-   * so we can ignore them.. for now. 
+   * so we can ignore them.. for now.
    */
-  
-  
-  return {
-    jsonPath : nodes[1],
-    url : nodes[3]
-  };
- }
 
- module.exports = function(trigger, data) {
+  return {
+    action: nodes[0],
+    jsonPath: nodes[1],
+    url: nodes[3],
+  };
+}
+
+/**
+ * parse a code trigger and execute it
+ * @param {string} trigger
+ * @param {BotCommand} data
+ */
+module.exports = function (trigger, data) {
   var deets = parseTrigger(trigger);
   var url = deets.url;
 
-  // the url should contain {n} (n = any number) so that you can replace 
+  // the url should contain {n} (n = any number) so that you can replace
   // it with dynamic info from the trigger command arguments
   if (/(\{\d\})+/g.test(url) && !data.args.length) {
     return "This trigger requires more data";
   }
 
   if (data.args.length > 0) {
-
     // if you put {@} in the url it will take all of the arguments and join them
     // with a "+" and replace it
-    if (url.includes('{@}')) {
-      url = url.replace('{@}', data.args.join('+'));
+    if (url.includes("{@}")) {
+      url = url.replace("{@}", data.args.join("+"));
     } else {
       data.args.forEach((p, i) => {
         url = url.replace(`{${i}}`, p);
       });
     }
-
   }
-  
+
   var options = {
     url: url,
     headers: {
-      'Accept' : 'application/json'
-    }
+      Accept: "application/json",
+    },
   };
 
-  return new Promise(function(resolve, reject){
+  return new Promise(function (resolve, reject) {
     request(options, function (error, response, body) {
       if (error) {
         reject(error);
@@ -97,7 +100,7 @@ var _get = require('lodash/get');
           let json = JSON.parse(body);
           let result = _get(json, deets.jsonPath, "No results");
           resolve(result);
-        } catch(e) { 
+        } catch (e) {
           reject(e); // json parsing error
         }
         return;
@@ -106,4 +109,4 @@ var _get = require('lodash/get');
       reject(`Bad request with code: ${response.statusCode}`);
     });
   });
- };
+};

@@ -1,5 +1,5 @@
 "use strict";
-var repo = require(process.cwd() + "/repo");
+const repos = require("../../../repos");
 
 /**
  * This grabs the text of a trigger and returns it as is without interpreting it
@@ -24,7 +24,7 @@ module.exports = function(bot, db, data) {
     trigger = trigger.substring(1);
   }
 
-  repo.getTrigger(db, trigger, function(val) {
+  repos.triggers.getTrigger(db, trigger, function(val) {
     if (val !== null) {
       var keys = Object.keys(val);
       var result = val[keys[0]];
