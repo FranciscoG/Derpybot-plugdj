@@ -1,17 +1,17 @@
 "use strict";
-var repo = require(process.cwd() + "/repo");
-var userStore = require(process.cwd() + "/bot/store/users.js");
+const repos = require("../../repos");
+const userStore = require(process.cwd() + "/bot/store/users.js");
 
-var successMsg = function(recipient, pointType, pointEmoji) {
+function successMsg(recipient, pointType, pointEmoji) {
   if (pointType === "flow") {
     return `@${recipient.username} now has ${recipient[pointType]} flowpoint :${pointEmoji}:`;
   }
   return `@${recipient.username} now has ${recipient[pointType]} props :${pointEmoji}:`;
-};
+}
 
-var noRepeatPointMsg = function(username, pointEmoji) {
+function noRepeatPointMsg(username, pointEmoji) {
   return `@${username}, you have already given a :${pointEmoji}: for this song`;
-};
+}
 
 /**
  * Save point to db and send chat message
@@ -33,11 +33,11 @@ async function addPoint(
   repeatCheck,
   pointEmoji
 ) {
-  const user = await repo.incrementUser(db, recipient, pointType);
+  const user = await repos.users.incrementUser(db, recipient, pointType);
   if (!user) {
     Promise.reject("user not found");
   }
-  userStore.addPoint(repeatCheck, data.from.id);
+  userStore.addPoint(repeatCheck, data.user.id);
   return Promise.resolve(successMsg(user, pointType, pointEmoji));
 }
 
@@ -48,12 +48,12 @@ async function addPoint(
  * @param {string} trig the current trigger text being processed
  * @param {"prop"|"flow"} type
  * @param {string} [emoji]
- * @returns {Promise.resolve<array>} array of strings that will be sent to the chat
+ * @returns {Promise<string[]>} array of strings that will be sent to the chat
  */
 module.exports = async function(bot, db, data, trig, type, emoji) {
   const messages = [];
 
-  if (data.from.username === bot.getUser().username) {
+  if (data.user.username === bot.getUser().username) {
     messages.push("I am not allowed to award points");
     return Promise.resolve(messages);
   }
@@ -83,8 +83,8 @@ module.exports = async function(bot, db, data, trig, type, emoji) {
 
   if (!bot.myconfig.allow_multi_prop) {
     // no repeat giving
-    if (userStore.hasId(repeatCheck, data.from.id)) {
-      messages.push(noRepeatPointMsg(data.from.username, pointEmoji));
+    if (userStore.hasId(repeatCheck, data.user.id)) {
+      messages.push(noRepeatPointMsg(data.user.username, pointEmoji));
       return Promise.resolve(messages);
     }
   }
@@ -94,7 +94,7 @@ module.exports = async function(bot, db, data, trig, type, emoji) {
 
   // can not give points to self
   // but don't show a warning, just remain silent
-  if (data.from.username === dj.username) {
+  if (data.user.username === dj.username) {
     return Promise.resolve(messages);
   }
 

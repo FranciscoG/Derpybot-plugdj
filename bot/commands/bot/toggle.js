@@ -14,6 +14,12 @@ function hasPermission(bot, user) {
   return true;
 }
 
+/**
+ * !toggle configItem - toggles boolean config values
+ * @param {PlugApi} bot
+ * @param {object} db
+ * @param {import('../../utilities/typedefs').BotCommand} data
+ */
 module.exports = function(bot, db, data) {
   if (typeof bot !== 'object' || typeof data !== 'object') {
     return;
@@ -24,7 +30,7 @@ module.exports = function(bot, db, data) {
   if (!hasPermission(bot,user)) return;
 
   // config item to toggle
-  var item = data.args[0];
+  var [ item ] = data.args;
 
   if (!item) {
     bot.sendChat(`You must provide a config item to toggle. See full list here: http://franciscog.com/DerpyBot/commands/#config`);

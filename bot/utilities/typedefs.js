@@ -2,6 +2,7 @@
  * @typedef {object} BotUser
  * @property {string} id user id from plug.dj
  * @property {string} username plug.dj user's name 
+ * @property {0|1000|2000|3000|4000|5000} role plug.dj user's name 
  */
 
  /**
@@ -10,13 +11,13 @@
  * @property {string} Returns Trigger text
  * @property {string} Trigger Trigger name
  * @property {'created'|'updated'} status
- * @property {Date} [lastUpdated] timestamp of last update
- * @property {Date} createdOn timestamp of when it was created
+ * @property {number} [lastUpdated] timestamp of last update
+ * @property {number} createdOn timestamp of when it was created
  * @property {string} createdBy who original created this trigger
  * @property {boolean} [givesProp=false] does this trigger give a prop point, default: false
- * @property {string} [propEmoji=fist] which emoji to use in a prop, default: "fist"
+ * @property {string} [propEmoji="fist"] which emoji to use in a prop, default: "fist"
  * @property {boolean} [givesFlow=false] does this trigger give a flow point, default: false
- * @property {string} [flowEmoji=surfer] which emoji to use in a flow, default: "surfer"
+ * @property {string} [flowEmoji="surfer"] which emoji to use in a flow, default: "surfer"
  */
 
 /**
@@ -35,3 +36,5 @@
  * @property {BotUser} user
  * @property {array} args
  */
+
+ module.exports = {};

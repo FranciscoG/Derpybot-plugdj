@@ -1,21 +1,21 @@
-/**
- * !leaders
- * returns the top 3 props and flow leaders
- */
 'use strict';
 const leaderUtils = require(process.cwd() + '/bot/utilities/leaderUtils.js');
 const moment = require('moment');
-const _get = require('lodash/get');
 const handleChat = require("../../utilities/handleChat");
 
+/**
+ * !leaders - display current leaders in prop and flow
+ * @param {PlugApi} bot
+ * @param {object} db
+ * @param {import('../../utilities/typedefs').BotCommand} data
+ */
 module.exports = function(bot, db, data) {
   if (!bot.leaderboard) {
     bot.sendChat("I don't have leader informtaion at the momemt but try again in a minute");
     return;
   }
 
-  const param1 = _get(data, 'params[0]');
-  const param2 = _get(data, 'params[1]');
+  const [param1, param2] = data.args;
 
   // get all time leaders
   if (param1 && param1 === "all") {
@@ -29,7 +29,7 @@ module.exports = function(bot, db, data) {
       return a += `${v[0]} (${v[1]}), `;
     }, '').replace(/, $/, '');
 
-    handleChat(
+    return handleChat(
       [
         `All time prop leaders are:`,
         propString,
@@ -37,7 +37,6 @@ module.exports = function(bot, db, data) {
         flowString
       ]
     );
-    return;
   }
 
   if (param1 && param2) { 

@@ -1,4 +1,3 @@
-
 if (!Array.prototype.random) {
   Array.prototype.random = function() {
     let i = Math.floor( ( Math.random()*this.length ) );

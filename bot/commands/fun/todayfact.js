@@ -1,8 +1,6 @@
 'use strict';
 var request = require('request');
 
-// 'http://numbersapi.com/' + (new Date().getMonth() + 1) + '/' + new Date().getDate() + '/date'
-// 
 module.exports = function(bot, db) {
   var month = new Date().getMonth() + 1;
   var day = new Date().getDate();

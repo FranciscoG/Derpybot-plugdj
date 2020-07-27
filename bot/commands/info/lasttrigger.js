@@ -1,5 +1,5 @@
 'use strict';
-const triggerStore = require(process.cwd()+ '/bot/store/triggerStore.js');
+const triggerStore = require('../../store/triggerStore.js');
 
 module.exports = function(bot, db, data) {
   
@@ -12,7 +12,7 @@ module.exports = function(bot, db, data) {
 
   if (lastTrig) {
     let trigname = lastTrig.Trigger;
-    bot.sendChat(`!${trigname} was the most recently ${lastTrig.status} trigger by ${lastTrig.Author}`);
+    return bot.sendChat(`!${trigname} was the most recently ${lastTrig.status} trigger by ${lastTrig.Author}`);
   }
 
 };

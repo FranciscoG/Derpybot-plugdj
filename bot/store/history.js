@@ -1,5 +1,5 @@
 "use strict";
-const _ = require("lodash");
+const _get = require("lodash/get");
 var moment = require("moment");
 
 var historyStore = {
@@ -26,8 +26,8 @@ var historyStore = {
     return {
       id: song.id,
       lastplayed: song.timestamp,
-      user: _.get(song, "user.username", "404usernamenotfound"),
-      title: _.get(song, "media.title", "404songnamenotfound"),
+      user: _get(song, "user.username", "404usernamenotfound"),
+      title: _get(song, "media.title", "404songnamenotfound"),
       modIgnore: false
     };
   },
@@ -117,8 +117,8 @@ var historyStore = {
       return;
     }
 
-    var songId = _.get(song, "media.id");
-    var lastplayed = _.get(song, "raw.song.played");
+    var songId = _get(song, "media.id");
+    var lastplayed = _get(song, "raw.song.played");
     if (!lastplayed || !songId) {
       return;
     }

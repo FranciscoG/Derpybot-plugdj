@@ -1,8 +1,14 @@
+"use strict";
+/// require('../utilities/typedefs');
 /**
  * This formats a Trigger text with dynamic replacements
  */
 
-"use strict";
+/**
+ * 
+ * @param {string} str 
+ * @returns {array} array of tokens
+ */
 function getTokens(str) {
   var found = [];
 
@@ -30,16 +36,16 @@ function getTokens(str) {
 }
 
 function regEsc(s) {
-  return s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
+  return s.replace(/[-/\\^$*+?.()|[\]{}]/g, "\\$&");
 }
 
 /**
  * handle replacing indexed placeholder with data args from the commands
  *
- * @param {*} text - the full text of the trigger
- * @param {*} arg - current numbered argument index to replace
- * @param {*} bot - the PlugApi instance
- * @param {*} data - full data object from the event callback
+ * @param {string} text - the full text of the trigger
+ * @param {string} arg - current numbered argument index to replace
+ * @param {PlugAPI} bot - the PlugApi instance
+ * @param {BotCommand} data - full data object from the event callback
  * @returns
  */
 function handleNumbered(text, arg, bot, data) {
@@ -91,6 +97,12 @@ function handleSpreadsheets(text, c, bot) {
   return text;
 }
 
+/**
+ * 
+ * @param {string} text 
+ * @param {PlugAPI} bot 
+ * @param {BotCommand} data 
+ */
 module.exports = function triggerFormatter(text, bot, data) {
   var tokens = getTokens(text);
 
@@ -102,7 +114,7 @@ module.exports = function triggerFormatter(text, bot, data) {
 
     if (token === "%me%") {
       // replace with user who entered chat name
-      text = text.replace("%me%", data.from.username);
+      text = text.replace("%me%", data.user.username);
     }
 
     // if (/%[a-z]+\./.test(c)) {

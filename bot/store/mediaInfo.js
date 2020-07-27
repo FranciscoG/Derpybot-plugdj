@@ -1,6 +1,5 @@
 "use strict";
-var _ = require("lodash");
-var repo = require(process.cwd() + "/repo");
+const _get = require("lodash/get");
 
 var mediaStore = {
   current: {
@@ -42,12 +41,12 @@ var mediaStore = {
       name: currentSong.title,
       plays: 1,
       firstplay: {
-        user: _.get(storedData, "firstplay.user", currentSong.dj),
-        when: _.get(storedData, "firstplay.when", Date.now())
+        user: _get(storedData, "firstplay.user", currentSong.dj),
+        when: _get(storedData, "firstplay.when", Date.now())
       },
       lastplay: {
-        user: _.get(storedData, "lastplay.user", currentSong.dj),
-        when: _.get(storedData, "lastplay.when", Date.now())
+        user: _get(storedData, "lastplay.user", currentSong.dj),
+        when: _get(storedData, "lastplay.when", Date.now())
       }
     };
 
@@ -68,17 +67,6 @@ var mediaStore = {
       if (!song.id) {
         return;
       }
-
-      // look for the song in the db
-      // repo
-      //   .getSong(db, song.id)
-      //   .then(data => {
-      //     // then save song in the db
-      //     repo.saveSong(db, song.id, this.lastPlayModel(song, data.val()));
-      //   })
-      //   .catch(err => {
-      //     console.log(err);
-      //   });
     }
   },
 
