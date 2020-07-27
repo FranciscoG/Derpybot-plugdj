@@ -1,10 +1,8 @@
 "use strict";
+const assert = require("assert").strict;
 const propifyCommand = require(process.cwd() + "/bot/commands/triggers/propify.js");
 const triggerCommand = require(process.cwd() + "/bot/commands/triggers/trigger.js");
 const triggerRepo = require("../../repos/triggers.js");
-
-const chai = require("chai");
-const expect = chai.expect;
 
 // stubs for bot functions
 const stubs = require("../stubs.js");
@@ -31,23 +29,23 @@ describe("!propify tests", function () {
   it("should show help if just !trigger was sent", async () => {
     const data = makeData();
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.include("!propify <trigger_name>");
+    assert.ok(msg.includes("!propify <trigger_name>"));
   });
 
   it("Can't propify a trigger that does not exist", async () => {
     const data = makeData();
     data.args = [triggerName];
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.include(`Trigger ${triggerName} does not exist`);
+    assert.ok(msg.includes(`Trigger ${triggerName} does not exist`));
   });
 
   // resdj min role
   it("Only ResDJ and up can propify a trigger", async () => {
     const data = makeData();
-    data.from = userObjects.rando2;
+    data.user = userObjects.rando2;
     data.args = [triggerName];
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.equal(`Sorry only Resident DJs or above can !propify`);
+    assert.strictEqual(msg, `Sorry only Resident DJs or above can !propify`);
   });
 
   // propify's a trigger
@@ -61,29 +59,29 @@ describe("!propify tests", function () {
     const data = makeData();
     data.args = [triggerName];
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.equal(`trigger *!${triggerName}* propified!`);
+    assert.strictEqual(msg, `trigger *!${triggerName}* propified!`);
 
     const [err, trig] = await triggerRepo.getTrigger(db, triggerName);
-    expect(trig.givesProp).to.equal(true);
+    assert.strictEqual(trig.givesProp, true);
   });
 
   it("set a custom emoji for prop", async () => {
     const data = makeData();
-    data.args = [triggerName, 'taco'];
+    data.args = [triggerName, "taco"];
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.equal(`trigger *!${triggerName}* propified!`);
+    assert.strictEqual(msg, `trigger *!${triggerName}* propified!`);
 
     const [err, trig] = await triggerRepo.getTrigger(db, triggerName);
-    expect(trig.propEmoji).to.equal('taco');
+    assert.strictEqual(trig.propEmoji, "taco");
   });
 
   it("change custom emoji for prop", async () => {
     const data = makeData();
-    data.args = [triggerName, 'phone'];
+    data.args = [triggerName, "phone"];
     const msg = await propifyCommand(bot, db, data);
-    expect(msg).to.equal(`trigger *!${triggerName}* propified!`);
+    assert.strictEqual(msg, `trigger *!${triggerName}* propified!`);
 
     const [err, trig] = await triggerRepo.getTrigger(db, triggerName);
-    expect(trig.propEmoji).to.equal('phone');
+    assert.strictEqual(trig.propEmoji, "phone");
   });
 });

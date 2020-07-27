@@ -1,10 +1,8 @@
 "use strict";
+const assert = require("assert").strict;
 const triggerStore = require(process.cwd() + "/bot/store/triggerStore.js");
 const triggerCommand = require(process.cwd() + "/bot/commands/triggers/trigger.js");
 const triggerRepo = require("../../repos/triggers.js");
-
-const chai = require("chai");
-const expect = chai.expect;
 
 // stubs for bot functions
 const stubs = require("../stubs.js");
@@ -31,102 +29,102 @@ describe("!trigger tests", function () {
 
   it("should show help if just !trigger was sent", async () => {
     const data = makeData();
-    data.from.role = 1000; // make them a resDJ so they can add new triggers
+    data.user.role = 1000; // make them a resDJ so they can add new triggers
 
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.include("!trigger trigger_name trigger_text");
+    assert.ok(msg.includes("!trigger trigger_name trigger_text"));
   });
 
   it("can not create a trigger with invalid character: [", async () => {
     const data = makeData();
     data.args = ["[)", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
-  
+
   it("can not create a trigger with invalid character: ]", async () => {
     const data = makeData();
     data.args = ["])", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
-  
+
   it("can not create a trigger with invalid character: .", async () => {
     const data = makeData();
     data.args = ["help...", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
-  
+
   it("can not create a trigger with invalid character: $", async () => {
     const data = makeData();
     data.args = ["mo$ney", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
-  
+
   it("can not create a trigger with invalid character: #", async () => {
     const data = makeData();
     data.args = ["no#1", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
-  
+
   it("can not create a trigger with invalid character: /", async () => {
     const data = makeData();
     data.args = ["slash/dot", "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Trigger names can NOT contain the following characters: . $ [ ] # /`);
+    assert.strictEqual(msg, `Trigger names can NOT contain the following characters: . $ [ ] # /`);
   });
 
   it("should create a new trigger", async () => {
     const data = makeData();
     data.args = [triggerName, "this", "is", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.include(`trigger for *!${triggerName}* created`);
+    assert.ok(msg.includes(`trigger for *!${triggerName}* created`));
   });
 
   it("Trying to create a trigger without proper access fails", async () => {
     const data = makeData();
 
     // change to a user with only ResDJ role
-    data.from = userObjects.rando2;
+    data.user = userObjects.rando2;
 
     // try updating
     data.args = ["does_not_matter", "this", "is", "not", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal("Sorry only ResidentDJs and above can create triggers");
+    assert.strictEqual(msg, "Sorry only ResidentDJs and above can create triggers");
   });
 
   it("Trying to update a trigger but without proper access fails", async () => {
     const data = makeData();
 
     // change to a user with only ResDJ role
-    data.from = userObjects.rando;
+    data.user = userObjects.rando;
 
     // try updating
     data.args = [triggerName, "this", "is", "not", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Sorry only Mods and above can update or delete a triggers`);
+    assert.strictEqual(msg, `Sorry only Mods and above can update or delete a triggers`);
   });
 
   it("Successfully update a trigger", async () => {
     const data = makeData();
-    data.from = userObjects.botUser;
+    data.user = userObjects.botUser;
     data.args = [triggerName, "this", "is", "not", "a", "test"];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`trigger for *!${triggerName}* updated!`);
+    assert.strictEqual(msg, `trigger for *!${triggerName}* updated!`);
   });
 
   it("Trying to delete a trigger but without proper access fails", async () => {
     const data = makeData();
 
     // change to a user with only ResDJ role
-    data.from = userObjects.rando;
+    data.user = userObjects.rando;
 
     // try updating
     data.args = [triggerName];
     const msg = await triggerCommand(bot, db, data);
-    expect(msg).to.equal(`Sorry only Mods and above can update or delete a triggers`);
+    assert.strictEqual(msg, `Sorry only Mods and above can update or delete a triggers`);
   });
 });

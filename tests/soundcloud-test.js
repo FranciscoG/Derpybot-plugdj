@@ -1,14 +1,13 @@
-'use strict';
-const chai = require('chai');
-const expect = chai.expect;
+"use strict";
+const assert = require("assert").strict;
 
 // stubs for bot functions
-const stubs = require('./stubs.js');
+const stubs = require("./stubs.js");
 const bot = stubs.bot;
 
 // DJ = testDJname;
 const data = {
-  user: { username: 'testUser' }
+  user: { username: "testUser" },
 };
 
 /*
@@ -27,107 +26,105 @@ IDs of working songs (as of May 2018)
 */
 
 // require our file to test
-const sc = require('../bot/utilities/soundcloud.js');
+const sc = require("../bot/utilities/soundcloud.js");
 
 /* global it, describe */
-describe('Soundcloud track info tests', function(){
-
-  it('Should successfully connect to soundcloud', function(done){
-    var media = {cid: 123456789, name: 'not a real track' };
-    sc.getLink(bot, media, function(error, result){
-      expect(result).to.not.be.null;
+describe("Soundcloud track info tests", function () {
+  it("Should successfully connect to soundcloud", function (done) {
+    var media = { cid: 123456789, name: "not a real track" };
+    sc.getLink(bot, media, function (error, result) {
+      assert.ok(result);
       done();
     });
   });
 
-  it('Missing bot argument should return undefined', function(done){
-    expect(sc.getLink()).to.be.undefined;
+  it("Missing bot argument should return undefined", function (done) {
+    assert.strictEqual(sc.getLink(), undefined);
     done();
   });
 
-  it('Missing callback argument should return undefined', function(done){
-    expect( sc.getLink(bot) ).to.be.undefined;
+  it("Missing callback argument should return undefined", function (done) {
+    assert.strictEqual(sc.getLink(bot), undefined);
     done();
   });
 
-  it('Should return an error message when media object is missing', function(done){
-    sc.getLink(bot, null, function(result){
-      expect(result.error_message).to.equal('soundcloud getSCjson: missing media object');
+  it("Should return an error message when media object is missing", function (done) {
+    sc.getLink(bot, null, function (result) {
+      assert.strictEqual(result.error_message, "soundcloud getSCjson: missing media object");
       done();
     });
   });
 
-  it('Should return an error message when song ID is missing', function(done){
-    sc.getLink(bot, {}, function(result){
-      expect(result.error_message).to.equal('soundcloud getSCjson: missing song id');
+  it("Should return an error message when song ID is missing", function (done) {
+    sc.getLink(bot, {}, function (result) {
+      assert.strictEqual(result.error_message, "soundcloud getSCjson: missing song id");
       done();
     });
   });
 
-  it('Should return a 404 for made-up id', function(done){
+  it("Should return a 404 for made-up id", function (done) {
     var media = { cid: 111111111111111 };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.skippable).to.be.true;
-      expect(result.error_message).to.equal('404 - Not Found');
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(result.skippable, true);
+      assert.strictEqual(result.error_message, "404 - Not Found");
       done();
     });
   });
 
-  it('Should return a 404 for a confirmed broken id', function(done){
-    var media = {cid: 87380722, name: 'Chamber Of Secrets' };
+  it("Should return a 404 for a confirmed broken id", function (done) {
+    var media = { cid: 87380722, name: "Chamber Of Secrets" };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.link).to.be.null;
-      expect(result.skippable).to.be.true;
-      expect(result.error_message).to.equal('404 - Not Found');
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(result.link, null);
+      assert.strictEqual(result.skippable, true);
+      assert.strictEqual(result.error_message, "404 - Not Found");
       done();
     });
   });
 
-  it('Body should be null for api forbidden track', function(done){
-    var media = {cid: 116534641, name: 'The Other Side - Help Me (FilososfischeStilte Remix)' };
+  it("Body should be null for api forbidden track", function (done) {
+    var media = { cid: 116534641, name: "The Other Side - Help Me (FilososfischeStilte Remix)" };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.link).to.be.null;
-      expect(result.skippable).to.be.true;
-      expect(result.error_message).to.be.a.string;
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(result.link, null);
+      assert.strictEqual(result.skippable, true);
+      assert.strictEqual(typeof result.error_message, "string");
       done();
     });
   });
 
-  it('Body should be null for api forbidden track', function(done){
-    var media = {cid: 54816877, name: 'Morning in Japan' };
+  it("Body should be null for api forbidden track", function (done) {
+    var media = { cid: 54816877, name: "Morning in Japan" };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.link).to.be.null;
-      expect(result.skippable).to.be.true;
-      expect(result.error_message).to.be.a.string;
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(result.link, null);
+      assert.strictEqual(result.skippable, true);
+      assert.strictEqual(typeof result.error_message, "string");
       done();
     });
   });
 
-  it('Should successfully return track info', function(done){
-    var media = {cid: 223456028, name: 'Mz Boom Bap - Fast Life (Instrumental)' };
+  it("Should successfully return track info", function (done) {
+    var media = { cid: 223456028, name: "Mz Boom Bap - Fast Life (Instrumental)" };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.link).to.be.a.string;
-      expect(result.skippable).to.be.false;
-      expect(result.error_message).to.be.null;
-      expect(/^https?/.test(result.link)).to.be.true;
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(typeof result.link, "string");
+      assert.strictEqual(result.skippable, false);
+      assert.strictEqual(result.error_message, null);
+      assert.ok(/^https?/.test(result.link));
       done();
     });
   });
 
-  it('Should not skip this track but the bot did anyways which is weird, oh well', function(done){
-    var media = {cid: 276516174, name: 'Grown' };
+  it("Should not skip this track but the bot did anyways which is weird, oh well", function (done) {
+    var media = { cid: 276516174, name: "Grown" };
 
-    sc.getLink(bot, media, function(result){
-      expect(result.link).to.equal('https://soundcloud.com/pryced/grown');
-      expect(result.skippable).to.be.false;
-      expect(result.error_message).to.be.null;
+    sc.getLink(bot, media, function (result) {
+      assert.strictEqual(result.link, "https://soundcloud.com/pryced/grown");
+      assert.strictEqual(result.skippable, false);
+      assert.strictEqual(result.error_message, null);
       done();
     });
   });
-
 });
