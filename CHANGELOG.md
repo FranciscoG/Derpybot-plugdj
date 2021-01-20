@@ -7,6 +7,18 @@ The Commands of the bot are its API so here's how it will adhere to Semantic Ver
 **MINOR** - Adding new commands or functionality that won't affect or break existing ones     
 **PATCH** - Bug fixes, code improvements (backwards-compatible bug fixes)
 
+## [2.0.0]
+
+Big internal rewrite
+- replaced deprecated `request` library with [got](https://github.com/sindresorhus/got#json-mode)
+- Added more unit/integration tests (still working on that though)
+- updated the code to modern ES (mostly) and using more async await
+- Transforming data from API before using it to make handling API changes easier 
+
+## Breaking
+- `!cat` -  the api no longer works so removing this and will eventually replace it using the trigger code
+- Completely re-wrote how prop and flow points are added to triggers. Instead of `+prop` and `+flow`, there's now `!propify` and `!flowify` commands. It updates the trigger object in the database instead of relying on parsing.
+
 ## [1.24.0] - 2019-07-18
 ## Fixed
 - updated internal dependencies
