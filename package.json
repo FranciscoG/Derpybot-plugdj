@@ -1,6 +1,6 @@
 {
   "name": "derpybot-plug",
-  "version": "1.24.0",
+  "version": "2.0.0",
   "description": "A Plug.dj bot using PlugApi",
   "main": "index.js",
   "scripts": {
@@ -12,9 +12,10 @@
   },
   "dependencies": {
     "cleverbot-node": "^0.3.11",
-    "firebase-admin": "^8.13.0",
+    "firebase-admin": "^9.0.0",
     "fuzzysort": "^1.1.4",
     "googleapis": "^41.0.1",
+    "got": "^11.5.1",
     "jethro": "^4.4.3",
     "lodash": "^4.17.19",
     "moment": "^2.27.0",
@@ -36,6 +37,7 @@
   "author": "Cory Shaw, FranciscoG",
   "license": "MIT",
   "devDependencies": {
+    "@types/got": "^9.6.11",
     "marked": "^0.7.0",
     "mocha": "^8.0.1"
   }
