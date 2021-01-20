@@ -30,7 +30,7 @@ module.exports = function(bot, db, data) {
   if (!hasPermission(bot,user)) return;
 
   // config item to toggle
-  var [ item ] = data.args;
+  const [ item ] = data.args;
 
   if (!item) {
     bot.sendChat(`You must provide a config item to toggle. See full list here: http://franciscog.com/DerpyBot/commands/#config`);

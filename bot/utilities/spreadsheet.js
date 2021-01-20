@@ -2,7 +2,7 @@
 /**
  * Loads spreadsheet data into memory
  */
-var moment = require('moment');
+const moment = require('moment');
 const {google} = require('googleapis');
 
 class MySheet {
@@ -46,22 +46,22 @@ class MySheet {
   }
 
   getNext(rows, dateCol) {
-    var closestRow = 'no rows found';
+    const closestRow = 'no rows found';
 
     // get today's day
-    var a = moment(Date.now());
+    const a = moment(Date.now());
 
     rows.reverse().forEach((row)=>{
       if (!row[dateCol]) { return; }
 
       // check the date of the row in the spreadsheet
-      var b = moment(row[dateCol], "M/D/YYYY");
+      const b = moment(row[dateCol], "M/D/YYYY");
 
       // check the difference in days between today and spreadsheet
       // positive int means event is in the future, 
       // 0 is today,
       // negative = event in the past
-      var diff = b.diff(a, 'days');
+      const diff = b.diff(a, 'days');
       if (diff >= 0) {
         closestRow = row;
       }

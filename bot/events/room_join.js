@@ -7,12 +7,21 @@ const repos = require("../../repos");
 const pointReset = require("../utilities/point-reset.js");
 const sleep = require("../utilities/sleep.js");
 
-module.exports = function(bot, db) {
-  bot.on(bot.events.ROOM_JOIN, async function(roomname) {
+/**
+ * @typedef {import('../utilities/typedefs').DerpyBot} Bot
+ */
+
+/**
+ *
+ * @param {Bot} bot
+ * @param {import('firebase-admin').database.Database} db
+ */
+module.exports = function (bot, db) {
+  bot.on(bot.events.ROOM_JOIN, async function (roomname) {
     bot.isConnected = true;
     bot.log("info", "BOT", "Connected to " + roomname);
     bot.sendChat("Initializing...");
-    var initStart = Date.now();
+    const initStart = Date.now();
 
     // pause for 3 seconds to give time for connection to complete
     await sleep(3000);
@@ -20,28 +29,26 @@ module.exports = function(bot, db) {
     /*******************************************
      *  log current logged in user data
      */
-    bot
-      .getUsers()
-      .forEach(async function(user) {
-        try {
-          await repos.users.logUser(db, user);
-        } catch (e) {
-          bot.log('error', 'BOT', `error logging user ${user.username}: ${e.message}`);
-        }
-      });
+    bot.getUsers().forEach(async function (user) {
+      try {
+        await repos.users.logUser(db, user);
+      } catch (e) {
+        bot.log("error", "BOT", `error logging user ${user.username}: ${e.message}`);
+      }
+    });
 
     /*******************************************
      *  handle current playing song
      */
     bot.woot();
-    var media = bot.getMedia();
-    var dj = bot.getDJ();
+    const media = bot.getMedia();
+    const dj = bot.getDJ();
     if (media) {
-      var currentSong = {
+      const currentSong = {
         name: media.title,
         id: media.cid,
         format: media.format, // format (Number) : 1 if the song is YouTube. 2 if SoundCloud
-        dj: !dj || !dj.username ? "404usernamenotfound" : dj.username
+        dj: !dj || !dj.username ? "404usernamenotfound" : dj.username,
       };
       mediaStore.setCurrent(currentSong);
     }
@@ -60,18 +67,14 @@ module.exports = function(bot, db) {
     // TODO: don't access db.ref directly here, move to repo and create function
     db.ref("users").on(
       "value",
-      function(snapshot) {
-        var val = snapshot.val();
+      function (snapshot) {
+        const val = snapshot.val();
         bot.allUsers = val;
         // update leaderboard everytime someone gives a point
         leaderUtils.updateLeaderboard(bot, db);
       },
-      function(error) {
-        bot.log(
-          "error",
-          "BOT",
-          `error getting users from firebase - ${error}`
-        );
+      function (error) {
+        bot.log("error", "BOT", `error getting users from firebase - ${error}`);
       }
     );
 
@@ -79,22 +82,18 @@ module.exports = function(bot, db) {
     triggerStore.init(bot, db);
 
     // store leaderboard info locally
-    var leaderboard = db.ref("leaderboard");
+    const leaderboard = db.ref("leaderboard");
     leaderboard.on(
       "value",
-      function(snapshot) {
-        var val = snapshot.val();
+      function (snapshot) {
+        const val = snapshot.val();
         bot.leaderboard = val;
       },
-      function(error) {
-        bot.log(
-          "error",
-          "BOT",
-          `error getting leaderboard from firebase - ${error}`
-        );
+      function (error) {
+        bot.log("error", "BOT", `error getting leaderboard from firebase - ${error}`);
       }
     );
-    
+
     /*******************************************
      *  Start the monthly point reset
      */
@@ -103,9 +102,8 @@ module.exports = function(bot, db) {
     bot.sendChat("Initialization complete");
 
     await historyStore.init(bot);
-    
-    var complete = (Date.now() - initStart) / 1000;
-    bot.log('info', 'BOT', `Initialization completed in ${complete} seconds`);
-    
+
+    const complete = (Date.now() - initStart) / 1000;
+    bot.log("info", "BOT", `Initialization completed in ${complete} seconds`);
   });
 };

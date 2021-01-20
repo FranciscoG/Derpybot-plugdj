@@ -31,7 +31,7 @@ function unrecognized(trigger) {
  * @param {Object} db
  * @param {BotCommand} model
  */
-var handleCommands = async function (bot, db, commandModel) {
+const handleCommands = async function (bot, db, commandModel) {
   let chat_messages = [];
 
   // first go through the commands in /commands to see if they exist

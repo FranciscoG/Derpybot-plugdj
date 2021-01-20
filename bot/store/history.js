@@ -1,8 +1,8 @@
 "use strict";
 const _get = require("lodash/get");
-var moment = require("moment");
+const moment = require("moment");
 
-var historyStore = {
+const historyStore = {
   songStore: [],
   warnedStore: [],
 
@@ -35,10 +35,10 @@ var historyStore = {
   /**
    * checks to see if a user was already warned about a song within the last minute
    * @param  {Object} warnSong
-   * @return {Bool}
+   * @return {boolean}
    */
   recentlyWarned: function(warnSong) {
-    var result = false;
+    const result = false;
 
     this.warnedStore.forEach(function(song) {
       if (song.id !== warnSong.id && song.user !== warnSong.user) {
@@ -69,8 +69,8 @@ var historyStore = {
     if (!this.ready) {
       return;
     }
-    var result = [];
-    var self = this;
+    const result = [];
+    const self = this;
 
     this.songStore.forEach(function(song) {
       if (song.songid !== songid) {
@@ -117,13 +117,13 @@ var historyStore = {
       return;
     }
 
-    var songId = _get(song, "media.id");
-    var lastplayed = _get(song, "raw.song.played");
+    const songId = _get(song, "media.id");
+    const lastplayed = _get(song, "raw.song.played");
     if (!lastplayed || !songId) {
       return;
     }
 
-    var convert = this.fromUpdate(song);
+    const convert = this.fromUpdate(song);
     // add song to the beginning of the array
     this.songStore.unshift(convert);
 
@@ -140,7 +140,7 @@ var historyStore = {
   init: function(bot) {
     this.clear();
 
-    var self = this;
+    const self = this;
 
     return new Promise(function(resolve, reject) {
       bot.getHistory(function(history) {

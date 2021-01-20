@@ -1,6 +1,6 @@
 'use strict';
 
-var giphy = require(process.cwd() + '/bot/utilities/giphy.js');
+const giphy = require(process.cwd() + '/bot/utilities/giphy.js');
 
 module.exports = function(bot, db, data) {
   if (!data) {

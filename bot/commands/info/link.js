@@ -1,6 +1,6 @@
 'use strict';
-var mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
-var _ = require('lodash');
+const mediaStore = require(process.cwd()+ '/bot/store/mediaInfo.js');
+const _ = require('lodash');
 
 function makeYTCheckerUrl(yid){
   return `https://polsy.org.uk/stuff/ytrestrict.cgi?ytid=${yid}`;
@@ -8,10 +8,10 @@ function makeYTCheckerUrl(yid){
 
 module.exports = function(bot, db, data) {
   if(!data) { return; }
-  var current = mediaStore.getCurrent();  
-  var restrictions = '';
+  const current = mediaStore.getCurrent();  
+  const restrictions = '';
 
-  var whoAsked = _.get(data, 'user.username', '');
+  const whoAsked = _.get(data, 'user.username', '');
   if (whoAsked){ 
     whoAsked = "@"+whoAsked;
   }

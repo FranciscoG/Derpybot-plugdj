@@ -10,10 +10,10 @@
  * @returns {array} array of tokens
  */
 function getTokens(str) {
-  var found = [];
+  const found = [];
 
-  var openToken = false;
-  var storage = "";
+  const openToken = false;
+  const storage = "";
 
   str.split("").forEach(function(char) {
     if (char === "%" && !openToken) {
@@ -104,7 +104,7 @@ function handleSpreadsheets(text, c, bot) {
  * @param {BotCommand} data 
  */
 module.exports = function triggerFormatter(text, bot, data) {
-  var tokens = getTokens(text);
+  const tokens = getTokens(text);
 
   tokens.forEach(function(token) {
     if (token === "%dj%") {

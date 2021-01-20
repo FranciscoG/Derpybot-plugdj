@@ -1,13 +1,12 @@
 "use strict";
+const got = require("got");
 
-const request = require("request");
-
-module.exports = function (bot, db) {
-  request("http://numbersapi.com/random/trivia", function (error, response, body) {
-    var result = "Bad request to facts...";
-    if (!error && response.statusCode === 200) {
-      result = body;
-    }
-    bot.sendChat(result);
-  });
+module.exports = async function (bot, db) {
+  try {
+    const response = await got("http://numbersapi.com/random/trivia");
+    bot.sendChat(response.body);
+  } catch (error) {
+    bot.sendChat('Sorry an error occured trying to get a fact');
+    bot.log('error', 'BOT', `[!fact] ${error.message}`);
+  }
 };

@@ -1,5 +1,5 @@
 'use strict';
-var skipService = require(process.cwd() + '/bot/utilities/skips');
+const skipService = require(process.cwd() + '/bot/utilities/skips');
 
 function doSkip(bot) {
   bot.moderateForceSkip(function(err){

@@ -11,6 +11,6 @@ module.exports = function(bot, db, data) {
     return;
   }
 
-  var content = encodeURIComponent(data.args.join(' '));
+  const content = encodeURIComponent(data.args.join(' '));
   bot.sendChat(`${urlPrefix}${content}`);
 };

@@ -1,7 +1,7 @@
 'use strict';
 
 
-var UserStore = {
+const UserStore = {
   usersThatPropped : [],
   usersThatFlowed : [],
 

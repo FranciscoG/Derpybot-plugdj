@@ -1,13 +1,13 @@
 'use strict';
 
 module.exports = function(bot, db, data) {
-  var uid = data.user.id;
-  var username = data.user.username;
-  var queue = bot.getQueue();
-  var boothTime = 0;
-  var inQueue = false;
+  const uid = data.user.id;
+  const username = data.user.username;
+  const queue = bot.getQueue();
+  const boothTime = 0;
+  const inQueue = false;
 
-  for(var i = 0; i < queue.length; i++){
+  for(const i = 0; i < queue.length; i++){
     if(queue[i].uid !== uid){
         boothTime += queue[i].media.songLength / 1000 / 60;
     } else {

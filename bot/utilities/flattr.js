@@ -1,12 +1,13 @@
 'use strict';
-// var repo = require(process.cwd()+'/repo');
+// const repo = require(process.cwd()+'/repo');
 const _private = require(process.cwd() + '/private/get'); 
 const settings = _private.settings;
-var request = require('request');
-var log = require('jethro');
+const got = require("got");
+
+const log = require('jethro');
 log.setTimestampFormat(null, 'YYYY-MM-DD HH:mm:ss:SSS');
 
-var flattrApi = {
+const flattrApi = {
   'authorize' : 'https://flattr.com/oauth/authorize',
   'token' : 'https://flattr.com/oauth/token',
   'user' : 'https://api.flattr.com/rest/v2/users/:username',

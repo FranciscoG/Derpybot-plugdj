@@ -8,7 +8,7 @@ module.exports = function(bot, db, data) {
     return bot.sendChat('An error occured, try again');
   }
 
-  var lastTrig = triggerStore.getLast();
+  const lastTrig = triggerStore.getLast();
 
   if (lastTrig) {
     let trigname = lastTrig.Trigger;

@@ -80,7 +80,7 @@ module.exports = async function (bot, db, data) {
   
       await repos.triggers.insertTrigger(db, newTrigModel);
 
-      var inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
+      const inf = `[TRIG] ADDED by ${data.from.username} -> !${triggerName} -> ${triggerText}`;
       bot.log("info", "BOT", inf);
       bot.moderateDeleteChat(chatID, function () {});
       return bot.sendChat(`trigger for *!${triggerName}* created, try it out!`);
@@ -111,7 +111,7 @@ module.exports = async function (bot, db, data) {
 
       await repos.triggers.insertTrigger(db, updateModel);
 
-      var info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${existingTrigger.Returns} TO-> ${triggerText}`;
+      const info = `[TRIG] UPDATE: ${data.from.username} changed !${triggerName} FROM-> ${existingTrigger.Returns} TO-> ${triggerText}`;
       bot.log("info", "BOT", info);
       bot.moderateDeleteChat(chatID, function () {});
       return bot.sendChat(`trigger for *!${triggerName}* updated!`);

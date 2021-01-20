@@ -7,10 +7,10 @@ const schedule = require('node-schedule');
 const repos = require('../../repos');
 const leaders = require('../commands/credits/leaders.js');
 
-var resetAllUserPoints = function(bot, db){
+const resetAllUserPoints = function(bot, db){
   if (!bot.myconfig.reset_points) { return; }
 
-  var updatedUsers = {};
+  const updatedUsers = {};
   Object.keys(bot.allUsers).forEach((key)=>{
     let user = bot.allUsers[key];
     updatedUsers[key] = user;
@@ -40,13 +40,13 @@ module.exports = function pointReset(bot, db){
   // setTimeout(()=>{resetAllUserPoints(bot, db);}, 10000);
 
   // this will run once a month, on the first of the month, at midnight
-  var monthly = schedule.scheduleJob('15 0 1 * *', function(){
+  const monthly = schedule.scheduleJob('15 0 1 * *', function(){
     // go through every user and reset their points
     resetAllUserPoints(bot, db);
   });
 
   // this will run at the top of every hour
-  var hourly = schedule.scheduleJob('0 * * * *', function(){
+  const hourly = schedule.scheduleJob('0 * * * *', function(){
     // notify the room who the current leaders are
     if (bot.myconfig.hourly_leader) { 
       leaders(bot);

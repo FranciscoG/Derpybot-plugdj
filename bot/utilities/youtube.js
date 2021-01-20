@@ -5,10 +5,10 @@ const settings = _private.settings;
 const repo = require(process.cwd()+'/repo');
 const YOUR_API_KEY = settings.YT_API;
 const request = require('request');
-// var countryCodes = require(process.cwd() + '/bot/utilities/countries.js');
+// const countryCodes = require(process.cwd() + '/bot/utilities/countries.js');
 
 
-var Youtube = {
+const Youtube = {
   'base' : 'https://www.googleapis.com/youtube/v3/videos?',
   options : {
     part : 'status,contentDetails',
@@ -17,9 +17,9 @@ var Youtube = {
 };
 
 function makeYTurl(id) {
-  var queryString = [];
+  const queryString = [];
   Youtube.options.id = id;
-  for (var key in Youtube.options) {
+  for (const key in Youtube.options) {
     queryString.push(key + '=' + Youtube.options[key] );
   }
   return Youtube.base + queryString.join('&');
@@ -41,7 +41,7 @@ function makeYTurl(id) {
   https://developers.google.com/youtube/v3/docs/videos#status.uploadStatus
   https://developers.google.com/youtube/v3/docs/videos#contentDetails.regionRestriction
  */
-var badStatuses = [
+const badStatuses = [
   'deleted',
   'failed',
   'rejected'
@@ -53,9 +53,9 @@ function makeYTCheckerUrl(yid){
 
 function regionBlock(bot, db, _region, yt, media){
   bot.sendChat(`*FYI, Youtube is saying this video has region restrictions:* - ${media.name}`);
-  var ytid = _.get(yt, 'items[0].id');
+  const ytid = _.get(yt, 'items[0].id');
   if (ytid) {
-    var ytchk = makeYTCheckerUrl(ytid);
+    const ytchk = makeYTCheckerUrl(ytid);
     bot.sendChat(`See here for more details: ${ytchk}`);
   }
 }
@@ -74,17 +74,17 @@ function checkStatus(bot, db, media, body) {
   if (!body || !bot || !db) { return; }
 
   // set DJ name
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
   dj = dj === void(0) ? 'dj' : dj.username;
 
-  var yt = JSON.parse(body);
-  var status = _.get(yt, 'items[0].status');
+  const yt = JSON.parse(body);
+  const status = _.get(yt, 'items[0].status');
   
   if (status) {
     
     // if one of these bad uploadStatuses exist then we skip
     if (badStatuses.includes(status.uploadStatus)) {
-      var reason = yt.items[0].status.uploadStatus;
+      const reason = yt.items[0].status.uploadStatus;
       return doSkip(bot, media, `Sorry @${dj} this Youtube video is broken`, reason);
     }
 
@@ -97,7 +97,7 @@ function checkStatus(bot, db, media, body) {
 
   // check if a video has region restrictions. For now just put that info in the chat
   // and log it, but do nothing else
-  var _region = _.get(yt, 'items[0].contentDetails.regionRestriction');
+  const _region = _.get(yt, 'items[0].contentDetails.regionRestriction');
   if (_region) {
     regionBlock(bot, db, _region, yt, media);
   }
@@ -109,7 +109,7 @@ function checkStatus(bot, db, media, body) {
 
 }
 
-var start = function(bot, db, media){
+const start = function(bot, db, media){
   request(makeYTurl(media.cid), function (error, response, body) {
     if (!error && response.statusCode === 200) {
       return checkStatus(bot, db, media, body);

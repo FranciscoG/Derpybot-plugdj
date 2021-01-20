@@ -17,16 +17,16 @@ module.exports = function checkHistory(bot, data){
   }
 
   // converting Hours to Milliseconds
-  var limitInMS = bot.myconfig.recently_played_limit * (1000 * 60 * 60) ;
+  const limitInMS = bot.myconfig.recently_played_limit * (1000 * 60 * 60) ;
 
-  var dj = _.get(data, 'user.username');
-  var songName = _.get(data, 'media.title');
-  var id = _.get(data, 'media.id');
+  const dj = _.get(data, 'user.username');
+  const songName = _.get(data, 'media.title');
+  const id = _.get(data, 'media.id');
 
   if (!id) { return; }
 
   // check history
-  var check = historyStore.getSong(bot, data.media.id);
+  const check = historyStore.getSong(bot, data.media.id);
   
   if (check.length > 0) {
     // if the song was played OVER [limit] hours ago, do nothing
@@ -34,8 +34,8 @@ module.exports = function checkHistory(bot, data){
       return;
     }
 
-    var time = historyStore.convertTime(check[0].lastplayed);
-    var msg;
+    const time = historyStore.convertTime(check[0].lastplayed);
+    const msg;
 
     if (!dj) {
       msg = `FYI, there's a song in the queue that was played ${time}: *${songName}*`;

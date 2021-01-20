@@ -2,7 +2,7 @@
  * chat-queue.js
  * 
  * Implements a simple internal rate limiting system so that we don't get
- * temp banned from Dubtrack for sending too many chats at once
+ * temp banned for sending too many chats at once
  * 
  * helpful source: http://www.matteoagosti.com/blog/2013/01/22/rate-limiting-function-calls-in-javascript/
  */
@@ -11,15 +11,15 @@
 const timers = require('timers');
 const setTimeout = timers.setTimeout;
 
-var _maxRate;
-var _interval;
-var _numOps = 0;
-var _start;
-var queue = [];
-var bot;
+const _maxRate;
+const _interval;
+const _numOps = 0;
+const _start;
+const queue = [];
+const bot;
 
 function schedule(item) {
-  var rate = 0,
+  const rate = 0,
       now = new Date().getTime(),
       elapsed = now - _start;
 

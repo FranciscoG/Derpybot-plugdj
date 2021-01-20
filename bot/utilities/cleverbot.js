@@ -12,7 +12,7 @@ module.exports = function(bot, message) {
     return;
   }
 
-  var cleverbot = new Cleverbot();
+  const cleverbot = new Cleverbot();
   cleverbot.configure({botapi: settings.CLEVERBOT_API_KEY});
   cleverbot.write(message, function (response) {
     if (!response) {

@@ -1,6 +1,6 @@
 /// require('../utilities/typedefs');
-var request = require("request");
-var _get = require("lodash/get");
+const request = require("request");
+const _get = require("lodash/get");
 
 /**
  * Mini programming language for triggers
@@ -60,8 +60,8 @@ function parseTrigger(trig) {
  * @param {BotCommand} data
  */
 module.exports = function (trigger, data) {
-  var deets = parseTrigger(trigger);
-  var url = deets.url;
+  const deets = parseTrigger(trigger);
+  const url = deets.url;
 
   // the url should contain {n} (n = any number) so that you can replace
   // it with dynamic info from the trigger command arguments
@@ -81,7 +81,7 @@ module.exports = function (trigger, data) {
     }
   }
 
-  var options = {
+  const options = {
     url: url,
     headers: {
       Accept: "application/json",

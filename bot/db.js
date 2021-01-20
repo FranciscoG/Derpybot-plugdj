@@ -1,11 +1,11 @@
 "use strict";
-var admin = require("firebase-admin");
+const admin = require("firebase-admin");
 const config = require("../private/get");
 const settings = config.settings;
 const svcAcct = config.svcAcct;
-var BASEURL = settings.FIREBASE.BASEURL;
+const BASEURL = settings.FIREBASE.BASEURL;
 
-function Database(serviceAccount, BASEURL, optionalAppName) {
+function database(serviceAccount, BASEURL, optionalAppName) {
   if (!serviceAccount || !BASEURL) {
     throw new Error("Missing databse credentials for Database");
   }
@@ -22,6 +22,6 @@ function Database(serviceAccount, BASEURL, optionalAppName) {
   return admin.database();
 }
 
-var db = new Database(svcAcct, BASEURL);
+const db = database(svcAcct, BASEURL);
 
 module.exports = db;

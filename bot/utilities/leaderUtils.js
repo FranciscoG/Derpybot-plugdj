@@ -60,7 +60,7 @@ function decodeUsername(str) {
 }
 
 function getTop3(bot, prop) {
-  var arr = [];
+  const arr = [];
 
   Object.keys(bot.allUsers).forEach((userId) => {
     arr.push(bot.allUsers[userId]);
@@ -78,7 +78,7 @@ function getTop3(bot, prop) {
   });
   arr.reverse();
 
-  var finalArr = [];
+  const finalArr = [];
   for (let i = 0; i < 3; i++) {
     finalArr.push(arr[i]);
   }
@@ -86,9 +86,9 @@ function getTop3(bot, prop) {
 }
 
 function updateLeaderboard(bot, db) {
-  var year = moment().format("Y");
-  var month = moment().format("MMM");
-  var leaderObj = {
+  const year = moment().format("Y");
+  const month = moment().format("MMM");
+  const leaderObj = {
     month: month,
     year: year,
     props: "",
@@ -97,8 +97,8 @@ function updateLeaderboard(bot, db) {
     flowObj: {},
   };
 
-  var propsArr = [];
-  var props = getTop3(bot, "props");
+  const propsArr = [];
+  const props = getTop3(bot, "props");
   props.forEach(function (user) {
     if (user.props > 0) {
       propsArr.push(user.username + " (" + user.props + ")");
@@ -112,8 +112,8 @@ function updateLeaderboard(bot, db) {
     leaderObj.props = propsArr.join(", ");
   }
 
-  var flowArr = [];
-  var flow = getTop3(bot, "flow");
+  const flowArr = [];
+  const flow = getTop3(bot, "flow");
   flow.forEach(function (user) {
     if (user.flow > 0) {
       flowArr.push(user.username + " (" + user.flow + ")");
@@ -161,8 +161,8 @@ function allTimeLeaders(bot) {
           user3: total
   */
 
-  var flows = {};
-  var props = {};
+  const flows = {};
+  const props = {};
 
   // build our list of flows and props
   Object.keys(bot.leaderboard).forEach((key) => {
@@ -191,12 +191,12 @@ function allTimeLeaders(bot) {
 
   // sort all the flows by this method:
   // https://stackoverflow.com/a/1069840/395414
-  var flow_sortable = [];
+  const flow_sortable = [];
   for (let u in flows) {
     flow_sortable.push([u, flows[u]]);
   }
 
-  var top3Flow = flow_sortable
+  const top3Flow = flow_sortable
     .sort(function (a, b) {
       return a[1] - b[1];
     })
@@ -204,12 +204,12 @@ function allTimeLeaders(bot) {
     .slice(0, 3);
 
   // sort all the props
-  var props_sortable = [];
+  const props_sortable = [];
   for (let u in props) {
     props_sortable.push([u, props[u]]);
   }
 
-  var top3Props = props_sortable
+  const top3Props = props_sortable
     .sort(function (a, b) {
       return a[1] - b[1];
     })

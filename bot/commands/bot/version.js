@@ -1,8 +1,8 @@
 'use strict';
-var pkg = require(process.cwd() + '/package.json');
+const pkg = require(process.cwd() + '/package.json');
 
 /**
- * Displays the current version of the bot listed inthe pacakge.json
+ * Displays the current version of the bot listed in the pacakge.json
  * @param  {object} bot Dubapi instance
  */
 module.exports = function(bot) {

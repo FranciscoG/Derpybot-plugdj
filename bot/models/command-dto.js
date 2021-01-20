@@ -1,7 +1,7 @@
 const userModel = require("./user-dto");
 
 /**
- * @param {Object} data 
+ * @param {import('plugapi').Event.Chat} data 
  * @returns {import("../utilities/typedefs").BotCommand}
  */
 function commandDTO(data) {

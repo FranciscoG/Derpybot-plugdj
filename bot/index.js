@@ -3,11 +3,15 @@ require("./extend/array-extensions.js");
 const PlugAPI = require("plugapi");
 const { settings } = require(process.cwd() + "/private/get");
 
-var config = require(process.cwd() + "/bot/config.js");
+const config = require(process.cwd() + "/bot/config.js");
 config.botName = settings.USERNAME;
 
 const db = require(process.cwd() + "/bot/db.js");
 
+/**
+ * @type {import('./utilities/typedefs').DerpyBot}
+ */
+// @ts-ignore
 const bot = new PlugAPI({
   email: settings.USERNAME,
   password: settings.PASSWORD
@@ -28,9 +32,13 @@ if (bot.myconfig.muted) {
 }
 
 if (bot.myconfig.verboseLogging) {
-  bot.log = require("jethro");
+  const Jethro = require("jethro");
+  // @ts-ignore
+  bot.log = new Jethro();
+  // @ts-ignore
   bot.log.setTimestampFormat(null, "YYYY-MM-DD HH:mm:ss:SSS");
 } else {
+  // @ts-ignore
   bot.log = function() {
     return;
   }; // do nothing

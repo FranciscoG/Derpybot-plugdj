@@ -18,7 +18,7 @@ module.exports = function(bot, db, data) {
     return bot.sendChat("*usage:* !sourcetext <trigger_name>");
   }
 
-  var trigger = data.args[0];
+  const trigger = data.args[0];
 
   if (trigger.charAt(0) === "!") {
     trigger = trigger.substring(1);
@@ -26,8 +26,8 @@ module.exports = function(bot, db, data) {
 
   repos.triggers.getTrigger(db, trigger, function(val) {
     if (val !== null) {
-      var keys = Object.keys(val);
-      var result = val[keys[0]];
+      const keys = Object.keys(val);
+      const result = val[keys[0]];
       if (result && result.Returns) {
         return bot.sendChat(`[${trigger}]: ${result.Returns}`);
       } else {

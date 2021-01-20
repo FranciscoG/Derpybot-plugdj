@@ -2,15 +2,15 @@
 const repos = require('../../../repos');
 
 function sayMyBalance(bot, user) {
-  var flowS = user.flow > 1 || user.flow <= 0 ? 's' : '';
-  var propS = user.props > 1 || user.props <= 0 ? 's' : '';
+  const flowS = user.flow > 1 || user.flow <= 0 ? 's' : '';
+  const propS = user.props > 1 || user.props <= 0 ? 's' : '';
 
   bot.sendChat(`@${user.username} you have ${user.props} prop${propS} :fist: and ${user.flow} flowpoint${flowS} :surfer:`);
 }
 
 function sayTheirBalance(bot, whoAsked, user) {
-  var flowS = user.flow > 1 || user.flow <= 0 ? 's' : '';
-  var propS = user.props > 1 || user.props <= 0 ? 's' : '';
+  const flowS = user.flow > 1 || user.flow <= 0 ? 's' : '';
+  const propS = user.props > 1 || user.props <= 0 ? 's' : '';
 
   bot.sendChat(`@${whoAsked}, the user @${user.username} has ${user.props} prop${propS} :fist: and ${user.flow} flowpoint${flowS} :surfer:`);
 }

@@ -1,12 +1,12 @@
 "use strict";
 /**
- * @typedef {import('../bot/models/trigger-model').TriggerModelData} TriggerModelData
+ * @typedef {import('../bot/utilities/typedefs').TriggerModelData} TriggerModelData
  */
 
 /**
  *
  * @param {object} db firebase db instance
- * @returns {Promise<Error?, TriggerModelData[]?>}
+ * @returns {Promise<[Error?, TriggerModelData[]?]>}
  */
 const getAllTriggers = async function (db) {
   try {
@@ -36,7 +36,7 @@ const getTrigger = async function (db, triggerName) {
 /**
  * Insert new, or update existing, trigger into the DB
  * @param  {Object} db   Firebase instance
- * @param  {TriggerModel} data Trigger data, see function for details, needs {Author, Returns, Trigger}
+ * @param  {TriggerModelData} model Trigger data, see function for details, needs {Author, Returns, Trigger}
  * @return {Promise<true>}
  * @throws
  */
@@ -55,7 +55,7 @@ const insertTrigger = async function (db, model) {
 /**
  * Delete a trigger in the db
  * @param  {Object} db Firebase Instance
- * @param  {TriggerModelData} model
+ * @param  {TriggerModelData} data
  * @return {Promise<true>}
  * @throws
  */

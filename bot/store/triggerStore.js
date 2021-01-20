@@ -3,7 +3,7 @@ const fuzzysort = require("fuzzysort");
 const repos = require('../../repos');
 const triggerFormatter = require(process.cwd() + "/bot/utilities/trigger-formatter.js");
 
-var TriggerStore = {
+const TriggerStore = {
   triggers: {},
   propGivers: {},
   flowGivers: {},
@@ -48,7 +48,7 @@ var TriggerStore = {
       threshold: -10000, // don't return bad results
     };
 
-    var results = fuzzysort.go(term, Object.keys(this.triggers), options);
+    const results = fuzzysort.go(term, Object.keys(this.triggers), options);
     return results.map(function (el) {
       return el.target;
     });
@@ -72,7 +72,7 @@ var TriggerStore = {
       threshold: -10000, // don't return bad results
     };
 
-    var finds = fuzzysort.go(term, Object.keys(this.triggers), options);
+    const finds = fuzzysort.go(term, Object.keys(this.triggers), options);
     if (finds.length === 0 && term.length > 3) {
       term = term.slice(0, term.length - 1);
       return this.recursiveSearch(term, returnLimit);
@@ -131,7 +131,7 @@ var TriggerStore = {
   },
 
   init: function (bot, db) {
-    var triggers = db.ref("triggers");
+    const triggers = db.ref("triggers");
 
     // Get ALL triggers and store them locally
     // this will run everytime a trigger is updated or created
@@ -156,11 +156,11 @@ var TriggerStore = {
       this.removeTrigger.call(this, triggerDeleted.Trigger);
     });
 
-    var lastTrigger = db.ref("lastTrigger");
+    const lastTrigger = db.ref("lastTrigger");
     lastTrigger.on(
       "value",
       (snapshot) => {
-        var val = snapshot.val();
+        const val = snapshot.val();
         bot.log("info", "BOT", "lastTrigger updated");
         this.lastTrigger = val;
       },

@@ -29,8 +29,8 @@ module.exports = function(bot, db, data) {
   }
   
   // finally 
-  var recipient = bot.mentions[0];
-  var queuePosition = bot.getWaitListPosition(recipient.id);
+  const recipient = bot.mentions[0];
+  const queuePosition = bot.getWaitListPosition(recipient.id);
   
   if (queuePosition > 0) {
     bot.moderateMoveDJ(recipient.id, 0, function(){});

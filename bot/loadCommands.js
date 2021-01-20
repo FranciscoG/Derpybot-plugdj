@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
-var commands = {};
+const commands = {};
 
 const walk = function(dir) {
   //cache all the commands here by auto requiring them and passing the bot
   //supports directories no matter how deep you go.
   fs.readdirSync(dir).forEach(function(file) {
-    var _path = path.resolve(dir, file);
+    const _path = path.resolve(dir, file);
     fs.stat(_path, function(err, stat) {
         if (stat && stat.isDirectory()) {
             walk(_path);

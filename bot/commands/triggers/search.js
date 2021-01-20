@@ -18,7 +18,7 @@ module.exports = function(bot, db, data) {
     );
   }
 
-  var results = triggerStore.search(searchTerm, 50);
+  const results = triggerStore.search(searchTerm, 50);
 
   if (results && results.length > 0) {
     bot.sendChat("only showing first 50 results: ");

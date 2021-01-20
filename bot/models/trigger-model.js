@@ -1,51 +1,25 @@
-require("../utilities/typedefs");
 const _get = require("lodash/get");
+/**
+ * @typedef {import('../utilities/typedefs').TriggerModelData} TriggerModelData
+ * 
+ * @typedef {import('../utilities/typedefs').BotCommand} BotCommand
+ */
 
+/**
+ * @type {TriggerModelData}
+ */
 const triggerModel = {
-  /**
-   * @type {string} creator or the last person to update the trigger
-   */
   Author: "",
-  /**
-   * @type {string} The text of the trigger to be sent to chat
-   */
   Returns: "",
-  /**
-   * @type {string} The lookup name of the trigger
-   */
   Trigger: "",
-  /**
-   * @type {'created'|'updated'}
-   */
   status: "created",
-  /**
-   * @type {number?} when this trigger was last update - ms since unix epoch timestamp
-   */
   lastUpdated: null,
-  /**
-   * @type {number} when this trigger was create - ms since unix epoch timestamp
-   */
   createdOn: null,
-  /**
-   * @type {string} original author of the trigger
-   */
   createdBy: "",
-  /**
-   * @type {boolean} whether this trigger gives a prop point. default: false
-   */
   givesProp: false,
-  /**
-   * @type {string} emoji to be shown during propping. default: "fist"
-   */
   propEmoji: "fist",
-  /**
-   * @type {boolean} whether this trigger gives a flow point. default: false
-   */
   givesFlow: false,
-  /**
-   * @type {string} emoji to be shown during flow point. default: "surfer"
-   */
-  flowEmoji: "surfer",
+  flowEmoji: "surfer"
 };
 
 /**
@@ -82,7 +56,7 @@ function updateTrigger(newData, orignialValue = {}) {
 
 /**
  *
- * @param {PlugApi} bot instance of PlugAPI bot
+ * @param {import('plugapi')} bot instance of PlugAPI bot
  * @param {BotCommand} data the object from the incoming chat command event
  * @param {TriggerModelData?} triggerObj an existing trigger to be updated
  */

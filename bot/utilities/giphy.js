@@ -1,12 +1,12 @@
 'use strict';
 // modified from this source: https://github.com/ShMcK/API-Demos/tree/master/demo-ng/packages/giphy
-var request = require('request');
+const request = require('request');
 
-var ROOT_API = 'http://api.giphy.com/v1/gifs/';
+const ROOT_API = 'http://api.giphy.com/v1/gifs/';
 
-var Giphy = {};
+const Giphy = {};
 
-var defaults = {
+const defaults = {
   API_KEY: 'dc6zaTOxFJmzC',
   size: 'original', // {string} [fixed, downsized, original]
   limit: 15,
@@ -16,12 +16,12 @@ var defaults = {
 
 Giphy.options = Object.assign({}, defaults);
 
-var getRandom = function (list) {
+const getRandom = function (list) {
   return list[Math.floor((Math.random()*list.length))];
 };
 
-var reformatRandomImage = function(data) {
-  var url = null;
+const reformatRandomImage = function(data) {
+  const url = null;
   switch (Giphy.options.size) {
     case 'original':
       url = data.image_original_url;
@@ -38,8 +38,8 @@ var reformatRandomImage = function(data) {
   return url;
 };
 
-var buildAPI = function(query){
-  var apiPath = ROOT_API;
+const buildAPI = function(query){
+  const apiPath = ROOT_API;
 
   if (Giphy.options.random) {
     apiPath += 'random';
@@ -56,7 +56,7 @@ var buildAPI = function(query){
 };
 
 function apiCall(query, callback) {
-  var apiPath = buildAPI(query);
+  const apiPath = buildAPI(query);
 
   return request.get(apiPath, function (error, response, body) {
     if (error) {
@@ -65,7 +65,7 @@ function apiCall(query, callback) {
     } 
     
     if (!error && response.statusCode === 200) {
-      var result = JSON.parse(body);
+      const result = JSON.parse(body);
       if (!Giphy.options.random) {
         callback(null, getRandom(result.data).images[Giphy.options.size] );
       } else {
@@ -82,7 +82,7 @@ function apiCall(query, callback) {
   size : {string} [fixed, downsized, original] 
  */
 
-var getGif = function(options, query, callback){
+const getGif = function(options, query, callback){
   if (typeof callback !== 'function') {
     return; // what's the point if we're not going to do anything with it
   }

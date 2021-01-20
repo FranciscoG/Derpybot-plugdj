@@ -1,7 +1,7 @@
 'use strict';
 
-// var repo = require(process.cwd()+'/repo');
-// var flattr = require(process.cwd()+'/bot/utilities/flattr');
+// const repo = require(process.cwd()+'/repo');
+// const flattr = require(process.cwd()+'/bot/utilities/flattr');
 
 module.exports = function(bot, db, data){
   if (typeof bot !== 'object' || 

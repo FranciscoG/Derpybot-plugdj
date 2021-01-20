@@ -1,6 +1,6 @@
 "use strict";
 module.exports.broken = function(bot, db, data) {
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   bot.moderateForceSkip(function() {
     bot.sendChat(
@@ -10,7 +10,7 @@ module.exports.broken = function(bot, db, data) {
 };
 
 module.exports.nsfw = function(bot, db, data) {
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   bot.moderateForceSkip(function() {
     bot.sendChat(
@@ -20,7 +20,7 @@ module.exports.nsfw = function(bot, db, data) {
 };
 
 module.exports.op = function(bot, db, data) {
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   bot.moderateForceSkip(function() {
     // moderateMoveDJ(userID: Number, position: Number, callback: RESTCallback?): Boolean
@@ -30,7 +30,7 @@ module.exports.op = function(bot, db, data) {
 
     //Wait for next dj in line to start
     setTimeout(function() {
-      var backInQueue = bot.getWaitListPosition(dj.id) != -1;
+      const backInQueue = bot.getWaitListPosition(dj.id) != -1;
 
       if (backInQueue) {
         bot.moderateMoveDJ(dj.id, 0, function() {
@@ -44,7 +44,7 @@ module.exports.op = function(bot, db, data) {
 };
 
 module.exports.theme = function(bot, db, data) {
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   bot.moderateForceSkip(function() {
     bot.sendChat(
@@ -54,7 +54,7 @@ module.exports.theme = function(bot, db, data) {
 };
 
 module.exports.troll = function(bot, db, data) {
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   // moderateWaitListBan(userID: Number, reason: Number?, duration: String?, callback: RESTCallback?): Boolean
 

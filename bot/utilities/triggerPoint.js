@@ -59,9 +59,9 @@ module.exports = async function(bot, db, data, trig, type, emoji) {
   }
 
   // default to prop
-  var pointType = "props"; // this must match the name in the db
-  var repeatCheck = "usersThatPropped";
-  var pointEmoji = emoji || "fist";
+  const pointType = "props"; // this must match the name in the db
+  const repeatCheck = "usersThatPropped";
+  const pointEmoji = emoji || "fist";
 
   if (type === "flow") {
     pointType = "flow"; // this must match the name in the db
@@ -70,8 +70,8 @@ module.exports = async function(bot, db, data, trig, type, emoji) {
   }
 
   // send the trigger no matter what but remove the +prop/+flow stuff
-  var re = new RegExp("\\+" + pointType + "?(=[a-z0-9_-]+)?$", "i");
-  var strippedMsg = trig.replace(re, "");
+  const re = new RegExp("\\+" + pointType + "?(=[a-z0-9_-]+)?$", "i");
+  const strippedMsg = trig.replace(re, "");
   if (strippedMsg !== "") {
     messages.push(strippedMsg);
   }
@@ -90,7 +90,7 @@ module.exports = async function(bot, db, data, trig, type, emoji) {
   }
 
   // the person being propped
-  var dj = bot.getDJ();
+  const dj = bot.getDJ();
 
   // can not give points to self
   // but don't show a warning, just remain silent

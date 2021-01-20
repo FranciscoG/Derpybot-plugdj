@@ -19,13 +19,13 @@ module.exports = function(bot, db, data) {
 
   // get all time leaders
   if (param1 && param1 === "all") {
-    var all_time = leaderUtils.allTimeLeaders(bot);
+    const all_time = leaderUtils.allTimeLeaders(bot);
 
-    var propString = all_time.props.reduce(function(a,v){
+    const propString = all_time.props.reduce(function(a,v){
       return a += `${v[0]} (${v[1]}), `;
     }, '').replace(/, $/, '');
 
-    var flowString = all_time.flows.reduce(function(a,v){
+    const flowString = all_time.flows.reduce(function(a,v){
       return a += `${v[0]} (${v[1]}), `;
     }, '').replace(/, $/, '');
 
@@ -40,7 +40,7 @@ module.exports = function(bot, db, data) {
   }
 
   if (param1 && param2) { 
-    var monthResult = leaderUtils.getLeadersByMonthYear(bot, param1, param2);
+    const monthResult = leaderUtils.getLeadersByMonthYear(bot, param1, param2);
 
     let monthInfo = `The leaders for ${param1} ${param2} were:
       *props*: ${monthResult.props}
@@ -50,9 +50,9 @@ module.exports = function(bot, db, data) {
     return;
   }
 
-  var year = moment().format('Y');
-  var month = moment().format('MMM');
-  var month_full = moment().format('MMMM');
+  const year = moment().format('Y');
+  const month = moment().format('MMM');
+  const month_full = moment().format('MMMM');
 
   const chat_msg = [
     `Current leaders for ${month_full} ${year} are:`

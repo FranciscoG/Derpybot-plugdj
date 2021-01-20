@@ -1,15 +1,19 @@
-'use strict';
-var request = require('request');
+"use strict";
+const got = require("got");
 
-module.exports = function(bot, db) {
-  var month = new Date().getMonth() + 1;
-  var day = new Date().getDate();
-  var factApi = `http://numbersapi.com/${month}/${day}`;
-  request(factApi, function (error, response, body) {
-    var result = 'Bad request to facts...';
-    if (!error && response.statusCode === 200 ) {
-      result = body;
+module.exports = async function (bot, db) {
+  try {
+    const month = new Date().getMonth() + 1;
+    const day = new Date().getDate();
+    const factApi = `http://numbersapi.com/${month}/${day}`;
+    const response = await got(factApi);
+    const result = "Bad request to facts...";
+    if (response.statusCode === 200) {
+      result = response.body;
     }
     bot.sendChat(result);
-  });
+  } catch (error) {
+    bot.sendChat("Bad request to facts...");
+    bot.log("error", "BOT", `[!todayfact] ${error.message}`);
+  }
 };

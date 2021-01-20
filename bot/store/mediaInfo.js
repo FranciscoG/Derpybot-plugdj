@@ -1,7 +1,14 @@
 "use strict";
 const _get = require("lodash/get");
 
-var mediaStore = {
+/**
+ * @typedef {import("../utilities/typedefs").SongInfo} SongInfo
+ */
+
+const mediaStore = {
+  /**
+   * @type {SongInfo}
+   */
   current: {
     link: null,
     name: null,
@@ -14,6 +21,9 @@ var mediaStore = {
     when: 0
   },
 
+  /**
+   * @type {SongInfo}
+   */
   last: {
     link: null,
     name: null,
@@ -56,23 +66,25 @@ var mediaStore = {
     return obj;
   },
 
-  setLast: function(db, song) {
+  /**
+   * @param {SongInfo} song 
+   */
+  setLast: function(song) {
     if (typeof song === "object" && song) {
-      for (var key in song) {
+      for (const key in song) {
         if (this.last.hasOwnProperty(key)) {
           this.last[key] = song[key];
         }
       }
-
-      if (!song.id) {
-        return;
-      }
     }
   },
 
+  /**
+   * @param {object} x 
+   */
   setCurrent: function(x) {
     if (typeof x === "object") {
-      for (var key in x) {
+      for (const key in x) {
         if (this.current.hasOwnProperty(key)) {
           this.current[key] = x[key];
         }
@@ -80,6 +92,10 @@ var mediaStore = {
     }
   },
 
+  /**
+   * @param {string} key 
+   * @param {string|number} value 
+   */
   setCurrentKey: function(key, value) {
     if (this.current.hasOwnProperty(key)) {
       this.current[key] = value;
