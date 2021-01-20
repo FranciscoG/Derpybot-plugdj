@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "baseUrl": ".",
+    "paths": {
+      "bot/*": ["./bot/*"]
+    }
+  },
+  "exclude": ["node_modules"]
+}
