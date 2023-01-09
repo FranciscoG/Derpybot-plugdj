@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "cleverbot-node": "^0.3.11",
-    "firebase-admin": "^8.2.0",
+    "firebase-admin": "^11.4.1",
     "fuzzysort": "^1.1.4",
     "googleapis": "^41.0.1",
     "jethro": "^4.4.3",
